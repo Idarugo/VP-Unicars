@@ -65,7 +65,8 @@ export default function App() {
     document.documentElement.classList.toggle('is-loading', !listo)
     if (listo) {
       window.__lenis?.start()
-      ScrollTrigger.refresh()
+      // La portada crea su pin después del resto: ordenar por posición en la página y recalcular
+      requestAnimationFrame(() => { ScrollTrigger.sort(); ScrollTrigger.refresh() })
       // Solo desarrollo: ?shot=.selector:offset salta a una sección (para capturas)
       const shot = import.meta.env.DEV && new URLSearchParams(location.search).get('shot')
       if (shot) {

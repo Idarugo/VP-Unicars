@@ -44,7 +44,8 @@ export default function HeroVideo({ listo }) {
     orden.forEach((i) => {
       const img = new Image()
       img.decoding = 'async'
-      if (i === 0) { img.fetchPriority = 'high'; img.onload = () => { estado.current.ultimo = -1; pintar() } }
+      if (i === 0) img.fetchPriority = 'high'
+      img.onload = () => { estado.current.ultimo = -1; pintar() } // repinta apenas llega un cuadro útil
       img.src = `/seq/${CARPETA}/${String(i + 1).padStart(3, '0')}.webp`
       frames.current[i] = img
     })
@@ -69,7 +70,7 @@ export default function HeroVideo({ listo }) {
         .from('.hv-kicker, .hv-sub, .hv-ctas > *, .hv-scroll', { y: 30, opacity: 0, duration: 1, stagger: 0.08 }, 0.8)
 
       gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1500', scrub: 0.25, pin: true },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1500', scrub: 0.25, pin: true, refreshPriority: 1 },
       })
         .to(estado.current, { f: TOTAL - 1, duration: 10, ease: 'none', onUpdate: pintar }, 0)
         .to('.hv-copy', { opacity: 0, y: -60, duration: 2 }, 0.3)

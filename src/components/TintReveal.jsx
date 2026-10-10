@@ -46,13 +46,13 @@ export default function TintReveal({
       for (let i = 0; i < total; i++) {
         const img = new Image()
         img.src = `/seq/${carpeta}/${String(i + 1).padStart(3, '0')}.webp`
-        if (i === 0) img.onload = () => { ultimo = -1; pintar() }
+        img.onload = () => { ultimo = -1; pintar() } // repinta apenas llega un cuadro útil
         frames.push(img)
       }
     }
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=1500', once: true, onEnter: cargar })
+      ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=3000', once: true, onEnter: cargar })
       const tl = gsap.timeline({ defaults: {},
         scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1700', scrub: 0.25, pin: true },
       })

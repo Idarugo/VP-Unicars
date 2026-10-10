@@ -57,14 +57,14 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
         const img = new Image()
         img.decoding = 'async'
         img.src = src(i)
-        if (i === 0) img.onload = () => { ultimo = -1; render() }
+        img.onload = () => { ultimo = -1; render() } // repinta apenas llega un cuadro útil
         frames.push(img)
       }
     }
 
     const ctx = gsap.context(() => {
       // Precarga cuando la sección se acerca
-      ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=1500', once: true, onEnter: cargar })
+      ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=3000', once: true, onEnter: cargar })
 
       const tl = gsap.timeline({
         scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${total * 15}`, scrub: 0.25, pin: true },
