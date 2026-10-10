@@ -1,0 +1,4 @@
+Pon aquí las fotos de los trabajos (jpg/webp, idealmente 1200px de ancho)
+y escribe el nombre del archivo en src/data.js, en el campo "foto".
+Ej: foto: '/fotos/porsche-ppf.jpg'
+Si un trabajo no tiene foto, la página muestra una ilustración generada.
