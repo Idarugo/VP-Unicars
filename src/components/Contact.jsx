@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { negocio, waLink } from '../data.js'
 import Logo from './Logo.jsx'
-import { Icon, faLocationDot, faWhatsapp, faInstagram } from '../icons.js'
+import { Icon, faLocationDot, faWhatsapp, faInstagram, faClock } from '../icons.js'
 
 export default function Contact() {
   const root = useRef(null)
@@ -44,6 +44,7 @@ export default function Contact() {
         <div className="contact-info">
           <div><span className="muted">Dónde</span><a href={negocio.mapaLink} target="_blank" rel="noreferrer"><Icon icon={faLocationDot} className="ico" /> {negocio.direccion}</a></div>
           <div><span className="muted">WhatsApp</span><a href={waLink()} target="_blank" rel="noreferrer"><Icon icon={faWhatsapp} className="ico" /> +56 9 3023 5194</a></div>
+          <div><span className="muted">Horario</span><span className="contact-txt"><Icon icon={faClock} className="ico" /> {negocio.horario}</span><small className="muted">{negocio.horarioNota}</small></div>
           <div><span className="muted">Instagram</span><a href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} className="ico" /> @vp_unicars</a></div>
         </div>
         <div className="contact-map">

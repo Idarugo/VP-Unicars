@@ -7,6 +7,8 @@ export const negocio = {
   direccion: 'Mall Plaza América, Rancagua',
   mapa: 'https://www.google.com/maps?q=Mall+Plaza+Am%C3%A9rica+Rancagua&output=embed',
   mapaLink: 'https://maps.google.com/?q=Mall+Plaza+America+Rancagua',
+  horario: '10:00 a 18:00 aprox.',
+  horarioNota: 'Algunos días hacemos trabajos a domicilio: agenda por WhatsApp.',
 }
 
 export const waLink = (texto = negocio.whatsappTexto) =>
@@ -93,6 +95,17 @@ export const servicios = [
   },
 ]
 
+// Servicios adicionales: todo se cotiza y agenda por el WhatsApp de VP Unicars.
+// icono: nombre del ícono de Font Awesome definido en components/MasServicios.jsx
+export const masServicios = [
+  { id: 'audio', titulo: 'Audio', texto: 'Instalación de parlantes, radios, subwoofers y amplificadores.', icono: 'audio' },
+  { id: 'corta-corriente', titulo: 'Corta corriente e inmovilizadores', texto: 'Protección antirrobo que impide que tu auto arranque sin ti.', icono: 'corriente' },
+  { id: 'seguridad', titulo: 'Sistemas de seguridad', texto: 'Alarmas y soluciones para que tu auto esté siempre protegido.', icono: 'seguridad' },
+  { id: 'iluminacion', titulo: 'Iluminación', texto: 'Luces y todo lo que sea iluminación para tu auto.', icono: 'luces' },
+  { id: 'electricidad', titulo: 'Electricidad automotriz', texto: 'Instalaciones y trabajos eléctricos en tu vehículo.', icono: 'electricidad' },
+  { id: 'grabado', titulo: 'Grabado de patentes', texto: 'Grabado de patente en los vidrios de tu auto.', icono: 'grabado' },
+]
+
 export const niveles = [
   {
     nombre: 'Estándar',
@@ -165,6 +178,14 @@ export const faqs = [
   {
     q: '¿Trabajan hogares y oficinas?',
     a: 'Sí. Instalamos polarizado arquitectónico espejo, bronce y control solar en casas, oficinas y locales comerciales.',
+  },
+  {
+    q: '¿Qué otros servicios tienen?',
+    a: 'Además de polarizado y PPF, en VP Unicars hacemos audio, corta corriente e inmovilizadores, sistemas de seguridad, iluminación, electricidad automotriz y grabado de patentes. Todo se cotiza por nuestro WhatsApp.',
+  },
+  {
+    q: '¿Atienden a domicilio?',
+    a: 'Algunos trabajos los realizamos a domicilio. Escríbenos por WhatsApp y coordinamos el día y la hora.',
   },
   {
     q: '¿Cómo agendo?',

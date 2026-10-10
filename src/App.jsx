@@ -9,6 +9,7 @@ import HeroVideo from './components/HeroVideo.jsx'
 import Manifesto from './components/Manifesto.jsx'
 import TintReveal from './components/TintReveal.jsx'
 import Services from './components/Services.jsx'
+import MasServicios from './components/MasServicios.jsx'
 import PPFShield from './components/PPFShield.jsx'
 import Tiers from './components/Tiers.jsx'
 import Stats from './components/Stats.jsx'
@@ -92,6 +93,7 @@ export default function App() {
         <ZoomThrough />
         <TintReveal />
         <Services />
+        <MasServicios />
         <PPFShield />
         <FrameScroll id="proceso-ppf" carpeta="porsche" total={120} kicker="Proceso real · PPF en parabrisas" titulo={<>Así se protege<br />un <em>911 Turbo S</em>.</>} beats={beatsPorsche} />
         <Tiers />

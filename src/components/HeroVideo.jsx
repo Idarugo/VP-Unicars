@@ -91,7 +91,7 @@ export default function HeroVideo({ listo }) {
           <span className="row"><Split text="VP" /> <span className="hv-stroke"><Split text="UNICARS" /></span></span>
         </h1>
         <p className="hv-sub">
-          Polarizados, PPF, vinilos y láminas de seguridad.<br />
+          Polarizados, PPF, vinilos, audio y sistemas de seguridad.<br />
           <strong>Transformamos y protegemos</strong> autos, hogares y oficinas.
         </p>
         <div className="hv-ctas">
