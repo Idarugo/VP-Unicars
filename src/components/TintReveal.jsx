@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // Video generado con Google Flow (Veo): el auto pasa de vidrios claros a polarizado.
 // Se reproduce cuadro a cuadro con el scroll, a pantalla completa.
 export default function TintReveal({
-  id = 'polarizados', carpeta = 'flow-tint', total = 96,
+  id = 'polarizados', carpeta = 'flow-tint', total = 80,
   linea1 = 'Mira cómo', linea2 = <><em>desaparece</em> el interior.</>,
   kicker = 'Polarizado nanocerámico', cierre = 'Privacidad total. Calor fuera.', vltHud = true,
 }) {
@@ -34,7 +34,7 @@ export default function TintReveal({
     }
 
     const ajustar = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.current.width = canvas.current.clientWidth * dpr
       canvas.current.height = canvas.current.clientHeight * dpr
       ultimo = -1
@@ -54,12 +54,12 @@ export default function TintReveal({
     const ctx = gsap.context(() => {
       ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=1500', once: true, onEnter: cargar })
       const tl = gsap.timeline({ defaults: {},
-        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=3200', scrub: 0.5, pin: true },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1700', scrub: 0.25, pin: true },
       })
       tl.to(estado, { f: total - 1, duration: 10, ease: 'none', onUpdate: pintar }, 0)
-        .fromTo('.tr-media', { clipPath: 'inset(18% 14% 18% 14% round 32px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', duration: 2.4, ease: 'power2.inOut' }, 0)
+        .fromTo('.tr-media', { scale: 0.7, borderRadius: 32 }, { scale: 1, borderRadius: 0, duration: 2.4, ease: 'power2.inOut' }, 0)
         .fromTo('.tr-title .line > span', { yPercent: 110 }, { yPercent: 0, stagger: 0.2, duration: 1.2, ease: 'expo.out' }, 0.4)
-        .to('.tr-title', { opacity: 0, y: -40, filter: 'blur(10px)', duration: 1 }, 3.2)
+        .to('.tr-title', { opacity: 0, y: -40, duration: 1 }, 3.2)
         .fromTo(root.current.querySelector('.tr-hud') || {}, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1 }, 2.4)
         .fromTo('.tr-end', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.2 }, 8.4)
     }, root)

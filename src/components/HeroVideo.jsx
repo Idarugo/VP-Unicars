@@ -7,7 +7,7 @@ import { Icon, faWhatsapp, faLocationDot, faArrowDown } from '../icons.js'
 // Portada: video generado con Google Flow (Veo) al estilo de los reels de VP Unicars.
 // Al hacer scroll avanza cuadro a cuadro: la cámara se acerca mientras se instala el polarizado.
 const CARPETA = 'flow-taller'
-const TOTAL = 110
+const TOTAL = 90
 
 const Split = ({ text }) =>
   text.split('').map((c, i) => <span key={i} className="ch">{c === ' ' ? ' ' : c}</span>)
@@ -22,7 +22,7 @@ export default function HeroVideo({ listo }) {
     const e = estado.current
     let i = Math.round(e.f)
     const fr = frames.current
-    while (i > 0 && !(fr[i]?.complete && fr[i].naturalWidth)) i--
+    while (i > 0 && !(fr[i]?.complete && fr[i]?.naturalWidth)) i--
     const img = fr[i]
     if (!img?.complete || !img.naturalWidth || i === e.ultimo) return
     e.ultimo = i
@@ -38,14 +38,18 @@ export default function HeroVideo({ listo }) {
 
   // Carga inmediata: es lo primero que se ve
   useEffect(() => {
-    for (let i = 0; i < TOTAL; i++) {
+    // Orden de carga: primero 1 de cada 4 cuadros (se puede recorrer al tiro), luego el resto
+    const orden = [...Array(TOTAL).keys()].sort((a, b) => (a % 4 === 0 ? 0 : 1) - (b % 4 === 0 ? 0 : 1) || a - b)
+    frames.current = Array(TOTAL)
+    orden.forEach((i) => {
       const img = new Image()
+      img.decoding = 'async'
+      if (i === 0) { img.fetchPriority = 'high'; img.onload = () => { estado.current.ultimo = -1; pintar() } }
       img.src = `/seq/${CARPETA}/${String(i + 1).padStart(3, '0')}.webp`
-      if (i === 0) img.onload = () => { estado.current.ultimo = -1; pintar() }
-      frames.current.push(img)
-    }
+      frames.current[i] = img
+    })
     const ajustar = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.current.width = canvas.current.clientWidth * dpr
       canvas.current.height = canvas.current.clientHeight * dpr
       estado.current.ultimo = -1
@@ -60,15 +64,15 @@ export default function HeroVideo({ listo }) {
     if (!listo) return
     const ctx = gsap.context(() => {
       gsap.timeline({ defaults: { ease: 'expo.out' } })
-        .fromTo('.hv-canvas', { scale: 1.15, filter: 'brightness(0)' }, { scale: 1, filter: 'brightness(1)', duration: 2.2 }, 0)
+        .fromTo('.hv-canvas', { scale: 1.15, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2 }, 0)
         .from('.hv-title .ch', { yPercent: 120, opacity: 0, duration: 1.3, stagger: 0.04 }, 0.4)
         .from('.hv-kicker, .hv-sub, .hv-ctas > *, .hv-scroll', { y: 30, opacity: 0, duration: 1, stagger: 0.08 }, 0.8)
 
       gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=2800', scrub: 0.5, pin: true },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1500', scrub: 0.25, pin: true },
       })
         .to(estado.current, { f: TOTAL - 1, duration: 10, ease: 'none', onUpdate: pintar }, 0)
-        .to('.hv-copy', { opacity: 0, y: -60, filter: 'blur(8px)', duration: 2 }, 0.3)
+        .to('.hv-copy', { opacity: 0, y: -60, duration: 2 }, 0.3)
         .to('.hv-scroll', { opacity: 0, duration: 0.5 }, 0)
         .fromTo('.hv-end', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.2 }, 7.6)
     }, root)

@@ -12,7 +12,7 @@ export default function Garage() {
     const ctx = gsap.context(() => {
       const cards = gsap.utils.toArray('.garage-card')
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: '.garage-pin', start: 'top top', end: `+=${cards.length * 700}`, scrub: 1, pin: true },
+        scrollTrigger: { trigger: '.garage-pin', start: 'top top', end: `+=${cards.length * 360}`, scrub: 0.3, pin: true },
       })
       const k = window.innerWidth < 900 ? 0.25 : 1
       cards.forEach((card, i) => {

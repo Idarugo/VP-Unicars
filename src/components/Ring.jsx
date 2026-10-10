@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { negocio } from '../data.js'
 import { Icon, faInstagram } from '../icons.js'
 
@@ -24,11 +25,11 @@ export default function Ring() {
       })
       gsap.to(estado, {
         scroll: -220, ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 1 },
+        scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 0.3 },
       })
       gsap.fromTo('.ring-stage', { rotateX: 14 }, {
         rotateX: -8, ease: 'none',
-        scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 1 },
+        scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'bottom top', scrub: 0.3 },
       })
     }, root)
 
@@ -48,7 +49,12 @@ export default function Ring() {
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
 
+    // Solo anima cuando la galería está en pantalla
+    let visible = false
+    const vis = ScrollTrigger.create({ trigger: el, start: 'top bottom', end: 'bottom top', onToggle: (st) => (visible = st.isActive) })
+
     const tick = () => {
+      if (!visible) return
       if (!arrastrando) {
         estado.drag += estado.inercia
         estado.inercia *= 0.94
@@ -68,6 +74,7 @@ export default function Ring() {
     return () => {
       ctx.revert()
       gsap.ticker.remove(tick)
+      vis.kill()
       el.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)

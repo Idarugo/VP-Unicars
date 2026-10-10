@@ -16,7 +16,7 @@ export default function Services() {
         x: () => -distancia(), ease: 'none',
         scrollTrigger: {
           trigger: root.current, start: 'top top', end: () => `+=${distancia()}`,
-          scrub: 1, pin: true, invalidateOnRefresh: true,
+          scrub: 0.3, pin: true, invalidateOnRefresh: true,
         },
       })
       // Cada tarjeta gira en 3D según su posición en pantalla (efecto carrusel Apple)

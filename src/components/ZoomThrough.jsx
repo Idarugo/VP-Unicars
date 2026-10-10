@@ -8,7 +8,7 @@ export default function ZoomThrough() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=2400', scrub: 1, pin: true },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1300', scrub: 0.3, pin: true },
       })
       tl.fromTo('.zt-word', { scale: 1, backgroundPosition: '50% 30%' }, { scale: 42, backgroundPosition: '50% 60%', duration: 3, ease: 'power2.in' })
         .to('.zt-kicker', { opacity: 0, y: -40, duration: 0.6 }, 0)

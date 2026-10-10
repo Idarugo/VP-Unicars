@@ -13,7 +13,7 @@ export default function Competition() {
         y: 100, rotateX: 40, opacity: 0, duration: 1.4, ease: 'expo.out',
         scrollTrigger: { trigger: '.comp-card', start: 'top 85%' },
       })
-      gsap.to('.comp-trophy', { rotateY: 360, ease: 'none', scrollTrigger: { trigger: root.current, scrub: 1 } })
+      gsap.to('.comp-trophy', { rotateY: 360, ease: 'none', scrollTrigger: { trigger: root.current, scrub: 0.3 } })
     }, root)
     return () => ctx.revert()
   }, [])

@@ -16,14 +16,15 @@ export default function Fx() {
     })
 
     // Inclinación según velocidad del scroll
-    const skew = { v: 0 }
-    const set = gsap.quickSetter(document.documentElement, '--skew', 'deg')
-    const set2 = gsap.quickSetter(document.documentElement, '--stretch')
+    const skew = { v: 0, prev: 0 }
+    const setters = gsap.utils.toArray('.marquee, .manifesto-text').map((el) => gsap.quickSetter(el, 'skewY', 'deg'))
     const vel = () => {
       const v = window.__lenis ? window.__lenis.velocity : 0
-      skew.v += (gsap.utils.clamp(-8, 8, v * 0.35) - skew.v) * 0.12
-      set(skew.v)
-      set2(1 + Math.min(Math.abs(skew.v) * 0.012, 0.08))
+      skew.v += (gsap.utils.clamp(-5, 5, v * 0.25) - skew.v) * 0.15
+      if (Math.abs(skew.v - skew.prev) < 0.02) return // sin cambios: no tocar el DOM
+      skew.prev = skew.v
+      const s = skew.v * 0.4
+      setters.forEach((set) => set(s))
     }
     gsap.ticker.add(vel)
 

@@ -49,7 +49,7 @@ export default function App() {
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
-    const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9 })
+    const lenis = new Lenis({ lerp: 0.13, wheelMultiplier: 1.15, touchMultiplier: 1.4 })
     window.__lenis = lenis
     lenis.on('scroll', ScrollTrigger.update)
     const tick = (t) => lenis.raf(t * 1000)

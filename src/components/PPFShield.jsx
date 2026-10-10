@@ -18,7 +18,7 @@ export default function PPFShield() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: root.current, start: 'top top', end: '+=2800', scrub: 1, pin: true,
+          trigger: root.current, start: 'top top', end: '+=1600', scrub: 0.3, pin: true,
           onUpdate: (st) => root.current && (root.current.dataset.paso = Math.min(2, Math.floor(st.progress * 3))),
         },
       })

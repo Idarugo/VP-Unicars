@@ -14,7 +14,7 @@ export default function Spaces() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top 70%', end: 'bottom 40%', scrub: 1 },
+        scrollTrigger: { trigger: root.current, start: 'top 70%', end: 'bottom 40%', scrub: 0.3 },
       })
       tl.to('.facade-win', {
         rotateY: 180, duration: 1,

@@ -39,11 +39,13 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
     }
 
     const ajustar = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       for (const c of [fg.current, bg.current]) {
         const r = c.getBoundingClientRect()
-        c.width = Math.max(1, Math.round(r.width * dpr))
-        c.height = Math.max(1, Math.round(r.height * dpr))
+        // El fondo se dibuja en baja resolución: queda difuminado sin usar filter: blur
+        const k = c === bg.current ? 1 / 24 : dpr
+        c.width = Math.max(1, Math.round(r.width * k))
+        c.height = Math.max(1, Math.round(r.height * k))
       }
       ultimo = -1
       render()
@@ -65,19 +67,19 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
       ScrollTrigger.create({ trigger: root.current, start: 'top bottom+=1500', once: true, onEnter: cargar })
 
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${total * 38}`, scrub: 0.6, pin: true },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${total * 15}`, scrub: 0.25, pin: true },
       })
       tl.to(estado, { f: total - 1, duration: 10, ease: 'none', onUpdate: render }, 0)
         .fromTo('.seq-frame', { scale: 0.55, borderRadius: 40, rotateX: 18, y: 80 },
           { scale: 1, borderRadius: 0, rotateX: 0, y: 0, duration: 2.2, ease: 'power2.inOut' }, 0)
         .fromTo('.seq-bg', { opacity: 0 }, { opacity: 1, duration: 2 }, 0)
-        .to('.seq-intro', { opacity: 0, y: -60, filter: 'blur(10px)', duration: 1.4 }, 0.3)
+        .to('.seq-intro', { opacity: 0, y: -60, duration: 1.4 }, 0.3)
         .to('.seq-frame', { scale: 0.9, borderRadius: 36, duration: 1.2, ease: 'power2.inOut' }, 8.8)
 
       beats.forEach((b, i) => {
         const sel = `.seq-beat[data-i="${i}"]`
-        tl.fromTo(sel, { opacity: 0, y: 50, filter: 'blur(12px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7 }, b.desde)
-          .to(sel, { opacity: 0, y: -50, filter: 'blur(12px)', duration: 0.7 }, b.hasta)
+        tl.fromTo(sel, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.7 }, b.desde)
+          .to(sel, { opacity: 0, y: -50, duration: 0.7 }, b.hasta)
       })
     }, root)
 
