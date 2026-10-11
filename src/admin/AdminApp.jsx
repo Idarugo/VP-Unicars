@@ -11,12 +11,36 @@ import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars,
+  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight,
 } from './iconos.js'
 
 // DEMO: acceso de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
 const DEMO = { usuario: 'demo', clave: 'demo' }
 const SESION = 'vp-demo-sesion'
+
+// Números de página con "…" cuando hay muchas: 1 … 4 5 6 … 12
+const paginas = (actual, total) => {
+  const set = new Set([1, total, actual - 1, actual, actual + 1].filter((n) => n >= 1 && n <= total))
+  const lista = [...set].sort((a, b) => a - b)
+  return lista.flatMap((n, i) => (i && n - lista[i - 1] > 1 ? ['…', n] : [n]))
+}
+
+function Paginacion({ pagina, total, items, porPagina, onCambio }) {
+  const desde = (pagina - 1) * porPagina + 1
+  const hasta = Math.min(items, pagina * porPagina)
+  return (
+    <nav className="adm-pag" aria-label="Paginación">
+      <span className="adm-pag-info">Mostrando <b>{desde}–{hasta}</b> de <b>{items}</b></span>
+      <div className="adm-pag-btns">
+        <button className="adm-icon-btn" disabled={pagina === 1} onClick={() => onCambio(pagina - 1)} aria-label="Página anterior"><Icon icon={faChevronLeft} /></button>
+        {paginas(pagina, total).map((n, i) => (n === '…'
+          ? <span key={`e${i}`} className="adm-pag-dots">…</span>
+          : <button key={n} className={`adm-pag-n ${n === pagina ? 'is-on' : ''}`} onClick={() => onCambio(n)} aria-current={n === pagina ? 'page' : undefined}>{n}</button>))}
+        <button className="adm-icon-btn" disabled={pagina === total} onClick={() => onCambio(pagina + 1)} aria-label="Página siguiente"><Icon icon={faChevronRight} /></button>
+      </div>
+    </nav>
+  )
+}
 
 const leerSesion = () => { try { return sessionStorage.getItem(SESION) === '1' } catch { return false } }
 const fechaCorta = (iso) => iso.split('-').reverse().join('/')
@@ -57,6 +81,8 @@ export default function AdminApp() {
   const [form, setForm] = useState(vacio)
   const [actual, setActual] = useState(null)
   const [q, setQ] = useState('')
+  const [pagina, setPagina] = useState(1)
+  const POR_PAGINA = 10
   const [ocupado, setOcupado] = useState(false)
   const [menu, setMenu] = useState(false)
   const [aviso, setAviso] = useState('')
@@ -74,6 +100,9 @@ export default function AdminApp() {
       String(c.numero).includes(t) || c.patente.includes(t) || c.cliente.toUpperCase().replace(/\s/g, '').includes(t) ||
       `${c.marca}${c.modelo}`.toUpperCase().replace(/\s/g, '').includes(t))
   }, [lista, q])
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrada.length / POR_PAGINA))
+  const paginaActual = Math.min(pagina, totalPaginas)
 
   const mes = fechaLocal().slice(0, 7)
   const delMes = lista.filter((c) => c.fecha.startsWith(mes)).length
@@ -185,11 +214,11 @@ export default function AdminApp() {
 
           <div className="adm-buscar">
             <Icon icon={faMagnifyingGlass} />
-            <input placeholder="Buscar por patente, cliente, N° o modelo…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input placeholder="Buscar por patente, cliente, N° o modelo…" value={q} onChange={(e) => { setQ(e.target.value); setPagina(1) }} />
           </div>
 
           <ul className="adm-lista">
-            {filtrada.map((c) => (
+            {filtrada.slice((paginaActual - 1) * POR_PAGINA, paginaActual * POR_PAGINA).map((c) => (
               <li key={c.numero}>
                 <button className="adm-item" onClick={() => { setActual(c); setVista('ver') }}>
                   <span className="adm-item-num">N° {folio(c.numero)}</span>
@@ -203,7 +232,11 @@ export default function AdminApp() {
             {filtrada.length === 0 && <li className="adm-vacio">No hay certificados que coincidan con “{q}”.</li>}
           </ul>
 
-          <button className="adm-link" onClick={() => { if (window.confirm('¿Volver a los datos de ejemplo de la demo?')) { setLista(reiniciar()) } }}>
+          {filtrada.length > POR_PAGINA && (
+            <Paginacion pagina={paginaActual} total={totalPaginas} items={filtrada.length} porPagina={POR_PAGINA} onCambio={(n) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
+          )}
+
+          <button className="adm-link" onClick={() => { if (window.confirm('¿Volver a los datos de ejemplo de la demo?')) { setLista(reiniciar()); setPagina(1) } }}>
             <Icon icon={faRotateLeft} /> Reiniciar datos de la demo
           </button>
         </main>

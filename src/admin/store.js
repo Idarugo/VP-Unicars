@@ -9,7 +9,25 @@ const hoy = () => fechaLocal()
 const haceDias = (n) => fechaLocal(new Date(Date.now() - n * 864e5))
 export const nuevoCodigo = () => Math.random().toString(36).slice(2, 8).toUpperCase()
 
+// Certificados de ejemplo generados (N° 210–235) para mostrar la paginación
+const NOMBRES = ['Carlos Díaz', 'Paula Herrera', 'Jorge Castillo', 'Daniela Torres', 'Sebastián Rojas', 'Fernanda Silva', 'Cristóbal Vargas',
+  'Antonia Morales', 'Rodrigo Navarro', 'Javiera Contreras', 'Nicolás Espinoza', 'Catalina Flores', 'Martín Sepúlveda']
+const AUTOS = [['Toyota', 'Corolla', 'Automóvil'], ['Chevrolet', 'Groove', 'SUV'], ['Suzuki', 'Baleno', 'Automóvil'], ['Hyundai', 'Accent', 'Automóvil'],
+  ['Nissan', 'Kicks', 'SUV'], ['Mitsubishi', 'L200', 'Camioneta'], ['Kia', 'Sportage', 'SUV'], ['Peugeot', '208', 'Automóvil'], ['MG', 'ZS', 'SUV']]
+const TONOS = [[50, 20, 20], [70, 35, 35], [50, 5, 5], [70, 20, 20], [35, 15, 15]]
+const generados = Array.from({ length: 26 }, (_, i) => {
+  const [marca, modelo, tipo] = AUTOS[i % AUTOS.length]
+  const [d, t, l] = TONOS[i % TONOS.length]
+  return {
+    numero: 210 + i, fecha: haceDias(60 - i * 2), cliente: NOMBRES[i % NOMBRES.length], direccion: i % 3 ? 'Rancagua' : 'Machalí',
+    telefono: '', instalador: 'Marco Niño', tipo, marca, modelo, anio: String(2016 + (i % 9)),
+    patente: `DM${String(1000 + i * 37).slice(-4)}`, delanteros: d, traseros: t, luneta: l, observaciones: '',
+    codigo: `D${String(210 + i)}X${i % 10}Z`,
+  }
+})
+
 const ejemplo = [
+  ...generados,
   { numero: 236, fecha: haceDias(6), cliente: 'Juan Pérez', direccion: 'Rancagua', telefono: '', instalador: 'Marco Niño',
     tipo: 'Automóvil', marca: 'Toyota', modelo: 'Yaris 1.5', anio: '2021', patente: 'DEMO11', delanteros: 50, traseros: 20, luneta: 20,
     observaciones: 'Polarizado nanocarbon', codigo: 'K3P9QA' },

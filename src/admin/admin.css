@@ -325,3 +325,15 @@ a { color: inherit; text-decoration: none; }
   .adm-mobilebar img { order: 3; }
   .adm-list-head .adm-btn { width: 100%; }
 }
+
+/* Paginación */
+.adm-pag { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.adm-pag-info { color: var(--muted); font-size: 13px; }
+.adm-pag-info b { color: var(--text); }
+.adm-pag-btns { display: flex; align-items: center; gap: 6px; }
+.adm-pag-n { min-width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); font-weight: 700; font-size: 14px; color: var(--muted); transition: all 0.2s; }
+.adm-pag-n:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); }
+.adm-pag-n.is-on { background: var(--y); border-color: var(--y); color: #000; }
+.adm-pag-dots { color: var(--muted); padding: 0 4px; }
+.adm-icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+@media (max-width: 640px) { .adm-pag { justify-content: center; } .adm-pag-n { min-width: 38px; height: 38px; } }
