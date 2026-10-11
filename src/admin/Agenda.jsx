@@ -126,7 +126,7 @@ function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
   )
 }
 
-export default function Agenda({ trabajos, setTrabajos, onCertificado, onReiniciar }) {
+export default function Agenda({ trabajos, setTrabajos, onCertificado, onReiniciar, onLog = () => {} }) {
   const [lunes, setLunes] = useState(() => lunesDe(new Date()))
   const [filtro, setFiltro] = useState('todos')
   const [abierto, setAbierto] = useState(null) // { t, nuevo }
@@ -154,11 +154,13 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
   const guardar = (t, cerrar) => {
     const existe = trabajos.some((x) => x.id === t.id)
     setTrabajos(existe ? trabajos.map((x) => (x.id === t.id ? t : x)) : [...trabajos, { ...t, id: nuevoId() }])
+    onLog(existe ? 'Editó trabajo' : 'Agendó trabajo', `${t.servicio} · ${t.cliente}`)
     if (cerrar) setAbierto(null)
   }
   const eliminar = (t) => {
     if (!window.confirm('¿Eliminar este trabajo de la agenda?')) return
     setTrabajos(trabajos.filter((x) => x.id !== t.id))
+    onLog('Eliminó trabajo', `${t.servicio} · ${t.cliente}`)
     setAbierto(null)
   }
   // Si el día elegido en el celular no está en esta semana, mostrar el lunes

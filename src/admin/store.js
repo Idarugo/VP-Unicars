@@ -1,3 +1,5 @@
+import { sistema } from './config.js'
+
 // DEMO: los certificados se guardan en este navegador (localStorage).
 // En la versión real esto se reemplaza por una base de datos con usuarios (Supabase).
 const KEY = 'vp-demo-certificados'
@@ -56,7 +58,7 @@ export function reiniciar() {
   return ejemplo
 }
 
-export const siguienteNumero = (lista) => Math.max(0, ...lista.map((c) => c.numero)) + 1
+export const siguienteNumero = (lista) => Math.max(sistema.folioInicial || 0, Math.max(0, ...lista.map((c) => c.numero)) + 1)
 
 export const vacio = () => ({
   fecha: hoy(), cliente: '', direccion: '', telefono: '', instalador: 'Marco Niño',
@@ -118,3 +120,47 @@ export const trabajoVacio = (fecha) => ({
   fecha: fecha || hoy(), hora: '10:00', servicio: 'Polarizado', encargado: 'marco', lugar: 'local',
   cliente: '', telefono: '', marca: '', modelo: '', patente: '', direccion: '', estado: 'pendiente', notas: '',
 })
+
+/* ---------------- Historial de cambios (DEMO) ---------------- */
+const KEY_LOG = 'vp-demo-historial'
+export function leerHistorial() {
+  try {
+    const raw = localStorage.getItem(KEY_LOG)
+    if (raw) return JSON.parse(raw)
+  } catch { /* nada */ }
+  const hace = (h) => new Date(Date.now() - h * 36e5).toISOString()
+  return [
+    { fecha: hace(2), usuario: 'Marco Niño', accion: 'Emitió certificado', detalle: 'N° 000238 · DE·MO·33' },
+    { fecha: hace(5), usuario: 'Marco Niño', accion: 'Agendó trabajo', detalle: 'Audio · Diego Muñoz' },
+    { fecha: hace(26), usuario: 'Soporte', accion: 'Editó contenido web', detalle: 'Horario de atención' },
+    { fecha: hace(50), usuario: 'Marco Niño', accion: 'Emitió certificado', detalle: 'N° 000237 · DE·MO·22' },
+    { fecha: hace(73), usuario: 'Sistema', accion: 'Respaldo automático', detalle: 'Correcto' },
+  ]
+}
+export function registrar(usuario, accion, detalle = '') {
+  const lista = [{ fecha: new Date().toISOString(), usuario, accion, detalle }, ...leerHistorial()].slice(0, 300)
+  try { localStorage.setItem(KEY_LOG, JSON.stringify(lista)) } catch { /* nada */ }
+}
+
+/* ---------------- Usuarios (DEMO) ---------------- */
+const KEY_USR = 'vp-demo-usuarios'
+export const ROLES = {
+  admin: { nombre: 'Administrador', permisos: ['Agenda de todo el equipo', 'Certificados', 'Estadísticas'] },
+  tecnico: { nombre: 'Técnico', permisos: ['Su agenda', 'Emitir certificados'] },
+  soporte: { nombre: 'Soporte técnico', permisos: ['Todo', 'Mantención', 'Usuarios', 'Respaldos'] },
+}
+export function leerUsuarios() {
+  try {
+    const raw = localStorage.getItem(KEY_USR)
+    if (raw) return JSON.parse(raw)
+  } catch { /* nada */ }
+  return [
+    { id: 'u1', nombre: 'Marco Niño', usuario: 'demo', rol: 'admin', activo: true, acceso: new Date().toISOString() },
+    { id: 'u2', nombre: 'Felipe', usuario: 'felipe', rol: 'tecnico', activo: true, acceso: new Date(Date.now() - 864e5).toISOString() },
+    { id: 'u3', nombre: 'Javier', usuario: 'javier', rol: 'tecnico', activo: true, acceso: new Date(Date.now() - 3 * 864e5).toISOString() },
+    { id: 'u4', nombre: 'Soporte', usuario: 'soporte', rol: 'soporte', activo: true, acceso: new Date().toISOString() },
+  ]
+}
+export function guardarUsuarios(l) {
+  try { localStorage.setItem(KEY_USR, JSON.stringify(l)) } catch { /* nada */ }
+}

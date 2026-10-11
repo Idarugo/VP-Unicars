@@ -4,19 +4,24 @@ import Vista from './Vista.jsx'
 import Formulario from './Formulario.jsx'
 import Agenda from './Agenda.jsx'
 import Estadisticas from './Estadisticas.jsx'
+import Mantencion from './Mantencion.jsx'
 import {
   cargar, guardar, reiniciar, siguienteNumero, vacio, nuevoCodigo, fechaLocal,
-  cargarAgenda, guardarAgenda, reiniciarAgenda, equipo,
+  cargarAgenda, guardarAgenda, reiniciarAgenda, equipo, registrar, leerUsuarios, guardarUsuarios,
 } from './store.js'
 import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine,
+  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine, faScrewdriverWrench,
 } from './iconos.js'
 
-// DEMO: acceso de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
-const DEMO = { usuario: 'demo', clave: 'demo' }
+// DEMO: accesos de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
+// demo/demo = dueño (Administrador) · soporte/soporte = tú, con la sección de Mantención
+const DEMO = {
+  demo: { clave: 'demo', rol: 'admin', nombre: 'Marco Niño' },
+  soporte: { clave: 'soporte', rol: 'soporte', nombre: 'Soporte' },
+}
 const SESION = 'vp-demo-sesion'
 
 // Números de página con "…" cuando hay muchas: 1 … 4 5 6 … 12
@@ -43,7 +48,13 @@ function Paginacion({ pagina, total, items, porPagina, onCambio }) {
   )
 }
 
-const leerSesion = () => { try { return sessionStorage.getItem(SESION) === '1' } catch { return false } }
+const leerSesion = () => {
+  try {
+    const v = sessionStorage.getItem(SESION)
+    if (v === '1') return { usuario: 'demo', ...DEMO.demo } // sesiones antiguas de la demo
+    return v ? JSON.parse(v) : null
+  } catch { return null }
+}
 const fechaCorta = (iso) => iso.split('-').reverse().join('/')
 
 function Login({ onOk }) {
@@ -52,10 +63,16 @@ function Login({ onOk }) {
   const [error, setError] = useState('')
   const entrar = (e) => {
     e.preventDefault()
-    if (u.trim().toLowerCase() === DEMO.usuario && p === DEMO.clave) {
-      try { sessionStorage.setItem(SESION, '1') } catch { /* nada */ }
-      onOk()
-    } else setError('Usuario o clave incorrectos')
+    const usuario = u.trim().toLowerCase()
+    const cuenta = DEMO[usuario]
+    const registro = leerUsuarios().find((x) => x.usuario === usuario)
+    if (!cuenta || p !== cuenta.clave) return setError('Usuario o clave incorrectos')
+    if (registro && !registro.activo) return setError('Este usuario está desactivado')
+    const s = { usuario, rol: cuenta.rol, nombre: cuenta.nombre }
+    try { sessionStorage.setItem(SESION, JSON.stringify(s)) } catch { /* nada */ }
+    if (registro) guardarUsuarios(leerUsuarios().map((x) => (x.id === registro.id ? { ...x, acceso: new Date().toISOString() } : x)))
+    registrar(cuenta.nombre, 'Inició sesión')
+    onOk(s)
   }
   return (
     <div className="adm-login">
@@ -67,7 +84,7 @@ function Login({ onOk }) {
         <label>Clave<input type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" /></label>
         {error && <p className="adm-error">{error}</p>}
         <button className="adm-btn adm-btn--big"><Icon icon={faLock} /> Entrar</button>
-        <p className="adm-demo-note">Demo · usuario <b>demo</b> · clave <b>demo</b></p>
+        <p className="adm-demo-note">Demo · dueño: <b>demo</b> / <b>demo</b> · soporte: <b>soporte</b> / <b>soporte</b></p>
       </form>
     </div>
   )
@@ -76,7 +93,7 @@ function Login({ onOk }) {
 export default function AdminApp() {
   const [sesion, setSesion] = useState(leerSesion)
   const [lista, setLista] = useState(cargar)
-  const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver
+  const [vista, setVista] = useState(() => (leerSesion()?.rol === 'soporte' ? 'mantencion' : 'agenda')) // agenda | lista | nuevo | ver
   const [trabajos, setTrabajosState] = useState(cargarAgenda)
   const setTrabajos = (l) => { setTrabajosState(l); guardarAgenda(l) }
   const [form, setForm] = useState(vacio)
@@ -109,6 +126,8 @@ export default function AdminApp() {
   const delMes = lista.filter((c) => c.fecha.startsWith(mes)).length
 
   const mostrarAviso = (t) => { setAviso(t); setTimeout(() => setAviso(''), 3200) }
+  const log = (accion, detalle) => registrar(sesion?.nombre || 'Desconocido', accion, detalle)
+  const esSoporte = sesion?.rol === 'soporte'
 
   const emitir = () => {
     const c = { ...form, numero, codigo: nuevoCodigo(), creado: new Date().toISOString() }
@@ -117,6 +136,7 @@ export default function AdminApp() {
     setVista('ver')
     setForm(vacio())
     mostrarAviso(`Certificado N° ${folio(c.numero)} emitido`)
+    log('Emitió certificado', `N° ${folio(c.numero)} · ${formatoPatente(c.patente)}`)
   }
 
   const pdf = async (accion) => {
@@ -124,6 +144,7 @@ export default function AdminApp() {
     setOcupado(true)
     try {
       const blob = await generarPDF(exportar.current)
+      log(accion === 'descargar' ? 'Descargó PDF' : 'Envió certificado por WhatsApp', `N° ${folio(actual.numero)}`)
       if (accion === 'descargar') { descargar(blob, nombreArchivo(actual)); mostrarAviso('PDF descargado') }
       else {
         const r = await compartir(actual, blob)
@@ -153,10 +174,11 @@ export default function AdminApp() {
   const eliminar = (c) => {
     if (!window.confirm(`¿Eliminar el certificado N° ${folio(c.numero)}? (solo en la demo)`)) return
     actualizar(lista.filter((x) => x.numero !== c.numero))
+    log('Eliminó certificado', `N° ${folio(c.numero)} · ${formatoPatente(c.patente)}`)
     setVista('lista')
   }
 
-  if (!sesion) return <Login onOk={() => setSesion(true)} />
+  if (!sesion) return <Login onOk={(s) => { setSesion(s); setVista(s.rol === 'soporte' ? 'mantencion' : 'agenda') }} />
 
   return (
     <div className="adm">
@@ -170,6 +192,7 @@ export default function AdminApp() {
             ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda'],
             ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista)],
             ['estadisticas', faChartLine, 'Estadísticas', vista === 'estadisticas'],
+            ...(esSoporte ? [['mantencion', faScrewdriverWrench, 'Mantención', vista === 'mantencion']] : []),
           ].map(([v, ico, txt, on]) => (
             <button key={v} className={`adm-side-item ${on ? 'is-on' : ''}`} title={txt}
               onClick={() => { setVista(v); setMenu(false) }}>
@@ -178,8 +201,8 @@ export default function AdminApp() {
           ))}
         </nav>
         <div className="adm-side-foot">
-          <div className="adm-side-user"><i>M</i><span><b>Marco Niño</b><small>Administrador</small></span></div>
-          <button className="adm-side-item" title="Salir" onClick={() => { try { sessionStorage.removeItem(SESION) } catch { /* nada */ } setSesion(false) }}>
+          <div className="adm-side-user"><i className={esSoporte ? 'is-soporte' : ''}>{sesion.nombre[0]}</i><span><b>{sesion.nombre}</b><small>{esSoporte ? 'Soporte técnico' : 'Administrador'}</small></span></div>
+          <button className="adm-side-item" title="Salir" onClick={() => { log('Cerró sesión'); try { sessionStorage.removeItem(SESION) } catch { /* nada */ } setSesion(null) }}>
             <Icon icon={faRightFromBracket} /><span>Salir</span>
           </button>
         </div>
@@ -190,19 +213,23 @@ export default function AdminApp() {
       <header className="adm-mobilebar">
         <button className="adm-icon-btn" onClick={() => setMenu(true)} aria-label="Abrir menú"><Icon icon={faBars} /></button>
         <img src="/admin/logo-vp.png" alt="VP Unicars" />
-        <span className="adm-mobilebar-t">{vista === 'agenda' ? 'Agenda' : vista === 'estadisticas' ? 'Estadísticas' : 'Certificados'}</span>
+        <span className="adm-mobilebar-t">{{ agenda: 'Agenda', estadisticas: 'Estadísticas', mantencion: 'Mantención' }[vista] || 'Certificados'}</span>
       </header>
 
       <div className="adm-content">
 
       {vista === 'agenda' && (
         <Agenda
-          trabajos={trabajos} setTrabajos={setTrabajos} onCertificado={certificadoDesdeTrabajo}
+          trabajos={trabajos} setTrabajos={setTrabajos} onCertificado={certificadoDesdeTrabajo} onLog={log}
           onReiniciar={() => { if (window.confirm('¿Volver a la agenda de ejemplo?')) setTrabajosState(reiniciarAgenda()) }}
         />
       )}
 
       {vista === 'estadisticas' && <Estadisticas certificados={lista} trabajos={trabajos} />}
+
+      {vista === 'mantencion' && esSoporte && (
+        <Mantencion usuario={sesion.nombre} certificados={lista} trabajos={trabajos} siguiente={numero} avisar={mostrarAviso} />
+      )}
 
       {vista === 'lista' && (
         <main className="adm-main">

@@ -1,5 +1,6 @@
 // Todo el contenido editable de la página vive aquí.
-export const negocio = {
+import { leerContenido } from './contenido.js'
+const baseNegocio = {
   nombre: 'VP Unicars',
   whatsapp: '56930235194',
   whatsappTexto: 'Hola VP Unicars! Quiero cotizar un trabajo para mi auto 🚘',
@@ -22,7 +23,7 @@ export const stats = [
 ]
 
 // foto: '/fotos/archivo.jpg' (opcional)
-export const servicios = [
+const baseServicios = [
   {
     id: 'ppf',
     foto: '/fotos/porsche-ppf.jpg',
@@ -97,7 +98,7 @@ export const servicios = [
 
 // Servicios adicionales: todo se cotiza y agenda por el WhatsApp de VP Unicars.
 // icono: nombre del ícono de Font Awesome definido en components/MasServicios.jsx
-export const masServicios = [
+const baseMasServicios = [
   { id: 'audio', titulo: 'Audio', texto: 'Instalación de parlantes, radios, subwoofers y amplificadores.', icono: 'audio' },
   { id: 'corta-corriente', titulo: 'Corta corriente e inmovilizadores', texto: 'Protección antirrobo que impide que tu auto arranque sin ti.', icono: 'corriente' },
   { id: 'seguridad', titulo: 'Sistemas de seguridad', texto: 'Alarmas y soluciones para que tu auto esté siempre protegido.', icono: 'seguridad' },
@@ -166,7 +167,7 @@ export const pasos = [
   { t: 'Entrega', d: 'Revisión final contigo y recomendaciones de cuidado.' },
 ]
 
-export const faqs = [
+const baseFaqs = [
   {
     q: '¿Qué diferencia hay entre Nanocarbon y Nanocerámico?',
     a: 'Ambos son tecnologías de última generación. El Nanocarbon ofrece excelente rechazo de calor y no se decolora; el Nanocerámico va un paso más allá con el mayor rechazo térmico y máxima claridad, sin interferir con GPS ni señal de celular.',
@@ -192,3 +193,13 @@ export const faqs = [
     a: 'Escríbenos por WhatsApp o por DM en Instagram y coordinamos tu hora en Mall Plaza América, Rancagua.',
   },
 ]
+
+// Cambios hechos desde el panel de mantención (textos, fotos, horario, preguntas)
+const cambios = leerContenido()
+const aplicar = (lista, extra = {}) => lista.map((s) => ({ ...s, ...(extra[s.id] || {}) })).filter((s) => !s.oculto)
+
+export const negocio = { ...baseNegocio, ...(cambios.negocio || {}) }
+export const servicios = aplicar(baseServicios, cambios.servicios)
+export const masServicios = aplicar(baseMasServicios, cambios.masServicios)
+export const faqs = cambios.faqs?.length ? cambios.faqs : baseFaqs
+export const base = { negocio: baseNegocio, servicios: baseServicios, masServicios: baseMasServicios, faqs: baseFaqs }
