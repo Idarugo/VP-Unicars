@@ -3,6 +3,7 @@ import Certificado from './Certificado.jsx'
 import Vista from './Vista.jsx'
 import Formulario from './Formulario.jsx'
 import Agenda from './Agenda.jsx'
+import Estadisticas from './Estadisticas.jsx'
 import {
   cargar, guardar, reiniciar, siguienteNumero, vacio, nuevoCodigo, fechaLocal,
   cargarAgenda, guardarAgenda, reiniciarAgenda, equipo,
@@ -11,7 +12,7 @@ import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight,
+  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine,
 } from './iconos.js'
 
 // DEMO: acceso de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
@@ -168,6 +169,7 @@ export default function AdminApp() {
           {[
             ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda'],
             ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista)],
+            ['estadisticas', faChartLine, 'Estadísticas', vista === 'estadisticas'],
           ].map(([v, ico, txt, on]) => (
             <button key={v} className={`adm-side-item ${on ? 'is-on' : ''}`} title={txt}
               onClick={() => { setVista(v); setMenu(false) }}>
@@ -188,7 +190,7 @@ export default function AdminApp() {
       <header className="adm-mobilebar">
         <button className="adm-icon-btn" onClick={() => setMenu(true)} aria-label="Abrir menú"><Icon icon={faBars} /></button>
         <img src="/admin/logo-vp.png" alt="VP Unicars" />
-        <span className="adm-mobilebar-t">{vista === 'agenda' ? 'Agenda' : 'Certificados'}</span>
+        <span className="adm-mobilebar-t">{vista === 'agenda' ? 'Agenda' : vista === 'estadisticas' ? 'Estadísticas' : 'Certificados'}</span>
       </header>
 
       <div className="adm-content">
@@ -199,6 +201,8 @@ export default function AdminApp() {
           onReiniciar={() => { if (window.confirm('¿Volver a la agenda de ejemplo?')) setTrabajosState(reiniciarAgenda()) }}
         />
       )}
+
+      {vista === 'estadisticas' && <Estadisticas certificados={lista} trabajos={trabajos} />}
 
       {vista === 'lista' && (
         <main className="adm-main">
