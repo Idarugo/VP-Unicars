@@ -2,12 +2,16 @@ import { useMemo, useRef, useState } from 'react'
 import Certificado from './Certificado.jsx'
 import Vista from './Vista.jsx'
 import Formulario from './Formulario.jsx'
-import { cargar, guardar, reiniciar, siguienteNumero, vacio, nuevoCodigo } from './store.js'
+import Agenda from './Agenda.jsx'
+import {
+  cargar, guardar, reiniciar, siguienteNumero, vacio, nuevoCodigo, fechaLocal,
+  cargarAgenda, guardarAgenda, reiniciarAgenda, equipo,
+} from './store.js'
 import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode,
+  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars,
 } from './iconos.js'
 
 // DEMO: acceso de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
@@ -32,8 +36,8 @@ function Login({ onOk }) {
     <div className="adm-login">
       <form className="adm-login-card" onSubmit={entrar}>
         <img src="/admin/logo-vp.png" alt="VP Unicars" />
-        <h1>Panel de certificados</h1>
-        <p className="adm-muted">Ingresa para emitir y buscar certificados de instalación.</p>
+        <h1>Panel VP Unicars</h1>
+        <p className="adm-muted">Agenda del equipo y certificados de instalación.</p>
         <label>Usuario<input autoFocus value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" /></label>
         <label>Clave<input type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" /></label>
         {error && <p className="adm-error">{error}</p>}
@@ -47,11 +51,14 @@ function Login({ onOk }) {
 export default function AdminApp() {
   const [sesion, setSesion] = useState(leerSesion)
   const [lista, setLista] = useState(cargar)
-  const [vista, setVista] = useState('lista') // lista | nuevo | ver
+  const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver
+  const [trabajos, setTrabajosState] = useState(cargarAgenda)
+  const setTrabajos = (l) => { setTrabajosState(l); guardarAgenda(l) }
   const [form, setForm] = useState(vacio)
   const [actual, setActual] = useState(null)
   const [q, setQ] = useState('')
   const [ocupado, setOcupado] = useState(false)
+  const [menu, setMenu] = useState(false)
   const [aviso, setAviso] = useState('')
   const exportar = useRef(null)
 
@@ -68,7 +75,7 @@ export default function AdminApp() {
       `${c.marca}${c.modelo}`.toUpperCase().replace(/\s/g, '').includes(t))
   }, [lista, q])
 
-  const mes = new Date().toISOString().slice(0, 7)
+  const mes = fechaLocal().slice(0, 7)
   const delMes = lista.filter((c) => c.fecha.startsWith(mes)).length
 
   const mostrarAviso = (t) => { setAviso(t); setTimeout(() => setAviso(''), 3200) }
@@ -101,6 +108,18 @@ export default function AdminApp() {
     setVista('nuevo')
   }
 
+  // Desde la agenda: certificado prellenado con los datos del trabajo
+  const certificadoDesdeTrabajo = (t) => {
+    const p = equipo.find((e) => e.id === t.encargado)
+    setForm({
+      ...vacio(), fecha: t.fecha, cliente: t.cliente, telefono: t.telefono, direccion: t.direccion,
+      marca: t.marca, modelo: t.modelo, patente: t.patente, observaciones: t.notas,
+      instalador: p?.id === 'marco' ? 'Marco Niño' : p?.nombre || '',
+    })
+    setVista('nuevo')
+    mostrarAviso('Datos del trabajo cargados: completa los % de las láminas')
+  }
+
   const eliminar = (c) => {
     if (!window.confirm(`¿Eliminar el certificado N° ${folio(c.numero)}? (solo en la demo)`)) return
     actualizar(lista.filter((x) => x.numero !== c.numero))
@@ -111,23 +130,53 @@ export default function AdminApp() {
 
   return (
     <div className="adm">
-      <header className="adm-top">
-        <div className="adm-brand">
+      <aside className={`adm-side ${menu ? 'is-open' : ''}`}>
+        <div className="adm-side-brand">
           <img src="/admin/logo-vp.png" alt="VP Unicars" />
-          <span>Panel de certificados</span>
-          <em className="adm-badge">DEMO</em>
+          <span>Panel VP Unicars <em className="adm-badge">DEMO</em></span>
         </div>
-        <nav>
-          <button className={`adm-tab ${vista === 'lista' ? 'is-on' : ''}`} onClick={() => setVista('lista')}>Certificados</button>
-          <button className="adm-btn" onClick={() => { setVista('nuevo'); setForm(vacio()) }}><Icon icon={faPlus} /> Nuevo</button>
-          <button className="adm-icon-btn" title="Salir" onClick={() => { try { sessionStorage.removeItem(SESION) } catch { /* nada */ } setSesion(false) }}>
-            <Icon icon={faRightFromBracket} />
-          </button>
+        <nav className="adm-side-nav">
+          {[
+            ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda'],
+            ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista)],
+          ].map(([v, ico, txt, on]) => (
+            <button key={v} className={`adm-side-item ${on ? 'is-on' : ''}`} title={txt}
+              onClick={() => { setVista(v); setMenu(false) }}>
+              <Icon icon={ico} /><span>{txt}</span>
+            </button>
+          ))}
         </nav>
+        <div className="adm-side-foot">
+          <div className="adm-side-user"><i>M</i><span><b>Marco Niño</b><small>Administrador</small></span></div>
+          <button className="adm-side-item" title="Salir" onClick={() => { try { sessionStorage.removeItem(SESION) } catch { /* nada */ } setSesion(false) }}>
+            <Icon icon={faRightFromBracket} /><span>Salir</span>
+          </button>
+        </div>
+      </aside>
+      {menu && <div className="adm-side-bg" onClick={() => setMenu(false)} />}
+
+      {/* Celular: barra mínima con botón de menú */}
+      <header className="adm-mobilebar">
+        <button className="adm-icon-btn" onClick={() => setMenu(true)} aria-label="Abrir menú"><Icon icon={faBars} /></button>
+        <img src="/admin/logo-vp.png" alt="VP Unicars" />
+        <span className="adm-mobilebar-t">{vista === 'agenda' ? 'Agenda' : 'Certificados'}</span>
       </header>
+
+      <div className="adm-content">
+
+      {vista === 'agenda' && (
+        <Agenda
+          trabajos={trabajos} setTrabajos={setTrabajos} onCertificado={certificadoDesdeTrabajo}
+          onReiniciar={() => { if (window.confirm('¿Volver a la agenda de ejemplo?')) setTrabajosState(reiniciarAgenda()) }}
+        />
+      )}
 
       {vista === 'lista' && (
         <main className="adm-main">
+          <div className="adm-list-head">
+            <h1 className="adm-h1"><Icon icon={faFileSignature} /> Certificados</h1>
+            <button className="adm-btn" onClick={() => { setForm(vacio()); setVista('nuevo') }}><Icon icon={faPlus} /> Nuevo certificado</button>
+          </div>
           <div className="adm-stats">
             <div><span>Total emitidos</span><b>{lista.length}</b></div>
             <div><span>Este mes</span><b>{delMes}</b></div>
@@ -163,7 +212,7 @@ export default function AdminApp() {
       {vista === 'nuevo' && (
         <main className="adm-main adm-split">
           <div>
-            <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Volver</button>
+            <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Certificados</button>
             <h1 className="adm-h1"><Icon icon={faFileSignature} /> Nuevo certificado</h1>
             <Formulario f={form} set={setForm} instaladores={instaladores} onSubmit={emitir} numero={folio(numero)} />
           </div>
@@ -190,6 +239,8 @@ export default function AdminApp() {
           <Vista c={actual} />
         </main>
       )}
+
+      </div>
 
       {/* Copia a tamaño real, fuera de pantalla, para generar el PDF */}
       {actual && (
