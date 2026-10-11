@@ -1,9 +1,6 @@
-// Datos que aparecen en todos los certificados. Se pueden cambiar desde Mantención → Configuración.
-// DEMO: los cambios se guardan en este navegador.
-const KEY_CONFIG = 'vp-demo-config'
-const leerConfig = () => { try { return JSON.parse(localStorage.getItem(KEY_CONFIG) || '{}') } catch { return {} } }
-
-export const empresaBase = {
+// Datos que aparecen en todos los certificados. Vienen de la base de datos (Mantención → Configuración):
+// useConfiguracionStore los copia en estos objetos al entrar al panel. Estos son solo los valores iniciales.
+export const empresa = {
   nombre: 'VP Unicars',
   rut: '77.535.813-0',
   direccion: 'Av. Nueva Einstein 290, Rancagua',
@@ -11,7 +8,7 @@ export const empresaBase = {
   telefono: '+56 9 3023 5194',
 }
 
-export const certificacionBase = {
+export const certificacion = {
   uv: '99% de filtro UV',
   documento: 'LEHTX00900653 de 20/07/2020 U.S.A.',
   norma: 'Norma ISO 3795 test: FM55302:2011',
@@ -19,27 +16,7 @@ export const certificacionBase = {
     'En cumplimiento al Decreto 70-2019 de la Subsecretaría de Transportes, declaro la veracidad de los datos contenidos en este certificado.',
 }
 
-export const sistemaBase = {
-  folioInicial: 239, // el siguiente N° nunca será menor que este (para continuar la numeración en papel)
-  dominio: 'vpunicars.cl',
-  venceDominio: '2027-10-15',
-  hosting: 'Vercel (plan Hobby)',
-}
-
-const guardada = leerConfig()
-// Objetos mutables: al guardar se actualizan en el lugar y el panel los ve sin recargar
-export const empresa = { ...empresaBase, ...(guardada.empresa || {}) }
-export const certificacion = { ...certificacionBase, ...(guardada.certificacion || {}) }
-export const sistema = { ...sistemaBase, ...(guardada.sistema || {}) }
-
-export function guardarConfig({ empresa: e, certificacion: c, sistema: s }) {
-  Object.assign(empresa, e); Object.assign(certificacion, c); Object.assign(sistema, s)
-  try { localStorage.setItem(KEY_CONFIG, JSON.stringify({ empresa, certificacion, sistema })) } catch { /* modo privado */ }
-}
-export function restaurarConfig() {
-  Object.assign(empresa, empresaBase); Object.assign(certificacion, certificacionBase); Object.assign(sistema, sistemaBase)
-  try { localStorage.removeItem(KEY_CONFIG) } catch { /* nada */ }
-}
+export const sistema = { folioInicial: 239, dominio: 'vpunicars.cl', venceDominio: '', hosting: '' }
 
 export const tiposVehiculo = ['Automóvil', 'SUV', 'Camioneta', 'Station wagon', 'Furgón', 'Camión', 'Moto', 'Otro']
 export const tonos = [5, 15, 20, 35, 50, 70, 80]

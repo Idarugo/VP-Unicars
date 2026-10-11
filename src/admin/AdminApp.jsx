@@ -1,28 +1,22 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Certificado from './Certificado.jsx'
 import Vista from './Vista.jsx'
 import Formulario from './Formulario.jsx'
 import Agenda from './Agenda.jsx'
 import Estadisticas from './Estadisticas.jsx'
 import Mantencion from './Mantencion.jsx'
-import {
-  cargar, guardar, reiniciar, siguienteNumero, vacio, nuevoCodigo, fechaLocal,
-  cargarAgenda, guardarAgenda, reiniciarAgenda, equipo, registrar, leerUsuarios, guardarUsuarios,
-} from './store.js'
+import { vacio } from './store.js'
 import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
+import { useAuthStore } from '../stores/authStore.js'
+import { useCertificadoStore } from '../stores/certificadoStore.js'
+import { useAgendaStore } from '../stores/agendaStore.js'
+import { useConfiguracionStore } from '../stores/configuracionStore.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faRotateLeft, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine, faScrewdriverWrench,
+  faLock, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine,
+  faScrewdriverWrench, faKey,
 } from './iconos.js'
-
-// DEMO: accesos de prueba. La versión real usa usuarios con contraseña segura (Supabase Auth).
-// demo/demo = dueño (Administrador) · soporte/soporte = tú, con la sección de Mantención
-const DEMO = {
-  demo: { clave: 'demo', rol: 'admin', nombre: 'Marco Niño' },
-  soporte: { clave: 'soporte', rol: 'soporte', nombre: 'Soporte' },
-}
-const SESION = 'vp-demo-sesion'
 
 // Números de página con "…" cuando hay muchas: 1 … 4 5 6 … 12
 const paginas = (actual, total) => {
@@ -48,95 +42,115 @@ function Paginacion({ pagina, total, items, porPagina, onCambio }) {
   )
 }
 
-const leerSesion = () => {
-  try {
-    const v = sessionStorage.getItem(SESION)
-    if (v === '1') return { usuario: 'demo', ...DEMO.demo } // sesiones antiguas de la demo
-    return v ? JSON.parse(v) : null
-  } catch { return null }
-}
 const fechaCorta = (iso) => iso.split('-').reverse().join('/')
 
-function Login({ onOk }) {
+function Login() {
+  const { login, loading, error } = useAuthStore()
   const [u, setU] = useState('')
   const [p, setP] = useState('')
-  const [error, setError] = useState('')
-  const entrar = (e) => {
-    e.preventDefault()
-    const usuario = u.trim().toLowerCase()
-    const cuenta = DEMO[usuario]
-    const registro = leerUsuarios().find((x) => x.usuario === usuario)
-    if (!cuenta || p !== cuenta.clave) return setError('Usuario o clave incorrectos')
-    if (registro && !registro.activo) return setError('Este usuario está desactivado')
-    const s = { usuario, rol: cuenta.rol, nombre: cuenta.nombre }
-    try { sessionStorage.setItem(SESION, JSON.stringify(s)) } catch { /* nada */ }
-    if (registro) guardarUsuarios(leerUsuarios().map((x) => (x.id === registro.id ? { ...x, acceso: new Date().toISOString() } : x)))
-    registrar(cuenta.nombre, 'Inició sesión')
-    onOk(s)
-  }
   return (
     <div className="adm-login">
-      <form className="adm-login-card" onSubmit={entrar}>
+      <form className="adm-login-card" onSubmit={(e) => { e.preventDefault(); login(u.trim().toLowerCase(), p) }}>
         <img src="/admin/logo-vp.png" alt="VP Unicars" />
         <h1>Panel VP Unicars</h1>
         <p className="adm-muted">Agenda del equipo y certificados de instalación.</p>
-        <label>Usuario<input autoFocus value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" /></label>
-        <label>Clave<input type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" /></label>
+        <label>Usuario<input autoFocus value={u} onChange={(e) => setU(e.target.value)} autoComplete="username" required /></label>
+        <label>Clave<input type="password" value={p} onChange={(e) => setP(e.target.value)} autoComplete="current-password" required /></label>
         {error && <p className="adm-error">{error}</p>}
-        <button className="adm-btn adm-btn--big"><Icon icon={faLock} /> Entrar</button>
-        <p className="adm-demo-note">Demo · dueño: <b>demo</b> / <b>demo</b> · soporte: <b>soporte</b> / <b>soporte</b></p>
+        <button className="adm-btn adm-btn--big" disabled={loading}><Icon icon={faLock} /> {loading ? 'Entrando…' : 'Entrar'}</button>
+      </form>
+    </div>
+  )
+}
+
+function CambiarClave({ onClose, avisar }) {
+  const cambiarClave = useAuthStore((s) => s.cambiarClave)
+  const [f, setF] = useState({ actual: '', nueva: '', repetir: '' })
+  const [error, setError] = useState('')
+  const enviar = async (e) => {
+    e.preventDefault()
+    if (f.nueva.length < 8) return setError('La clave nueva debe tener al menos 8 caracteres')
+    if (f.nueva !== f.repetir) return setError('Las claves nuevas no coinciden')
+    const r = await cambiarClave(f.actual, f.nueva)
+    if (!r.ok) return setError(r.message)
+    avisar('Clave actualizada'); onClose()
+  }
+  return (
+    <div className="ag-modal-bg" onClick={onClose}>
+      <form className="ag-modal adm-form" onClick={(e) => e.stopPropagation()} onSubmit={enviar}>
+        <div className="ag-modal-head"><h2>Cambiar clave</h2></div>
+        <label>Clave actual<input type="password" autoComplete="current-password" required value={f.actual} onChange={(e) => setF({ ...f, actual: e.target.value })} /></label>
+        <label>Clave nueva<input type="password" autoComplete="new-password" required value={f.nueva} onChange={(e) => setF({ ...f, nueva: e.target.value })} /></label>
+        <label>Repite la clave nueva<input type="password" autoComplete="new-password" required value={f.repetir} onChange={(e) => setF({ ...f, repetir: e.target.value })} /></label>
+        {error && <p className="adm-error">{error}</p>}
+        <div className="ag-modal-foot">
+          <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose}>Cancelar</button>
+          <button className="adm-btn"><Icon icon={faKey} /> Guardar clave</button>
+        </div>
       </form>
     </div>
   )
 }
 
 export default function AdminApp() {
-  const [sesion, setSesion] = useState(leerSesion)
-  const [lista, setLista] = useState(cargar)
-  const [vista, setVista] = useState(() => (leerSesion()?.rol === 'soporte' ? 'mantencion' : 'agenda')) // agenda | lista | nuevo | ver
-  const [trabajos, setTrabajosState] = useState(cargarAgenda)
-  const setTrabajos = (l) => { setTrabajosState(l); guardarAgenda(l) }
+  const { usuario, initialized, init, logout, puede } = useAuthStore()
+  const certs = useCertificadoStore()
+  const { equipo, fetchEquipo } = useAgendaStore()
+  const fetchConfiguracion = useConfiguracionStore((s) => s.fetchConfiguracion)
+  useConfiguracionStore((s) => s.config) // vuelve a dibujar los certificados cuando llega la configuración
+
+  const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver | estadisticas | mantencion
   const [form, setForm] = useState(vacio)
   const [actual, setActual] = useState(null)
   const [q, setQ] = useState('')
-  const [pagina, setPagina] = useState(1)
-  const POR_PAGINA = 10
   const [ocupado, setOcupado] = useState(false)
   const [menu, setMenu] = useState(false)
   const [aviso, setAviso] = useState('')
+  const [claveAbierta, setClaveAbierta] = useState(false)
   const exportar = useRef(null)
 
-  const actualizar = (l) => { setLista(l); guardar(l) }
-  const numero = siguienteNumero(lista)
-  const instaladores = useMemo(() => [...new Set(lista.map((c) => c.instalador).filter(Boolean))], [lista])
+  const mostrarAviso = (t) => { setAviso(t); setTimeout(() => setAviso(''), 3500) }
+  const esSoporte = usuario?.rol === 'soporte'
 
-  const filtrada = useMemo(() => {
-    const t = q.trim().toUpperCase().replace(/[·\s-]/g, '')
-    const orden = [...lista].sort((a, b) => b.numero - a.numero)
-    if (!t) return orden
-    return orden.filter((c) =>
-      String(c.numero).includes(t) || c.patente.includes(t) || c.cliente.toUpperCase().replace(/\s/g, '').includes(t) ||
-      `${c.marca}${c.modelo}`.toUpperCase().replace(/\s/g, '').includes(t))
-  }, [lista, q])
+  useEffect(() => { init() }, [init])
 
-  const totalPaginas = Math.max(1, Math.ceil(filtrada.length / POR_PAGINA))
-  const paginaActual = Math.min(pagina, totalPaginas)
+  // Sesión vencida en cualquier llamada: volver al login
+  useEffect(() => {
+    const f = () => { logout(); mostrarAviso('Tu sesión venció, vuelve a entrar') }
+    window.addEventListener('vp:sesion-expirada', f)
+    return () => window.removeEventListener('vp:sesion-expirada', f)
+  }, [logout])
 
-  const mes = fechaLocal().slice(0, 7)
-  const delMes = lista.filter((c) => c.fecha.startsWith(mes)).length
+  useEffect(() => {
+    if (!usuario) return
+    fetchConfiguracion()
+    fetchEquipo()
+    certs.fetchResumen()
+    setVista(usuario.rol === 'soporte' ? 'mantencion' : 'agenda')
+  }, [usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const mostrarAviso = (t) => { setAviso(t); setTimeout(() => setAviso(''), 3200) }
-  const log = (accion, detalle) => registrar(sesion?.nombre || 'Desconocido', accion, detalle)
-  const esSoporte = sesion?.rol === 'soporte'
+  // Búsqueda con espera corta para no consultar en cada tecla
+  useEffect(() => {
+    if (!usuario || vista !== 'lista') return
+    const t = setTimeout(() => certs.fetchCertificados({ q, page: 1 }), 250)
+    return () => clearTimeout(t)
+  }, [q, vista, usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const emitir = () => {
-    const c = { ...form, numero, codigo: nuevoCodigo(), creado: new Date().toISOString() }
-    actualizar([...lista, c])
+  useEffect(() => { if (certs.error) { mostrarAviso(certs.error); certs.limpiarError() } }, [certs.error]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!initialized) return <div className="adm-login"><p className="adm-muted">Cargando…</p></div>
+  if (!usuario) return <Login />
+
+  const siguiente = certs.resumen.siguiente
+  const nuevoForm = () => ({ ...vacio(), instalador: usuario.nombre })
+
+  const emitir = async () => {
+    const c = await certs.createCertificado(form)
+    if (!c) return
     setActual(c)
     setVista('ver')
-    setForm(vacio())
+    setForm(nuevoForm())
     mostrarAviso(`Certificado N° ${folio(c.numero)} emitido`)
-    log('Emitió certificado', `N° ${folio(c.numero)} · ${formatoPatente(c.patente)}`)
   }
 
   const pdf = async (accion) => {
@@ -144,7 +158,6 @@ export default function AdminApp() {
     setOcupado(true)
     try {
       const blob = await generarPDF(exportar.current)
-      log(accion === 'descargar' ? 'Descargó PDF' : 'Envió certificado por WhatsApp', `N° ${folio(actual.numero)}`)
       if (accion === 'descargar') { descargar(blob, nombreArchivo(actual)); mostrarAviso('PDF descargado') }
       else {
         const r = await compartir(actual, blob)
@@ -154,156 +167,158 @@ export default function AdminApp() {
   }
 
   const duplicar = (c) => {
-    const { numero: _n, codigo: _c, creado: _cr, ...datos } = c
-    setForm({ ...datos, fecha: vacio().fecha })
+    setForm({
+      ...nuevoForm(), cliente: c.cliente, direccion: c.direccion || '', telefono: c.telefono || '', instalador: c.instalador,
+      tipo: c.tipo, marca: c.marca, modelo: c.modelo, anio: String(c.anio), patente: c.patente,
+    })
     setVista('nuevo')
   }
 
   // Desde la agenda: certificado prellenado con los datos del trabajo
   const certificadoDesdeTrabajo = (t) => {
-    const p = equipo.find((e) => e.id === t.encargado)
     setForm({
-      ...vacio(), fecha: t.fecha, cliente: t.cliente, telefono: t.telefono, direccion: t.direccion,
-      marca: t.marca, modelo: t.modelo, patente: t.patente, observaciones: t.notas,
-      instalador: p?.id === 'marco' ? 'Marco Niño' : p?.nombre || '',
+      ...nuevoForm(), fecha: t.fecha, cliente: t.cliente, telefono: t.telefono || '', direccion: t.direccion || '',
+      marca: t.marca || '', modelo: t.modelo || '', patente: t.patente || '', observaciones: t.notas || '',
+      instalador: t.encargado || usuario.nombre,
     })
     setVista('nuevo')
     mostrarAviso('Datos del trabajo cargados: completa los % de las láminas')
   }
 
-  const eliminar = (c) => {
-    if (!window.confirm(`¿Eliminar el certificado N° ${folio(c.numero)}? (solo en la demo)`)) return
-    actualizar(lista.filter((x) => x.numero !== c.numero))
-    log('Eliminó certificado', `N° ${folio(c.numero)} · ${formatoPatente(c.patente)}`)
-    setVista('lista')
+  const anular = async (c) => {
+    if (!window.confirm(`¿Anular el certificado N° ${folio(c.numero)}? Quedará registrado en el historial y su número no se vuelve a usar.`)) return
+    if (await certs.anularCertificado(c.numero)) { mostrarAviso(`Certificado N° ${folio(c.numero)} anulado`); setVista('lista') }
   }
 
-  if (!sesion) return <Login onOk={(s) => { setSesion(s); setVista(s.rol === 'soporte' ? 'mantencion' : 'agenda') }} />
+  const items = [
+    ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda', true],
+    ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista), puede('certificados.ver')],
+    ['estadisticas', faChartLine, 'Estadísticas', vista === 'estadisticas', puede('estadisticas.ver')],
+    ['mantencion', faScrewdriverWrench, 'Mantención', vista === 'mantencion', puede('mantencion.ver')],
+  ].filter((i) => i[4])
 
   return (
     <div className="adm">
       <aside className={`adm-side ${menu ? 'is-open' : ''}`}>
         <div className="adm-side-brand">
           <img src="/admin/logo-vp.png" alt="VP Unicars" />
-          <span>Panel VP Unicars <em className="adm-badge">DEMO</em></span>
+          <span>Panel VP Unicars</span>
         </div>
         <nav className="adm-side-nav">
-          {[
-            ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda'],
-            ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista)],
-            ['estadisticas', faChartLine, 'Estadísticas', vista === 'estadisticas'],
-            ...(esSoporte ? [['mantencion', faScrewdriverWrench, 'Mantención', vista === 'mantencion']] : []),
-          ].map(([v, ico, txt, on]) => (
-            <button key={v} className={`adm-side-item ${on ? 'is-on' : ''}`} title={txt}
-              onClick={() => { setVista(v); setMenu(false) }}>
+          {items.map(([v, ico, txt, on]) => (
+            <button key={v} className={`adm-side-item ${on ? 'is-on' : ''}`} title={txt} onClick={() => { setVista(v); setMenu(false) }}>
               <Icon icon={ico} /><span>{txt}</span>
             </button>
           ))}
         </nav>
         <div className="adm-side-foot">
-          <div className="adm-side-user"><i className={esSoporte ? 'is-soporte' : ''}>{sesion.nombre[0]}</i><span><b>{sesion.nombre}</b><small>{esSoporte ? 'Soporte técnico' : 'Administrador'}</small></span></div>
-          <button className="adm-side-item" title="Salir" onClick={() => { log('Cerró sesión'); try { sessionStorage.removeItem(SESION) } catch { /* nada */ } setSesion(null) }}>
+          <div className="adm-side-user">
+            <i className={esSoporte ? 'is-soporte' : ''} style={esSoporte ? undefined : { background: usuario.color }}>{usuario.nombre[0]}</i>
+            <span><b>{usuario.nombre}</b><small>{usuario.rolNombre}</small></span>
+          </div>
+          <button className="adm-side-item" title="Cambiar clave" onClick={() => { setClaveAbierta(true); setMenu(false) }}>
+            <Icon icon={faKey} /><span>Cambiar clave</span>
+          </button>
+          <button className="adm-side-item" title="Salir" onClick={logout}>
             <Icon icon={faRightFromBracket} /><span>Salir</span>
           </button>
         </div>
       </aside>
       {menu && <div className="adm-side-bg" onClick={() => setMenu(false)} />}
 
-      {/* Celular: barra mínima con botón de menú */}
       <header className="adm-mobilebar">
         <button className="adm-icon-btn" onClick={() => setMenu(true)} aria-label="Abrir menú"><Icon icon={faBars} /></button>
-        <img src="/admin/logo-vp.png" alt="VP Unicars" />
         <span className="adm-mobilebar-t">{{ agenda: 'Agenda', estadisticas: 'Estadísticas', mantencion: 'Mantención' }[vista] || 'Certificados'}</span>
+        <img src="/admin/logo-vp.png" alt="VP Unicars" />
       </header>
 
       <div className="adm-content">
+        {vista === 'agenda' && <Agenda onCertificado={certificadoDesdeTrabajo} avisar={mostrarAviso} />}
 
-      {vista === 'agenda' && (
-        <Agenda
-          trabajos={trabajos} setTrabajos={setTrabajos} onCertificado={certificadoDesdeTrabajo} onLog={log}
-          onReiniciar={() => { if (window.confirm('¿Volver a la agenda de ejemplo?')) setTrabajosState(reiniciarAgenda()) }}
-        />
-      )}
+        {vista === 'estadisticas' && <Estadisticas />}
 
-      {vista === 'estadisticas' && <Estadisticas certificados={lista} trabajos={trabajos} />}
+        {vista === 'mantencion' && esSoporte && <Mantencion avisar={mostrarAviso} />}
 
-      {vista === 'mantencion' && esSoporte && (
-        <Mantencion usuario={sesion.nombre} certificados={lista} trabajos={trabajos} siguiente={numero} avisar={mostrarAviso} />
-      )}
-
-      {vista === 'lista' && (
-        <main className="adm-main">
-          <div className="adm-list-head">
-            <h1 className="adm-h1"><Icon icon={faFileSignature} /> Certificados</h1>
-            <button className="adm-btn" onClick={() => { setForm(vacio()); setVista('nuevo') }}><Icon icon={faPlus} /> Nuevo certificado</button>
-          </div>
-          <div className="adm-stats">
-            <div><span>Total emitidos</span><b>{lista.length}</b></div>
-            <div><span>Este mes</span><b>{delMes}</b></div>
-            <div><span>Próximo N°</span><b>{folio(numero)}</b></div>
-          </div>
-
-          <div className="adm-buscar">
-            <Icon icon={faMagnifyingGlass} />
-            <input placeholder="Buscar por patente, cliente, N° o modelo…" value={q} onChange={(e) => { setQ(e.target.value); setPagina(1) }} />
-          </div>
-
-          <ul className="adm-lista">
-            {filtrada.slice((paginaActual - 1) * POR_PAGINA, paginaActual * POR_PAGINA).map((c) => (
-              <li key={c.numero}>
-                <button className="adm-item" onClick={() => { setActual(c); setVista('ver') }}>
-                  <span className="adm-item-num">N° {folio(c.numero)}</span>
-                  <span className="adm-item-pat">{formatoPatente(c.patente)}</span>
-                  <span className="adm-item-cli"><b>{c.cliente}</b><small>{c.marca} {c.modelo} · {c.anio}</small></span>
-                  <span className="adm-item-fecha">{fechaCorta(c.fecha)}</span>
-                  <Icon icon={faEye} className="adm-item-ico" />
-                </button>
-              </li>
-            ))}
-            {filtrada.length === 0 && <li className="adm-vacio">No hay certificados que coincidan con “{q}”.</li>}
-          </ul>
-
-          {filtrada.length > POR_PAGINA && (
-            <Paginacion pagina={paginaActual} total={totalPaginas} items={filtrada.length} porPagina={POR_PAGINA} onCambio={(n) => { setPagina(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
-          )}
-
-          <button className="adm-link" onClick={() => { if (window.confirm('¿Volver a los datos de ejemplo de la demo?')) { setLista(reiniciar()); setPagina(1) } }}>
-            <Icon icon={faRotateLeft} /> Reiniciar datos de la demo
-          </button>
-        </main>
-      )}
-
-      {vista === 'nuevo' && (
-        <main className="adm-main adm-split">
-          <div>
-            <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Certificados</button>
-            <h1 className="adm-h1"><Icon icon={faFileSignature} /> Nuevo certificado</h1>
-            <Formulario f={form} set={setForm} instaladores={instaladores} onSubmit={emitir} numero={folio(numero)} />
-          </div>
-          <aside className="adm-preview">
-            <p className="adm-preview-t">Vista previa en vivo</p>
-            <Vista c={{ ...form, numeroPreview: numero }} />
-          </aside>
-        </main>
-      )}
-
-      {vista === 'ver' && actual && (
-        <main className="adm-main">
-          <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Certificados</button>
-          <div className="adm-ver-head">
-            <h1 className="adm-h1">N° {folio(actual.numero)} · {formatoPatente(actual.patente)}</h1>
-            <div className="adm-acciones">
-              <button className="adm-btn" disabled={ocupado} onClick={() => pdf('descargar')}><Icon icon={faFilePdf} /> {ocupado ? 'Generando…' : 'Descargar PDF'}</button>
-              <button className="adm-btn adm-btn--wa" disabled={ocupado} onClick={() => pdf('compartir')}><Icon icon={faWhatsapp} /> Enviar por WhatsApp</button>
-              <a className="adm-btn adm-btn--ghost" href={urlVerificacion(actual)} target="_blank" rel="noreferrer"><Icon icon={faQrcode} /> Verificación</a>
-              <button className="adm-btn adm-btn--ghost" onClick={() => duplicar(actual)}><Icon icon={faCopy} /> Usar datos</button>
-              <button className="adm-icon-btn adm-icon-btn--danger" title="Eliminar" onClick={() => eliminar(actual)}><Icon icon={faTrash} /></button>
+        {vista === 'lista' && (
+          <main className="adm-main">
+            <div className="adm-list-head">
+              <h1 className="adm-h1"><Icon icon={faFileSignature} /> Certificados</h1>
+              {puede('certificados.crear') && (
+                <button className="adm-btn" onClick={() => { setForm(nuevoForm()); setVista('nuevo') }}><Icon icon={faPlus} /> Nuevo certificado</button>
+              )}
             </div>
-          </div>
-          <Vista c={actual} />
-        </main>
-      )}
+            <div className="adm-stats">
+              <div><span>Total emitidos</span><b>{certs.resumen.total}</b></div>
+              <div><span>Este mes</span><b>{certs.resumen.delMes}</b></div>
+              <div><span>Próximo N°</span><b>{siguiente ? folio(siguiente) : '—'}</b></div>
+            </div>
 
+            <div className="adm-buscar">
+              <Icon icon={faMagnifyingGlass} />
+              <input placeholder="Buscar por patente, cliente, N° o modelo…" value={q} onChange={(e) => setQ(e.target.value)} />
+            </div>
+
+            <ul className={`adm-lista ${certs.loading ? 'is-loading' : ''}`}>
+              {certs.certificados.map((c) => (
+                <li key={c.numero}>
+                  <button className="adm-item" onClick={() => { setActual(c); setVista('ver') }}>
+                    <span className="adm-item-num">N° {folio(c.numero)}</span>
+                    <span className="adm-item-pat">{formatoPatente(c.patente)}</span>
+                    <span className="adm-item-cli"><b>{c.cliente}</b><small>{c.marca} {c.modelo} · {c.anio}</small></span>
+                    <span className="adm-item-fecha">{fechaCorta(c.fecha)}</span>
+                    <Icon icon={faEye} className="adm-item-ico" />
+                  </button>
+                </li>
+              ))}
+              {!certs.loading && certs.certificados.length === 0 && (
+                <li className="adm-vacio">{q ? `No hay certificados que coincidan con “${q}”.` : 'Todavía no hay certificados emitidos.'}</li>
+              )}
+            </ul>
+
+            {certs.meta.total > certs.meta.limite && (
+              <Paginacion
+                pagina={certs.meta.pagina} total={certs.meta.paginas} items={certs.meta.total} porPagina={certs.meta.limite}
+                onCambio={(n) => { certs.fetchCertificados({ q, page: n }); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+              />
+            )}
+          </main>
+        )}
+
+        {vista === 'nuevo' && (
+          <main className="adm-main adm-split">
+            <div>
+              <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Certificados</button>
+              <h1 className="adm-h1"><Icon icon={faFileSignature} /> Nuevo certificado</h1>
+              <Formulario
+                f={form} set={setForm} instaladores={equipo.map((p) => p.nombre)} onSubmit={emitir}
+                numero={siguiente ? folio(siguiente) : '—'} guardando={certs.saving}
+              />
+            </div>
+            <aside className="adm-preview">
+              <p className="adm-preview-t">Vista previa en vivo</p>
+              <Vista c={{ ...form, numeroPreview: siguiente }} />
+            </aside>
+          </main>
+        )}
+
+        {vista === 'ver' && actual && (
+          <main className="adm-main">
+            <button className="adm-back" onClick={() => setVista('lista')}><Icon icon={faArrowLeft} /> Certificados</button>
+            <div className="adm-ver-head">
+              <h1 className="adm-h1">N° {folio(actual.numero)} · {formatoPatente(actual.patente)}</h1>
+              <div className="adm-acciones">
+                <button className="adm-btn" disabled={ocupado} onClick={() => pdf('descargar')}><Icon icon={faFilePdf} /> {ocupado ? 'Generando…' : 'Descargar PDF'}</button>
+                <button className="adm-btn adm-btn--wa" disabled={ocupado} onClick={() => pdf('compartir')}><Icon icon={faWhatsapp} /> Enviar por WhatsApp</button>
+                <a className="adm-btn adm-btn--ghost" href={urlVerificacion(actual)} target="_blank" rel="noreferrer"><Icon icon={faQrcode} /> Verificación</a>
+                {puede('certificados.crear') && <button className="adm-btn adm-btn--ghost" onClick={() => duplicar(actual)}><Icon icon={faCopy} /> Usar datos</button>}
+                {puede('certificados.anular') && (
+                  <button className="adm-icon-btn adm-icon-btn--danger" title="Anular" onClick={() => anular(actual)}><Icon icon={faTrash} /></button>
+                )}
+              </div>
+            </div>
+            <Vista c={actual} />
+          </main>
+        )}
       </div>
 
       {/* Copia a tamaño real, fuera de pantalla, para generar el PDF */}
@@ -313,6 +328,7 @@ export default function AdminApp() {
         </div>
       )}
 
+      {claveAbierta && <CambiarClave onClose={() => setClaveAbierta(false)} avisar={mostrarAviso} />}
       {aviso && <div className="adm-toast">{aviso}</div>}
     </div>
   )

@@ -31,14 +31,14 @@ export const faltantes = (f) => {
   return Object.entries(req).filter(([k]) => f[k] === '' || f[k] == null).map(([, v]) => v)
 }
 
-export default function Formulario({ f, set, instaladores, onSubmit, numero }) {
+export default function Formulario({ f, set, instaladores, onSubmit, numero, guardando = false }) {
   const cambiar = (k, v) => set((prev) => ({ ...prev, [k]: v }))
   const campo = (k) => ({ value: f[k], onChange: (e) => cambiar(k, e.target.value) })
   const patOk = !f.patente || patenteValida(f.patente)
   const faltan = faltantes(f)
 
   return (
-    <form className="adm-form" onSubmit={(e) => { e.preventDefault(); if (!faltan.length) onSubmit() }}>
+    <form className="adm-form" onSubmit={(e) => { e.preventDefault(); if (!faltan.length && !guardando) onSubmit() }}>
       <Grupo icono={faCalendarDays} titulo="Instalación">
         <div className="adm-row">
           <label>Fecha<input type="date" required {...campo('fecha')} /></label>
@@ -90,8 +90,8 @@ export default function Formulario({ f, set, instaladores, onSubmit, numero }) {
 
       <div className="adm-submit">
         {faltan.length > 0 && <p className="adm-faltan">Falta: {faltan.join(', ')}</p>}
-        <button className="adm-btn adm-btn--big" disabled={faltan.length > 0}>
-          <Icon icon={faCircleCheck} /> Emitir certificado N° {numero}
+        <button className="adm-btn adm-btn--big" disabled={faltan.length > 0 || guardando}>
+          <Icon icon={faCircleCheck} /> {guardando ? 'Emitiendo…' : `Emitir certificado N° ${numero}`}
         </button>
       </div>
     </form>

@@ -1,35 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { fechaLocal } from './store.js'
+import { useEstadisticaStore } from '../stores/estadisticaStore.js'
 import { Icon, faChartLine, faFilePdf, faCircleInfo, faArrowTrendUp, faArrowTrendDown } from './iconos.js'
-
-// DEMO: datos simulados (estables). En la versión real vendrían de la analítica de la web
-// (visitas y clics en los botones de WhatsApp) y de la base de datos del panel.
 
 const C_VISITAS = '#ffc800' // serie única del gráfico de línea
 const C_COTIZ = '#3987e5'   // serie única de barras (validado contra el fondo #111114)
-
-const SERVICIOS = [
-  ['Polarizado', 0.36], ['PPF', 0.15], ['Láminas de seguridad', 0.1], ['Audio', 0.09], ['Corta corriente', 0.08],
-  ['Ahumado de focos', 0.07], ['Vinilos / Kill chrome', 0.06], ['Iluminación', 0.04], ['Polarizado arquitectónico', 0.03], ['Grabado de patentes', 0.02],
-]
-const ORIGENES = [['Instagram', 0.52], ['Google', 0.23], ['Directo (link)', 0.15], ['Compartido por WhatsApp', 0.1]]
 const RANGOS = [[7, '7 días'], [30, '30 días'], [90, '90 días']]
-
-function serieSimulada() {
-  let s = 20261010
-  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647
-  const hoy = new Date()
-  return Array.from({ length: 180 }, (_, i) => {
-    const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - (179 - i))
-    const dow = d.getDay()
-    const factor = dow === 6 ? 1.2 : dow === 0 ? 0.75 : 1
-    const visitas = Math.round((42 + i * 0.32 + (rnd() - 0.5) * 30) * factor)
-    const clics = Math.round(visitas * (0.08 + rnd() * 0.05))
-    return { fecha: fechaLocal(d), visitas, clics }
-  })
-}
 
 const fmt = (n) => n.toLocaleString('es-CL')
 const fechaCorta = (iso) => { const [, m, d] = iso.split('-'); return `${Number(d)}/${Number(m)}` }
@@ -55,7 +33,7 @@ function GraficoVisitas({ datos }) {
   const [ref, W] = useAncho()
   const [idx, setIdx] = useState(null)
   const H = 240, ml = 40, mr = 12, mt = 14, mb = 28
-  const max = Math.max(...datos.map((d) => d.visitas)) * 1.05
+  const max = Math.max(5, ...datos.map((d) => d.visitas)) * 1.05
   const ys = ticks(max)
   const top = ys[ys.length - 1] || 1
   const x = (i) => ml + (i / Math.max(1, datos.length - 1)) * (W - ml - mr)
@@ -116,6 +94,7 @@ function GraficoVisitas({ datos }) {
 
 function Barras({ filas, color, unidad }) {
   const [hover, setHover] = useState(null)
+  if (!filas.length) return <p className="adm-muted st-vacio">Aún no hay {unidad} en este período.</p>
   const max = Math.max(...filas.map((f) => f.valor), 1)
   const total = filas.reduce((a, f) => a + f.valor, 0) || 1
   return (
@@ -151,31 +130,28 @@ function Kpi({ titulo, valor, previo, sufijo = '', nota, texto }) {
   )
 }
 
-export default function Estadisticas({ certificados, trabajos }) {
-  const [dias, setDias] = useState(30)
+export default function Estadisticas() {
+  const { datos, dias, loading, error, fetchEstadisticas } = useEstadisticaStore()
   const reporte = useRef(null)
   const [ocupado, setOcupado] = useState(false)
-  const serie = useMemo(serieSimulada, [])
 
-  const actual = serie.slice(-dias)
-  const previo = serie.slice(-dias * 2, -dias)
-  const suma = (arr, k) => arr.reduce((a, d) => a + d[k], 0)
-  const visitas = suma(actual, 'visitas')
-  const clics = suma(actual, 'clics')
-  const desde = actual[0].fecha
-  const certs = certificados.filter((c) => c.fecha >= desde).length
-  const agenda = trabajos.filter((t) => t.fecha >= desde).length
-  const tasa = visitas ? (clics / visitas) * 100 : 0
-  const tasaPrev = suma(previo, 'visitas') ? (suma(previo, 'clics') / suma(previo, 'visitas')) * 100 : 0
+  useEffect(() => { fetchEstadisticas(dias) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const setDias = (n) => fetchEstadisticas(n)
 
-  // Reparto fijo por servicio/origen: el resto se asigna al primero para que sume exacto
-  const repartir = (total, pesos) => {
-    const filas = pesos.map(([nombre, p]) => ({ nombre, valor: Math.round(total * p) }))
-    filas[0].valor += total - filas.reduce((a, f) => a + f.valor, 0)
-    return filas
+  if (!datos) {
+    return (
+      <main className="adm-main st">
+        <h1 className="adm-h1"><Icon icon={faChartLine} /> Estadísticas</h1>
+        <p className="adm-muted">{error || (loading ? 'Cargando estadísticas…' : '')}</p>
+      </main>
+    )
   }
-  const porServicio = repartir(clics, SERVICIOS)
-  const porOrigen = repartir(visitas, ORIGENES)
+
+  const actual = datos.serie
+  const { visitas, clics } = datos.totales
+  const { previo } = datos
+  const tasa = visitas ? (clics / visitas) * 100 : 0
+  const tasaPrev = previo.visitas ? (previo.clics / previo.visitas) * 100 : 0
 
   const descargar = async () => {
     setOcupado(true)
@@ -208,20 +184,20 @@ export default function Estadisticas({ certificados, trabajos }) {
         ))}
       </div>
 
-      <div ref={reporte} className="st-reporte">
+      <div ref={reporte} className={`st-reporte ${loading ? 'is-loading' : ''}`}>
         {/* Encabezado que solo aparece en el PDF */}
         <div className="st-rep-head">
           <img src="/admin/logo-vp.png" alt="" />
           <div><b>Reporte de la página web</b><span>Últimos {dias} días · {fechaCorta(actual[0].fecha)} al {fechaCorta(actual[actual.length - 1].fecha)} · generado el {fechaLocal().split('-').reverse().join('/')}</span></div>
         </div>
-        <p className="st-aviso"><Icon icon={faCircleInfo} /> Datos de visitas y clics simulados para la demo. En la versión real vienen de la página publicada.</p>
+        {visitas === 0 && <p className="st-aviso"><Icon icon={faCircleInfo} /> Todavía no hay visitas registradas en este período. Se cuentan automáticamente desde la página publicada.</p>}
 
         <div className="st-kpis">
-          <Kpi titulo="Visitas a la página" valor={visitas} previo={suma(previo, 'visitas')} />
-          <Kpi titulo="Cotizaciones por WhatsApp" valor={clics} previo={suma(previo, 'clics')} />
+          <Kpi titulo="Visitas a la página" valor={visitas} previo={previo.visitas} />
+          <Kpi titulo="Cotizaciones por WhatsApp" valor={clics} previo={previo.clics} />
           <Kpi titulo="Visitas que cotizan" valor={tasa} texto={tasa.toFixed(1).replace('.', ',')} sufijo="%" previo={tasaPrev || null} />
-          <Kpi titulo="Certificados emitidos" valor={certs} nota="Desde el panel" />
-          <Kpi titulo="Trabajos agendados" valor={agenda} nota="Desde la agenda" />
+          <Kpi titulo="Certificados emitidos" valor={datos.certificados} nota="Desde el panel" />
+          <Kpi titulo="Trabajos agendados" valor={datos.trabajos} nota="Desde la agenda" />
         </div>
 
         <section className="st-card">
@@ -239,11 +215,11 @@ export default function Estadisticas({ certificados, trabajos }) {
         <div className="st-dos">
           <section className="st-card">
             <header><h2>Cotizaciones por servicio</h2><span>Botones "Cotizar" de la página</span></header>
-            <Barras filas={porServicio} color={C_COTIZ} unidad="cotizaciones" />
+            <Barras filas={datos.porServicio} color={C_COTIZ} unidad="cotizaciones" />
           </section>
           <section className="st-card">
             <header><h2>De dónde llegan las visitas</h2><span>Origen del tráfico</span></header>
-            <Barras filas={porOrigen} color={C_VISITAS} unidad="visitas" />
+            <Barras filas={datos.porOrigen} color={C_VISITAS} unidad="visitas" />
           </section>
         </div>
       </div>

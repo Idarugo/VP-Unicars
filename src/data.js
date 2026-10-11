@@ -1,5 +1,4 @@
 // Todo el contenido editable de la página vive aquí.
-import { leerContenido } from './contenido.js'
 const baseNegocio = {
   nombre: 'VP Unicars',
   whatsapp: '56930235194',
@@ -195,11 +194,22 @@ const baseFaqs = [
 ]
 
 // Cambios hechos desde el panel de mantención (textos, fotos, horario, preguntas)
-const cambios = leerContenido()
-const aplicar = (lista, extra = {}) => lista.map((s) => ({ ...s, ...(extra[s.id] || {}) })).filter((s) => !s.oculto)
+// Contenido editado desde el panel (Mantención → Contenido web). main.jsx lo pide al backend
+// y lo aplica antes de dibujar la página; si el backend no responde se usa el contenido base.
+const mezclar = (lista, extra = {}) => lista.map((s) => ({ ...s, ...(extra[s.id] || {}) })).filter((s) => !s.oculto)
+const reemplazar = (arr, nuevos) => { arr.splice(0, arr.length, ...nuevos) }
 
-export const negocio = { ...baseNegocio, ...(cambios.negocio || {}) }
-export const servicios = aplicar(baseServicios, cambios.servicios)
-export const masServicios = aplicar(baseMasServicios, cambios.masServicios)
-export const faqs = cambios.faqs?.length ? cambios.faqs : baseFaqs
+export const negocio = { ...baseNegocio }
+export const servicios = [...baseServicios]
+export const masServicios = [...baseMasServicios]
+export const faqs = [...baseFaqs]
+
+export function aplicarContenido(c = {}) {
+  Object.assign(negocio, baseNegocio, c.negocio || {})
+  reemplazar(servicios, mezclar(baseServicios, c.servicios))
+  reemplazar(masServicios, mezclar(baseMasServicios, c.masServicios))
+  reemplazar(faqs, c.faqs?.length ? c.faqs : baseFaqs)
+}
+aplicarContenido()
+
 export const base = { negocio: baseNegocio, servicios: baseServicios, masServicios: baseMasServicios, faqs: baseFaqs }

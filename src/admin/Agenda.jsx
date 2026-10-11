@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
-import {
-  equipo, serviciosAgenda, llevaCertificado, lunesDe, fechaLocal, nuevoId, trabajoVacio,
-} from './store.js'
+import { useEffect, useMemo, useState } from 'react'
+import { serviciosAgenda, llevaCertificado, lunesDe, fechaLocal, trabajoVacio } from './store.js'
 import { formatoPatente } from './config.js'
+import { useAgendaStore } from '../stores/agendaStore.js'
+import { useAuthStore } from '../stores/authStore.js'
 import {
   Icon, faPlus, faChevronLeft, faChevronRight, faHouse, faStore, faClock, faXmark, faCheck, faTrash,
-  faWhatsapp, faFileSignature, faCalendarWeek, faRotateLeft,
+  faWhatsapp, faFileSignature, faCalendarWeek,
 } from './iconos.js'
 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -13,7 +13,13 @@ const DIAS_LARGO = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sába
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const ESTADOS = { pendiente: 'Por confirmar', confirmado: 'Confirmado', terminado: 'Terminado' }
 
-const persona = (id) => equipo.find((e) => e.id === id) || equipo[0]
+// Datos del encargado: del equipo activo o, si ya no está, lo que trae el trabajo
+const SIN_ASIGNAR = { id: null, nombre: 'Sin asignar', color: '#8a8a8a', descripcion: '' }
+const persona = (equipo, t) =>
+  equipo.find((e) => e.id === t.encargadoId) || (t.encargado ? { id: t.encargadoId, nombre: t.encargado, color: t.color || '#8a8a8a' } : SIN_ASIGNAR)
+const primerNombre = (n = '') => n.split(' ')[0]
+// La API devuelve null en campos vacíos; los inputs necesitan ''
+const paraForm = (t) => Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v ?? '']))
 const aFecha = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d) }
 const diaTexto = (iso) => {
   const d = aFecha(iso)
@@ -31,11 +37,10 @@ const telWa = (t = '') => {
 }
 const autoTexto = (t) => [t.marca, t.modelo].filter(Boolean).join(' ')
 
-function avisoEncargado(t) {
-  const p = persona(t.encargado)
+function avisoEncargado(p, t) {
   const auto = autoTexto(t)
   const lugar = t.lugar === 'domicilio' ? `a domicilio${t.direccion ? ` en ${t.direccion}` : ''}` : 'en el local'
-  return `Hola ${p.nombre}! ${diaTexto(t.fecha)[0].toUpperCase()}${diaTexto(t.fecha).slice(1)} a las ${t.hora} tienes ${t.servicio}${auto ? ` – ${auto}` : ''}${t.patente ? ` (${formatoPatente(t.patente)})` : ''} de ${t.cliente}, ${lugar}.${t.notas ? ` Nota: ${t.notas}.` : ''} ¿Confirmas? 💪`
+  return `Hola ${primerNombre(p.nombre)}! ${diaTexto(t.fecha)[0].toUpperCase()}${diaTexto(t.fecha).slice(1)} a las ${t.hora} tienes ${t.servicio}${auto ? ` – ${auto}` : ''}${t.patente ? ` (${formatoPatente(t.patente)})` : ''} de ${t.cliente}, ${lugar}.${t.notas ? ` Nota: ${t.notas}.` : ''} ¿Confirmas? 💪`
 }
 function avisoCliente(t) {
   const auto = autoTexto(t)
@@ -44,8 +49,7 @@ function avisoCliente(t) {
 }
 const abrirWa = (tel, texto) => window.open(`https://wa.me/${telWa(tel)}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener')
 
-function Tarjeta({ t, onClick }) {
-  const p = persona(t.encargado)
+function Tarjeta({ t, p, onClick }) {
   return (
     <button className={`ag-card is-${t.estado}`} style={{ '--c': p.color }} onClick={onClick}>
       <span className="ag-card-top">
@@ -56,17 +60,18 @@ function Tarjeta({ t, onClick }) {
       <span className="ag-card-cli">{t.cliente}</span>
       {(autoTexto(t) || t.patente) && <span className="ag-card-auto">{autoTexto(t)}{t.patente ? ` · ${formatoPatente(t.patente)}` : ''}</span>}
       <span className="ag-card-foot">
-        <i style={{ background: p.color }}>{p.nombre[0]}</i>{p.nombre}
+        <i style={{ background: p.color }}>{p.nombre[0]}</i>{primerNombre(p.nombre)}
         <em className={`ag-estado is-${t.estado}`}>{ESTADOS[t.estado]}</em>
       </span>
     </button>
   )
 }
 
-function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
-  const [f, setF] = useState(t)
+function Modal({ t, nuevo, equipo, verTodo, guardando, onClose, onSave, onDelete, onCertificado }) {
+  const [f, setF] = useState(() => paraForm(t))
+  const p = persona(equipo, { ...t, encargadoId: Number(f.encargadoId) || null })
   const campo = (k) => ({ value: f[k], onChange: (e) => setF((x) => ({ ...x, [k]: e.target.value })) })
-  const valido = f.cliente.trim() && f.fecha && f.hora
+  const valido = f.cliente.trim() && f.fecha && f.hora && !guardando
 
   return (
     <div className="ag-modal-bg" onClick={onClose}>
@@ -78,7 +83,7 @@ function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
 
         {!nuevo && (
           <div className="ag-acciones">
-            <button className="adm-btn adm-btn--wa" onClick={() => abrirWa('', avisoEncargado(f))}><Icon icon={faWhatsapp} /> Avisar a {persona(f.encargado).nombre}</button>
+            <button className="adm-btn adm-btn--wa" onClick={() => abrirWa('', avisoEncargado(p, f))}><Icon icon={faWhatsapp} /> Avisar a {primerNombre(p.nombre)}</button>
             <button className="adm-btn adm-btn--ghost" onClick={() => abrirWa(f.telefono, avisoCliente(f))}><Icon icon={faWhatsapp} /> Confirmar al cliente</button>
             {f.estado !== 'terminado' && (
               <button className="adm-btn adm-btn--ghost" onClick={() => { const x = { ...f, estado: 'terminado' }; setF(x); onSave(x, false) }}><Icon icon={faCheck} /> Marcar terminado</button>
@@ -97,7 +102,12 @@ function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
           </div>
           <div className="adm-row">
             <label>Servicio<select {...campo('servicio')}>{serviciosAgenda.map((s) => <option key={s}>{s}</option>)}</select></label>
-            <label>Encargado<select {...campo('encargado')}>{equipo.map((p) => <option key={p.id} value={p.id}>{p.nombre} · {p.rol}</option>)}</select></label>
+            {verTodo && (
+              <label>Encargado<select value={f.encargadoId} onChange={(e) => setF((x) => ({ ...x, encargadoId: Number(e.target.value) || '' }))}>
+                <option value="">Sin asignar</option>
+                {equipo.map((e) => <option key={e.id} value={e.id}>{e.nombre}{e.descripcion ? ` · ${e.descripcion}` : ''}</option>)}
+              </select></label>
+            )}
           </div>
           <div className="ag-lugar">
             {[['local', faStore, 'En el local'], ['domicilio', faHouse, 'A domicilio']].map(([k, ico, txt]) => (
@@ -118,7 +128,7 @@ function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
           <label>Notas<textarea rows={2} placeholder="Ej: Nanocarbon 20% traseros" {...campo('notas')} /></label>
           <div className="ag-modal-foot">
             {!nuevo && <button type="button" className="adm-icon-btn adm-icon-btn--danger" title="Eliminar" onClick={() => onDelete(f)}><Icon icon={faTrash} /></button>}
-            <button className="adm-btn" disabled={!valido}><Icon icon={faCheck} /> {nuevo ? 'Agendar' : 'Guardar cambios'}</button>
+            <button className="adm-btn" disabled={!valido}><Icon icon={faCheck} /> {guardando ? 'Guardando…' : nuevo ? 'Agendar' : 'Guardar cambios'}</button>
           </div>
         </form>
       </div>
@@ -126,7 +136,10 @@ function Modal({ t, nuevo, onClose, onSave, onDelete, onCertificado }) {
   )
 }
 
-export default function Agenda({ trabajos, setTrabajos, onCertificado, onReiniciar, onLog = () => {} }) {
+export default function Agenda({ onCertificado, avisar }) {
+  const { trabajos, equipo, loading, saving, error, fetchTrabajos, guardarTrabajo, eliminarTrabajo, limpiarError } = useAgendaStore()
+  const { usuario, puede } = useAuthStore()
+  const verTodo = puede('agenda.ver_todo')
   const [lunes, setLunes] = useState(() => lunesDe(new Date()))
   const [filtro, setFiltro] = useState('todos')
   const [abierto, setAbierto] = useState(null) // { t, nuevo }
@@ -138,7 +151,11 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
   }), [lunes])
   const isoDias = dias.map(fechaLocal)
 
-  const visibles = trabajos.filter((t) => filtro === 'todos' || t.encargado === filtro)
+  useEffect(() => { fetchTrabajos(isoDias[0], isoDias[6]) }, [isoDias[0]]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (error) { avisar(error); limpiarError() } }, [error]) // eslint-disable-line react-hooks/exhaustive-deps
+  const nuevoTrabajo = (fecha) => ({ ...trabajoVacio(fecha), encargadoId: verTodo ? '' : usuario.id })
+
+  const visibles = trabajos.filter((t) => filtro === 'todos' || t.encargadoId === filtro)
   const porDia = (iso) => visibles.filter((t) => t.fecha === iso).sort((a, b) => a.hora.localeCompare(b.hora))
   const semana = visibles.filter((t) => isoDias.includes(t.fecha))
   const domicilio = semana.filter((t) => t.lugar === 'domicilio').length
@@ -151,17 +168,15 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
     const d = new Date(lunes); d.setDate(d.getDate() + n * 7); setLunes(d)
     const m = new Date(d); setDiaMovil(fechaLocal(m))
   }
-  const guardar = (t, cerrar) => {
-    const existe = trabajos.some((x) => x.id === t.id)
-    setTrabajos(existe ? trabajos.map((x) => (x.id === t.id ? t : x)) : [...trabajos, { ...t, id: nuevoId() }])
-    onLog(existe ? 'Editó trabajo' : 'Agendó trabajo', `${t.servicio} · ${t.cliente}`)
+  const guardar = async (t, cerrar) => {
+    const r = await guardarTrabajo(t)
+    if (!r) return
+    avisar(t.id ? 'Trabajo actualizado' : 'Trabajo agendado')
     if (cerrar) setAbierto(null)
   }
-  const eliminar = (t) => {
+  const eliminar = async (t) => {
     if (!window.confirm('¿Eliminar este trabajo de la agenda?')) return
-    setTrabajos(trabajos.filter((x) => x.id !== t.id))
-    onLog('Eliminó trabajo', `${t.servicio} · ${t.cliente}`)
-    setAbierto(null)
+    if (await eliminarTrabajo(t.id)) { avisar('Trabajo eliminado'); setAbierto(null) }
   }
   // Si el día elegido en el celular no está en esta semana, mostrar el lunes
   const diaSel = isoDias.includes(diaMovil) ? diaMovil : isoDias[0]
@@ -175,19 +190,19 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
           <button className="adm-tab is-on" onClick={() => { setLunes(lunesDe(new Date())); setDiaMovil(hoy) }}>Hoy</button>
           <span className="ag-semana">{titulo}</span>
           <button className="adm-icon-btn" onClick={() => mover(1)} aria-label="Semana siguiente"><Icon icon={faChevronRight} /></button>
-          <button className="adm-btn" onClick={() => setAbierto({ t: trabajoVacio(diaSel), nuevo: true })}><Icon icon={faPlus} /> Agendar</button>
+          <button className="adm-btn" onClick={() => setAbierto({ t: nuevoTrabajo(diaSel), nuevo: true })}><Icon icon={faPlus} /> Agendar</button>
         </div>
       </div>
 
       <div className="ag-barra">
-        <div className="ag-filtros">
+        {verTodo && <div className="ag-filtros">
           <button className={`adm-chip ${filtro === 'todos' ? 'is-on' : ''}`} onClick={() => setFiltro('todos')}>Todo el equipo</button>
           {equipo.map((p) => (
-            <button key={p.id} className={`adm-chip ${filtro === p.id ? 'is-on' : ''}`} onClick={() => setFiltro(p.id)} title={p.rol}>
-              <i className="ag-dot" style={{ background: p.color }} /> {p.nombre}
+            <button key={p.id} className={`adm-chip ${filtro === p.id ? 'is-on' : ''}`} onClick={() => setFiltro(p.id)} title={p.descripcion || ''}>
+              <i className="ag-dot" style={{ background: p.color }} /> {primerNombre(p.nombre)}
             </button>
           ))}
-        </div>
+        </div>}
         <p className="ag-resumen"><b>{semana.length}</b> trabajos esta semana · <b>{domicilio}</b> a domicilio · <b>{pendientes}</b> por confirmar</p>
       </div>
 
@@ -204,7 +219,7 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
         })}
       </div>
 
-      <div className="ag-grid">
+      <div className={`ag-grid ${loading ? 'is-loading' : ''}`}>
         {dias.map((d, i) => {
           const iso = isoDias[i]
           const lista = porDia(iso)
@@ -215,19 +230,17 @@ export default function Agenda({ trabajos, setTrabajos, onCertificado, onReinici
                 <span>{DIAS[i]} <b>{d.getDate()}</b></span>
                 {fuera && <em title="Hay trabajos a domicilio"><Icon icon={faHouse} /> Terreno</em>}
               </header>
-              {lista.map((t) => <Tarjeta key={t.id} t={t} onClick={() => setAbierto({ t, nuevo: false })} />)}
-              <button className="ag-add" onClick={() => setAbierto({ t: trabajoVacio(iso), nuevo: true })}><Icon icon={faPlus} /> Agendar</button>
+              {lista.map((t) => <Tarjeta key={t.id} t={t} p={persona(equipo, t)} onClick={() => setAbierto({ t, nuevo: false })} />)}
+              <button className="ag-add" onClick={() => setAbierto({ t: nuevoTrabajo(iso), nuevo: true })}><Icon icon={faPlus} /> Agendar</button>
             </section>
           )
         })}
       </div>
 
-      <button className="adm-link" onClick={onReiniciar}><Icon icon={faRotateLeft} /> Reiniciar agenda de la demo</button>
-
       {abierto && (
         <Modal
           key={abierto.t.id || 'nuevo'}
-          t={abierto.t} nuevo={abierto.nuevo}
+          t={abierto.t} nuevo={abierto.nuevo} equipo={equipo} verTodo={verTodo} guardando={saving}
           onClose={() => setAbierto(null)} onSave={guardar} onDelete={eliminar}
           onCertificado={(t) => { setAbierto(null); onCertificado(t) }}
         />
