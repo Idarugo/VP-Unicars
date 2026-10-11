@@ -33,7 +33,7 @@ export default function Garage() {
         <h2 className="garage-title">El <em>garage</em></h2>
         <div className="garage-space">
           {trabajos.map((t) => (
-            <article key={t.auto} className="garage-card" style={{ '--tono': t.tono }}>
+            <article key={t.id} className="garage-card" style={{ '--tono': t.tono }}>
               <div className="garage-media">
                 {t.foto ? <img src={t.foto} alt={t.auto} loading="lazy" /> : <Car id={`g-${t.auto.replace(/\W/g, '')}`} className="garage-car" />}
               </div>
@@ -50,7 +50,7 @@ export default function Garage() {
       <div className="marquee" aria-label="Autos trabajados">
         {[0, 1].map((k) => (
           <div key={k} className="marquee-track" aria-hidden={k === 1}>
-            {autos.map((a) => <span key={a}>{a}<Icon icon={faStar} className="marquee-ico" /></span>)}
+            {autos.map((a, i) => <span key={`${a}-${i}`}>{a}<Icon icon={faStar} className="marquee-ico" /></span>)}
           </div>
         ))}
       </div>

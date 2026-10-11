@@ -21,10 +21,12 @@ export const useAgendaStore = create((set, get) => ({
     }
   },
 
-  fetchTrabajos: async (desde, hasta) => {
-    set({ loading: true, error: null, rango: { desde, hasta } })
+  fetchTrabajos: async (desde, hasta, { silencioso = false } = {}) => {
+    set(silencioso ? { rango: { desde, hasta } } : { loading: true, error: null, rango: { desde, hasta } })
     try {
       const r = await trabajoService.getRango(desde, hasta)
+      // Si mientras tanto se cambió de semana, se descarta esta respuesta
+      if (get().rango?.desde !== desde) return
       set({ trabajos: r.data || [], loading: false })
     } catch (e) {
       set({ loading: false, error: mensaje(e, 'Error al cargar la agenda') })

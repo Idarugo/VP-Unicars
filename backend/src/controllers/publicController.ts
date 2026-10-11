@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
-import { leerAjuste, leerConfiguracion } from "../models/ajustesModel";
+import { leerConfiguracion } from "../models/ajustesModel";
+import { leerContenido } from "../models/contenidoModel";
 import { verificarCertificado } from "../models/certificadoModel";
 import { registrarEvento } from "../models/eventoModel";
 import { texto } from "../utils/validar";
+import { emitirEstadisticas } from "../utils/tiempoReal";
 
 export const getContenidoPublico = async (req: Request, res: Response) => {
   try {
-    const contenido = (await leerAjuste(req.app.get("pool"), "contenido")) || {};
+    const contenido = await leerContenido(req.app.get("pool"));
     res.set("Cache-Control", "no-cache"); // revalida con ETag: los cambios del panel se ven al instante
     return res.status(200).json({ ok: true, data: contenido });
   } catch (error) {
@@ -50,6 +52,7 @@ export const registrarEventoPublico = async (req: Request, res: Response) => {
     const servicio = tipo === "whatsapp" ? texto(req.body?.servicio, 60) || "General" : null;
 
     await registrarEvento(req.app.get("pool"), tipo, servicio, origen);
+    emitirEstadisticas();
     return res.status(204).end();
   } catch (error) {
     console.error("Error al registrar evento:", error);

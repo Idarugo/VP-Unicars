@@ -17,8 +17,8 @@ export const useConfiguracionStore = create((set) => ({
   saving: false,
   error: null,
 
-  fetchConfiguracion: async () => {
-    set({ loading: true, error: null })
+  fetchConfiguracion: async ({ silencioso = false } = {}) => {
+    if (!silencioso) set({ loading: true, error: null })
     try {
       const r = await configuracionService.get()
       aplicar(r.data)

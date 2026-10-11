@@ -4,6 +4,10 @@ import { servicios, waLink } from '../data.js'
 import ServiceArt from './ServiceArt.jsx'
 import { Icon, faArrowRight, faWhatsapp } from '../icons.js'
 
+// El título se ajusta solo si se agregan o quitan servicios desde el panel
+const PALABRAS = ['Cero', 'Una', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis', 'Siete', 'Ocho', 'Nueve', 'Diez', 'Once', 'Doce']
+const cantidadEnPalabras = (n) => PALABRAS[n] || String(n)
+
 export default function Services() {
   const root = useRef(null)
   const track = useRef(null)
@@ -55,7 +59,7 @@ export default function Services() {
       <div className="services-track" ref={track}>
         <div className="services-intro">
           <p className="eyebrow">Lo que hacemos</p>
-          <h2 className="h2">Siete formas de<br /><em>transformar</em><br />tu auto.</h2>
+          <h2 className="h2">{cantidadEnPalabras(servicios.length)} {servicios.length === 1 ? 'forma' : 'formas'} de<br /><em>transformar</em><br />tu auto.</h2>
           <p className="muted">Cada servicio, con un clic para cotizar por WhatsApp.</p>
         </div>
         {servicios.map((s) => (

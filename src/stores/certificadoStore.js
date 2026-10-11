@@ -7,16 +7,19 @@ export const useCertificadoStore = create((set, get) => ({
   certificados: [],
   meta: { total: 0, pagina: 1, limite: 10, paginas: 1 },
   q: '',
+  cargado: false,
   resumen: { total: 0, delMes: 0, ultimo: null, siguiente: null },
   loading: false,
   saving: false,
   error: null,
 
-  fetchCertificados: async ({ q = get().q, page = 1 } = {}) => {
-    set({ loading: true, error: null, q })
+  fetchCertificados: async ({ q = get().q, page = 1, silencioso = false } = {}) => {
+    set(silencioso ? { q } : { loading: true, error: null, q })
     try {
       const r = await certificadoService.getAll({ q, page, limit: 10 })
-      set({ certificados: r.data || [], meta: r.meta, loading: false })
+      // Si al anular quedó una página vacía, volver a la anterior
+      if (!r.data?.length && page > 1) return get().fetchCertificados({ q, page: page - 1, silencioso })
+      set({ certificados: r.data || [], meta: r.meta, loading: false, cargado: true })
     } catch (e) {
       set({ loading: false, error: mensaje(e, 'Error al cargar certificados') })
     }

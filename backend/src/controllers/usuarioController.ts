@@ -5,10 +5,11 @@ import {
   countSoportesActivos, createUsuario, existsUsuarioByUsuario, getAllUsuarios, getEquipo, getUsuarioById,
   setUsuarioActivo, updateUsuario,
 } from "../models/usuarioModel";
-import { actualizarClave } from "../models/authModel";
+import { actualizarClave, cerrarSesiones } from "../models/authModel";
 import { registrarHistorial } from "../models/historialModel";
 import { ROL_NOMBRE, type Rol } from "../utils/permisos";
 import { color, texto, textoOpcional } from "../utils/validar";
+import { desconectarUsuario } from "../utils/tiempoReal";
 
 const ROLES: Rol[] = ["admin", "tecnico", "soporte"];
 const claveTemporal = () => crypto.randomBytes(6).toString("base64url"); // 8 caracteres
@@ -105,6 +106,10 @@ export const setEstadoUsuarioController = async (req: Request, res: Response) =>
     }
 
     await setUsuarioActivo(pool, id, activo);
+    if (!activo) {
+      await cerrarSesiones(pool, id);
+      desconectarUsuario(id);
+    }
     await registrarHistorial(pool, req.usuario!, activo ? "Activó usuario" : "Desactivó usuario", actual.nombre);
     return res.status(200).json({ ok: true, message: activo ? "Usuario activado" : "Usuario desactivado" });
   } catch (error) {
@@ -121,7 +126,8 @@ export const resetClaveController = async (req: Request, res: Response) => {
     if (!actual) return res.status(404).json({ ok: false, message: "Usuario no encontrado" });
 
     const clave = claveTemporal();
-    await actualizarClave(pool, id, await bcrypt.hash(clave, 10));
+    await actualizarClave(pool, id, await bcrypt.hash(clave, 10), true);
+    desconectarUsuario(id);
     await registrarHistorial(pool, req.usuario!, "Restableció clave", actual.nombre);
 
     return res.status(200).json({ ok: true, message: "Clave restablecida", data: { claveTemporal: clave } });

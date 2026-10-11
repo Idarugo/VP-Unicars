@@ -9,6 +9,10 @@ CREATE TABLE IF NOT EXISTS usuarios (
   descripcion VARCHAR(120) NULL,
   color CHAR(7) NOT NULL DEFAULT '#ffc800',
   activo TINYINT(1) NOT NULL DEFAULT 1,
+  -- Sube al cambiar/restablecer la clave o desactivar: invalida todas las sesiones abiertas
+  sesion_version INT NOT NULL DEFAULT 0,
+  -- Clave temporal: debe cambiarla al entrar
+  debe_cambiar_clave TINYINT(1) NOT NULL DEFAULT 0,
   ultimo_acceso DATETIME NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

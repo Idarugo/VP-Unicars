@@ -1,16 +1,17 @@
 import { create } from 'zustand'
 import { mantencionService } from '../services/mantencionService.js'
 import { usuarioService } from '../services/usuarioService.js'
-import { contenidoService } from '../services/ajustesService.js'
 
 const mensaje = (e, def) => (e instanceof Error ? e.message : def)
 
 export const useMantencionStore = create((set, get) => ({
   estado: null,
   tareas: {},
+  mes: null,
+  q: '',
+  historialCargado: false,
   historial: [],
   usuarios: [],
-  contenido: null,
   loading: false,
   saving: false,
   error: null,
@@ -25,6 +26,7 @@ export const useMantencionStore = create((set, get) => ({
   },
 
   fetchTareas: async (mes) => {
+    set({ mes })
     try {
       const r = await mantencionService.getTareas(mes)
       set({ tareas: r.data || {} })
@@ -43,11 +45,12 @@ export const useMantencionStore = create((set, get) => ({
     }
   },
 
-  fetchHistorial: async (q = '') => {
-    set({ loading: true })
+  fetchHistorial: async (q = '', { silencioso = false } = {}) => {
+    set(silencioso ? { q } : { loading: true, q })
     try {
       const r = await mantencionService.getHistorial(q)
-      set({ historial: r.data || [], loading: false })
+      if (get().q !== q) return
+      set({ historial: r.data || [], loading: false, historialCargado: true })
     } catch (e) {
       set({ loading: false, error: mensaje(e, 'Error al cargar el historial') })
     }
@@ -67,8 +70,8 @@ export const useMantencionStore = create((set, get) => ({
   },
 
   /* Usuarios */
-  fetchUsuarios: async () => {
-    set({ loading: true })
+  fetchUsuarios: async ({ silencioso = false } = {}) => {
+    if (!silencioso) set({ loading: true })
     try {
       const r = await usuarioService.getAll()
       set({ usuarios: r.data || [], loading: false })
@@ -94,38 +97,6 @@ export const useMantencionStore = create((set, get) => ({
   actualizarUsuario: (id, payload) => get().accionUsuario(() => usuarioService.update(id, payload)),
   setEstadoUsuario: (id, activo) => get().accionUsuario(() => usuarioService.setEstado(id, activo)),
   resetClave: (id) => get().accionUsuario(() => usuarioService.resetClave(id)),
-
-  /* Contenido web */
-  fetchContenido: async () => {
-    try {
-      const r = await contenidoService.get()
-      set({ contenido: r.data || {} })
-    } catch (e) {
-      set({ error: mensaje(e, 'Error al cargar el contenido') })
-    }
-  },
-  guardarContenido: async (payload) => {
-    set({ saving: true, error: null })
-    try {
-      const r = await contenidoService.update(payload)
-      set({ contenido: r.data, saving: false })
-      return true
-    } catch (e) {
-      set({ saving: false, error: mensaje(e, 'Error al guardar el contenido') })
-      return false
-    }
-  },
-  restaurarContenido: async () => {
-    set({ saving: true, error: null })
-    try {
-      await contenidoService.restaurar()
-      set({ contenido: {}, saving: false })
-      return true
-    } catch (e) {
-      set({ saving: false, error: mensaje(e, 'Error al restaurar el contenido') })
-      return false
-    }
-  },
 
   limpiarError: () => set({ error: null }),
 }))

@@ -6,6 +6,7 @@ import { todosLosCertificados } from "../models/certificadoModel";
 import { todosLosTrabajos } from "../models/trabajoModel";
 import { getAllUsuarios } from "../models/usuarioModel";
 import { listarHistorial, registrarHistorial } from "../models/historialModel";
+import { emitir, totalConectados } from "../utils/tiempoReal";
 
 const TAREAS = ["fotos", "whatsapp", "contenido", "respaldo", "reporte"];
 const mesValido = (m: unknown): m is string => typeof m === "string" && /^\d{4}-\d{2}$/.test(m);
@@ -20,7 +21,7 @@ export const getEstado = async (req: Request, res: Response) => {
     const config = await leerConfiguracion(pool);
     return res.status(200).json({
       ok: true,
-      data: { baseDatos: { ok: true, ms: msBaseDatos }, sistema: config.sistema, conteos: await conteos(pool) },
+      data: { baseDatos: { ok: true, ms: msBaseDatos }, sistema: config.sistema, conteos: await conteos(pool), conectados: totalConectados() },
     });
   } catch (error) {
     console.error("Error al obtener estado:", error);
@@ -72,6 +73,7 @@ export const exportarRespaldo = async (req: Request, res: Response) => {
     const sistema = (await leerAjuste<Record<string, unknown>>(pool, "sistema")) || {};
     await guardarAjuste(pool, "sistema", { ...sistema, ultimoRespaldo: fecha }, req.usuario!.id);
     await registrarHistorial(pool, req.usuario!, "Descargó respaldo", "Respaldo completo");
+    emitir("mantencion", req.usuario!.id);
 
     return res.status(200).json({ ok: true, data: respaldo });
   } catch (error) {

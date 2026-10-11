@@ -3,6 +3,7 @@ import { serviciosAgenda, llevaCertificado, lunesDe, fechaLocal, trabajoVacio } 
 import { formatoPatente } from './config.js'
 import { useAgendaStore } from '../stores/agendaStore.js'
 import { useAuthStore } from '../stores/authStore.js'
+import { exito, error as alertaError, confirmar, escapar } from './alertas.js'
 import {
   Icon, faPlus, faChevronLeft, faChevronRight, faHouse, faStore, faClock, faXmark, faCheck, faTrash,
   faWhatsapp, faFileSignature, faCalendarWeek,
@@ -136,7 +137,7 @@ function Modal({ t, nuevo, equipo, verTodo, guardando, onClose, onSave, onDelete
   )
 }
 
-export default function Agenda({ onCertificado, avisar }) {
+export default function Agenda({ onCertificado }) {
   const { trabajos, equipo, loading, saving, error, fetchTrabajos, guardarTrabajo, eliminarTrabajo, limpiarError } = useAgendaStore()
   const { usuario, puede } = useAuthStore()
   const verTodo = puede('agenda.ver_todo')
@@ -152,7 +153,7 @@ export default function Agenda({ onCertificado, avisar }) {
   const isoDias = dias.map(fechaLocal)
 
   useEffect(() => { fetchTrabajos(isoDias[0], isoDias[6]) }, [isoDias[0]]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (error) { avisar(error); limpiarError() } }, [error]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (error) { alertaError('No se pudo completar', error); limpiarError() } }, [error]) // eslint-disable-line react-hooks/exhaustive-deps
   const nuevoTrabajo = (fecha) => ({ ...trabajoVacio(fecha), encargadoId: verTodo ? '' : usuario.id })
 
   const visibles = trabajos.filter((t) => filtro === 'todos' || t.encargadoId === filtro)
@@ -171,12 +172,17 @@ export default function Agenda({ onCertificado, avisar }) {
   const guardar = async (t, cerrar) => {
     const r = await guardarTrabajo(t)
     if (!r) return
-    avisar(t.id ? 'Trabajo actualizado' : 'Trabajo agendado')
+    exito(t.id ? 'Trabajo actualizado' : 'Trabajo agendado')
     if (cerrar) setAbierto(null)
   }
   const eliminar = async (t) => {
-    if (!window.confirm('¿Eliminar este trabajo de la agenda?')) return
-    if (await eliminarTrabajo(t.id)) { avisar('Trabajo eliminado'); setAbierto(null) }
+    const ok = await confirmar({
+      titulo: '¿Eliminar este trabajo?',
+      html: `<b>${escapar(t.servicio)}</b> de ${escapar(t.cliente)}, ${escapar(t.fecha.split('-').reverse().join('/'))} a las ${escapar(t.hora)}.`,
+      confirmar: 'Sí, eliminar', peligro: true,
+    })
+    if (!ok) return
+    if (await eliminarTrabajo(t.id)) { exito('Trabajo eliminado'); setAbierto(null) }
   }
   // Si el día elegido en el celular no está en esta semana, mostrar el lunes
   const diaSel = isoDias.includes(diaMovil) ? diaMovil : isoDias[0]

@@ -6,5 +6,6 @@ export {
   faXmark, faCheck, faPhone, faBars, faChartLine, faCircleInfo, faArrowTrendUp, faArrowTrendDown,
   faScrewdriverWrench, faGlobe, faServer, faDatabase, faFloppyDisk, faArrowUp, faArrowDown, faEyeSlash, faDownload,
   faUpload, faUserPlus, faKey, faClockRotateLeft, faUsers, faGear, faPenToSquare, faHeartPulse, faArrowUpRightFromSquare,
+  faImage, faChevronDown,
 } from '@fortawesome/free-solid-svg-icons'
 export { faWhatsapp } from '@fortawesome/free-brands-svg-icons'

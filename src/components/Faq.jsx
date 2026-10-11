@@ -12,7 +12,7 @@ export default function Faq() {
       </div>
       <div className="faq-list">
         {faqs.map((f, i) => (
-          <div key={f.q} className={`faq-item ${abierta === i ? 'is-open' : ''}`}>
+          <div key={f.id} className={`faq-item ${abierta === i ? 'is-open' : ''}`}>
             <button onClick={() => setAbierta(abierta === i ? -1 : i)} aria-expanded={abierta === i}>
               <span>{f.q}</span><Icon icon={faPlus} className="faq-ico" aria-hidden="true" />
             </button>

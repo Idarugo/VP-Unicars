@@ -7,11 +7,13 @@ import Estadisticas from './Estadisticas.jsx'
 import Mantencion from './Mantencion.jsx'
 import { vacio } from './store.js'
 import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
+import { exito, info, error as alertaError, confirmar, escapar } from './alertas.js'
 import { folio, formatoPatente, urlVerificacion } from './config.js'
 import { useAuthStore } from '../stores/authStore.js'
 import { useCertificadoStore } from '../stores/certificadoStore.js'
 import { useAgendaStore } from '../stores/agendaStore.js'
 import { useConfiguracionStore } from '../stores/configuracionStore.js'
+import { useTiempoRealStore } from '../stores/tiempoRealStore.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
   faLock, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine,
@@ -63,28 +65,32 @@ function Login() {
   )
 }
 
-function CambiarClave({ onClose, avisar }) {
+function CambiarClave({ onClose, obligatorio = false }) {
   const cambiarClave = useAuthStore((s) => s.cambiarClave)
+  const logout = useAuthStore((s) => s.logout)
   const [f, setF] = useState({ actual: '', nueva: '', repetir: '' })
   const [error, setError] = useState('')
   const enviar = async (e) => {
     e.preventDefault()
     if (f.nueva.length < 8) return setError('La clave nueva debe tener al menos 8 caracteres')
     if (f.nueva !== f.repetir) return setError('Las claves nuevas no coinciden')
+    if (f.nueva === f.actual) return setError('La clave nueva debe ser distinta a la actual')
     const r = await cambiarClave(f.actual, f.nueva)
     if (!r.ok) return setError(r.message)
-    avisar('Clave actualizada'); onClose()
+    exito('Clave actualizada'); onClose?.()
   }
   return (
-    <div className="ag-modal-bg" onClick={onClose}>
-      <form className="ag-modal adm-form" onClick={(e) => e.stopPropagation()} onSubmit={enviar}>
-        <div className="ag-modal-head"><h2>Cambiar clave</h2></div>
-        <label>Clave actual<input type="password" autoComplete="current-password" required value={f.actual} onChange={(e) => setF({ ...f, actual: e.target.value })} /></label>
+    <div className={obligatorio ? 'adm-login' : 'ag-modal-bg'} onClick={obligatorio ? undefined : onClose}>
+      <form className={obligatorio ? 'adm-login-card adm-form' : 'ag-modal adm-form'} onClick={(e) => e.stopPropagation()} onSubmit={enviar}>
+        {obligatorio && <img src="/admin/logo-vp.png" alt="VP Unicars" />}
+        <div className="ag-modal-head"><h2>{obligatorio ? 'Crea tu clave' : 'Cambiar clave'}</h2></div>
+        {obligatorio && <p className="adm-muted">Entraste con una clave temporal. Por seguridad, elige una clave personal (mínimo 8 caracteres) para continuar.</p>}
+        <label>{obligatorio ? 'Clave temporal' : 'Clave actual'}<input type="password" autoComplete="current-password" required value={f.actual} onChange={(e) => setF({ ...f, actual: e.target.value })} /></label>
         <label>Clave nueva<input type="password" autoComplete="new-password" required value={f.nueva} onChange={(e) => setF({ ...f, nueva: e.target.value })} /></label>
         <label>Repite la clave nueva<input type="password" autoComplete="new-password" required value={f.repetir} onChange={(e) => setF({ ...f, repetir: e.target.value })} /></label>
         {error && <p className="adm-error">{error}</p>}
         <div className="ag-modal-foot">
-          <button type="button" className="adm-btn adm-btn--ghost" onClick={onClose}>Cancelar</button>
+          <button type="button" className="adm-btn adm-btn--ghost" onClick={obligatorio ? logout : onClose}>{obligatorio ? 'Salir' : 'Cancelar'}</button>
           <button className="adm-btn"><Icon icon={faKey} /> Guardar clave</button>
         </div>
       </form>
@@ -93,11 +99,12 @@ function CambiarClave({ onClose, avisar }) {
 }
 
 export default function AdminApp() {
-  const { usuario, initialized, init, logout, puede } = useAuthStore()
+  const { usuario, initialized, sinConexion, init, logout, puede } = useAuthStore()
   const certs = useCertificadoStore()
   const { equipo, fetchEquipo } = useAgendaStore()
   const fetchConfiguracion = useConfiguracionStore((s) => s.fetchConfiguracion)
   useConfiguracionStore((s) => s.config) // vuelve a dibujar los certificados cuando llega la configuración
+  const { conectado, ultimoCambio, iniciar: iniciarTiempoReal, terminar: terminarTiempoReal } = useTiempoRealStore()
 
   const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver | estadisticas | mantencion
   const [form, setForm] = useState(vacio)
@@ -105,29 +112,37 @@ export default function AdminApp() {
   const [q, setQ] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const [menu, setMenu] = useState(false)
-  const [aviso, setAviso] = useState('')
   const [claveAbierta, setClaveAbierta] = useState(false)
   const exportar = useRef(null)
 
-  const mostrarAviso = (t) => { setAviso(t); setTimeout(() => setAviso(''), 3500) }
   const esSoporte = usuario?.rol === 'soporte'
 
   useEffect(() => { init() }, [init])
 
   // Sesión vencida en cualquier llamada: volver al login
   useEffect(() => {
-    const f = () => { logout(); mostrarAviso('Tu sesión venció, vuelve a entrar') }
+    const f = () => { logout(); useAuthStore.setState({ error: 'Tu sesión se cerró (venció o el usuario fue desactivado). Vuelve a entrar.' }) }
     window.addEventListener('vp:sesion-expirada', f)
     return () => window.removeEventListener('vp:sesion-expirada', f)
   }, [logout])
 
   useEffect(() => {
-    if (!usuario) return
+    if (!usuario || usuario.debeCambiarClave) return
     fetchConfiguracion()
     fetchEquipo()
     certs.fetchResumen()
     setVista(usuario.rol === 'soporte' ? 'mantencion' : 'agenda')
-  }, [usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+    iniciarTiempoReal()
+    return () => terminarTiempoReal()
+  }, [usuario?.id, usuario?.debeCambiarClave]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Aviso cuando OTRA persona cambia algo (los datos ya se actualizaron solos)
+  useEffect(() => {
+    if (!ultimoCambio || ultimoCambio.origen === usuario?.id || !ultimoCambio.origen) return
+    const textos = { trabajos: 'La agenda se actualizó', certificados: 'Hay cambios en los certificados', usuarios: 'Se actualizó el equipo' }
+    const t = textos[ultimoCambio.tipos.find((x) => textos[x])]
+    if (t) info(`${t} (cambio de otro usuario)`)
+  }, [ultimoCambio]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Búsqueda con espera corta para no consultar en cada tecla
   useEffect(() => {
@@ -136,10 +151,11 @@ export default function AdminApp() {
     return () => clearTimeout(t)
   }, [q, vista, usuario?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { if (certs.error) { mostrarAviso(certs.error); certs.limpiarError() } }, [certs.error]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (certs.error) { alertaError('No se pudo completar', certs.error); certs.limpiarError() } }, [certs.error]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!initialized) return <div className="adm-login"><p className="adm-muted">Cargando…</p></div>
+  if (!initialized) return <div className="adm-login"><p className="adm-muted">{sinConexion ? 'Conectando con el servidor…' : 'Cargando…'}</p></div>
   if (!usuario) return <Login />
+  if (usuario.debeCambiarClave) return <CambiarClave obligatorio />
 
   const siguiente = certs.resumen.siguiente
   const nuevoForm = () => ({ ...vacio(), instalador: usuario.nombre })
@@ -150,7 +166,7 @@ export default function AdminApp() {
     setActual(c)
     setVista('ver')
     setForm(nuevoForm())
-    mostrarAviso(`Certificado N° ${folio(c.numero)} emitido`)
+    exito(`Certificado N° ${folio(c.numero)} emitido`)
   }
 
   const pdf = async (accion) => {
@@ -158,10 +174,10 @@ export default function AdminApp() {
     setOcupado(true)
     try {
       const blob = await generarPDF(exportar.current)
-      if (accion === 'descargar') { descargar(blob, nombreArchivo(actual)); mostrarAviso('PDF descargado') }
+      if (accion === 'descargar') { descargar(blob, nombreArchivo(actual)); exito('PDF descargado') }
       else {
         const r = await compartir(actual, blob)
-        if (r === 'descargado') mostrarAviso('PDF descargado: adjúntalo en el chat de WhatsApp')
+        if (r === 'descargado') info('PDF descargado: adjúntalo en el chat de WhatsApp')
       }
     } finally { setOcupado(false) }
   }
@@ -182,12 +198,17 @@ export default function AdminApp() {
       instalador: t.encargado || usuario.nombre,
     })
     setVista('nuevo')
-    mostrarAviso('Datos del trabajo cargados: completa los % de las láminas')
+    info('Datos del trabajo cargados: completa los % de las láminas')
   }
 
   const anular = async (c) => {
-    if (!window.confirm(`¿Anular el certificado N° ${folio(c.numero)}? Quedará registrado en el historial y su número no se vuelve a usar.`)) return
-    if (await certs.anularCertificado(c.numero)) { mostrarAviso(`Certificado N° ${folio(c.numero)} anulado`); setVista('lista') }
+    const ok = await confirmar({
+      titulo: `¿Anular el certificado N° ${folio(c.numero)}?`,
+      html: `De <b>${escapar(c.cliente)}</b> · ${escapar(formatoPatente(c.patente))}.<br>Queda registrado en el historial y su número no se vuelve a usar.`,
+      confirmar: 'Sí, anular', peligro: true,
+    })
+    if (!ok) return
+    if (await certs.anularCertificado(c.numero)) { exito(`Certificado N° ${folio(c.numero)} anulado`); setVista('lista') }
   }
 
   const items = [
@@ -212,6 +233,9 @@ export default function AdminApp() {
           ))}
         </nav>
         <div className="adm-side-foot">
+          <div className={`adm-vivo ${conectado ? 'is-on' : ''}`} title={conectado ? 'Los cambios del equipo aparecen al instante' : 'Reconectando…'}>
+            <i /><span>{conectado ? 'En vivo' : 'Reconectando…'}</span>
+          </div>
           <div className="adm-side-user">
             <i className={esSoporte ? 'is-soporte' : ''} style={esSoporte ? undefined : { background: usuario.color }}>{usuario.nombre[0]}</i>
             <span><b>{usuario.nombre}</b><small>{usuario.rolNombre}</small></span>
@@ -233,11 +257,11 @@ export default function AdminApp() {
       </header>
 
       <div className="adm-content">
-        {vista === 'agenda' && <Agenda onCertificado={certificadoDesdeTrabajo} avisar={mostrarAviso} />}
+        {vista === 'agenda' && <Agenda onCertificado={certificadoDesdeTrabajo} />}
 
         {vista === 'estadisticas' && <Estadisticas />}
 
-        {vista === 'mantencion' && esSoporte && <Mantencion avisar={mostrarAviso} />}
+        {vista === 'mantencion' && esSoporte && <Mantencion />}
 
         {vista === 'lista' && (
           <main className="adm-main">
@@ -328,8 +352,7 @@ export default function AdminApp() {
         </div>
       )}
 
-      {claveAbierta && <CambiarClave onClose={() => setClaveAbierta(false)} avisar={mostrarAviso} />}
-      {aviso && <div className="adm-toast">{aviso}</div>}
+      {claveAbierta && <CambiarClave onClose={() => setClaveAbierta(false)} />}
     </div>
   )
 }

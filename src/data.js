@@ -1,4 +1,5 @@
-// Todo el contenido editable de la página vive aquí.
+// Contenido ORIGINAL de la página. Todo se puede cambiar desde Mantención → Contenido web;
+// lo guardado en la base de datos reemplaza a cada sección (ver aplicarContenido al final).
 const baseNegocio = {
   nombre: 'VP Unicars',
   whatsapp: '56930235194',
@@ -14,11 +15,11 @@ const baseNegocio = {
 export const waLink = (texto = negocio.whatsappTexto) =>
   `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(texto)}`
 
-export const stats = [
-  { valor: 1900, prefijo: '+', sufijo: '', label: 'Trabajos realizados' },
-  { valor: 10.4, prefijo: '', sufijo: 'K', label: 'Seguidores en Instagram', decimales: 1 },
-  { valor: 1992, prefijo: '', sufijo: '', label: 'Publicaciones de trabajos' },
-  { valor: 99, prefijo: '', sufijo: '%', label: 'Protección UV' },
+const baseStats = [
+  { id: 'trabajos', valor: 1900, prefijo: '+', sufijo: '', label: 'Trabajos realizados', icono: 'trofeo' },
+  { id: 'seguidores', valor: 10.4, prefijo: '', sufijo: 'K', label: 'Seguidores en Instagram', decimales: 1, icono: 'instagram' },
+  { id: 'publicaciones', valor: 1992, prefijo: '', sufijo: '', label: 'Publicaciones de trabajos', icono: 'fotos' },
+  { id: 'uv', valor: 99, prefijo: '', sufijo: '%', label: 'Protección UV', icono: 'sol' },
 ]
 
 // foto: '/fotos/archivo.jpg' (opcional)
@@ -106,7 +107,7 @@ const baseMasServicios = [
   { id: 'grabado', titulo: 'Grabado de patentes', texto: 'Grabado de patente en los vidrios de tu auto.', icono: 'grabado' },
 ]
 
-export const niveles = [
+const baseNiveles = [
   {
     nombre: 'Estándar',
     desc: 'La entrada perfecta: privacidad y estética al mejor precio.',
@@ -134,7 +135,7 @@ export const niveles = [
   },
 ]
 
-export const autos = [
+const baseAutos = [
   'Porsche 911 Turbo S',
   'BMW 520i',
   'Ford Mustang GT',
@@ -148,7 +149,7 @@ export const autos = [
 ]
 
 // Trabajos destacados (sacados del Instagram). Agrega "foto" para mostrar la imagen real.
-export const trabajos = [
+const baseTrabajos = [
   { auto: 'Porsche 911 Turbo S', trabajo: 'PPF en interior piano black', tono: '#c9a227', foto: '/fotos/piano-black.jpg' },
   { auto: 'BMW 520i', trabajo: 'Nanocarbon + Nanocerámica', tono: '#3b82f6', foto: '/fotos/bmw-520i.jpg' },
   { auto: 'Ford Territory 2026', trabajo: 'PPF protector piano black', tono: '#a3a3a3', foto: '/fotos/territory-ppf.jpg' },
@@ -159,7 +160,7 @@ export const trabajos = [
   { auto: 'Hogar', trabajo: 'Polarizado arquitectónico', tono: '#a16207', foto: '/fotos/arquitectonico.webp' },
 ]
 
-export const pasos = [
+const basePasos = [
   { t: 'Escríbenos', d: 'Por WhatsApp o DM. Cuéntanos tu auto y lo que buscas.' },
   { t: 'Asesoría', d: 'Te recomendamos la lámina ideal para tu uso y presupuesto.' },
   { t: 'Instalación', d: 'Trabajo de precisión en nuestro taller de Mall Plaza América.' },
@@ -193,23 +194,56 @@ const baseFaqs = [
   },
 ]
 
-// Cambios hechos desde el panel de mantención (textos, fotos, horario, preguntas)
-// Contenido editado desde el panel (Mantención → Contenido web). main.jsx lo pide al backend
-// y lo aplica antes de dibujar la página; si el backend no responde se usa el contenido base.
-const mezclar = (lista, extra = {}) => lista.map((s) => ({ ...s, ...(extra[s.id] || {}) })).filter((s) => !s.oculto)
-const reemplazar = (arr, nuevos) => { arr.splice(0, arr.length, ...nuevos) }
+// Las fotos subidas desde el panel viven en el backend: en producción se antepone su dirección
+const API_ORIGEN = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '')
+export const urlFoto = (f) => (f && f.startsWith('/uploads/') ? `${API_ORIGEN}${f}` : f)
 
+// Cada ítem de lista lleva un id para poder editarlo, moverlo u ocultarlo
+const conId = (lista, clave) => lista.map((x, i) => ({ id: x.id || `${clave}-${i + 1}`, ...x }))
+
+// Contenido original en el mismo formato que guarda el panel
+export const base = {
+  negocio: baseNegocio,
+  servicios: baseServicios,
+  masServicios: baseMasServicios,
+  trabajos: conId(baseTrabajos, 'trabajo'),
+  autos: baseAutos.map((nombre, i) => ({ id: `auto-${i + 1}`, nombre })),
+  stats: baseStats,
+  niveles: conId(baseNiveles, 'nivel'),
+  pasos: conId(basePasos, 'paso'),
+  faqs: conId(baseFaqs, 'faq'),
+}
+
+/* --------- Lo que usan los componentes (se rellena con aplicarContenido) --------- */
 export const negocio = { ...baseNegocio }
-export const servicios = [...baseServicios]
-export const masServicios = [...baseMasServicios]
-export const faqs = [...baseFaqs]
+export const servicios = []
+export const masServicios = []
+export const trabajos = []
+export const autos = []
+export const stats = []
+export const niveles = []
+export const pasos = []
+export const faqs = []
 
+const reemplazar = (arr, nuevos) => { arr.splice(0, arr.length, ...nuevos) }
+const seccion = (c, clave) => (Array.isArray(c[clave]) ? c[clave] : base[clave]).filter((x) => !x.oculto)
+
+// c = contenido guardado en la base de datos (las secciones que no vienen usan el original)
 export function aplicarContenido(c = {}) {
   Object.assign(negocio, baseNegocio, c.negocio || {})
-  reemplazar(servicios, mezclar(baseServicios, c.servicios))
-  reemplazar(masServicios, mezclar(baseMasServicios, c.masServicios))
-  reemplazar(faqs, c.faqs?.length ? c.faqs : baseFaqs)
+  const lugar = encodeURIComponent(negocio.direccion)
+  negocio.mapa = `https://www.google.com/maps?q=${lugar}&output=embed`
+  negocio.mapaLink = `https://maps.google.com/?q=${lugar}`
+
+  reemplazar(servicios, seccion(c, 'servicios').map((s, i) => ({
+    ...s, num: String(i + 1).padStart(2, '0'), tags: s.tags || [], foto: urlFoto(s.foto),
+  })))
+  reemplazar(masServicios, seccion(c, 'masServicios').map((s) => ({ ...s, foto: urlFoto(s.foto) })))
+  reemplazar(trabajos, seccion(c, 'trabajos').map((t) => ({ ...t, tono: t.tono || '#ffc800', foto: urlFoto(t.foto) })))
+  reemplazar(autos, seccion(c, 'autos').map((a) => a.nombre))
+  reemplazar(stats, seccion(c, 'stats').map((s) => ({ ...s, valor: Number(s.valor) || 0, decimales: Number(s.decimales) || 0 })))
+  reemplazar(niveles, seccion(c, 'niveles'))
+  reemplazar(pasos, seccion(c, 'pasos'))
+  reemplazar(faqs, seccion(c, 'faqs'))
 }
 aplicarContenido()
-
-export const base = { negocio: baseNegocio, servicios: baseServicios, masServicios: baseMasServicios, faqs: baseFaqs }

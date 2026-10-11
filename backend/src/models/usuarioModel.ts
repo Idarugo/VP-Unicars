@@ -79,8 +79,8 @@ export const existsUsuarioByUsuario = async (pool: Pool, usuario: string) => {
 export const createUsuario = async (pool: Pool, data: CrearUsuarioData) => {
   const [result] = await pool.query<ResultSetHeader>(
     `
-      INSERT INTO usuarios (nombre, usuario, clave_hash, rol, descripcion, color)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO usuarios (nombre, usuario, clave_hash, rol, descripcion, color, debe_cambiar_clave)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
     `,
     [data.nombre, data.usuario, data.claveHash, data.rol, data.descripcion, data.color],
   );

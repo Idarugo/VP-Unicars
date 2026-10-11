@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { stats } from '../data.js'
-import { Icon, faTrophy, faInstagram, faImages, faSun } from '../icons.js'
+import { Icon, faTrophy, faInstagram, faImages, faSun, faStar, faCar } from '../icons.js'
 
-const iconos = [faTrophy, faInstagram, faImages, faSun]
+const iconos = { trofeo: faTrophy, instagram: faInstagram, fotos: faImages, sol: faSun, estrella: faStar, auto: faCar }
 
 export default function Stats() {
   const root = useRef(null)
@@ -30,9 +30,9 @@ export default function Stats() {
     <section className="stats" ref={root}>
       <div className="stats-bg" aria-hidden="true">+1.900 TRABAJOS · +1.900 TRABAJOS ·</div>
       <div className="stats-grid">
-        {stats.map((s, i) => (
-          <div key={s.label} className="stat">
-            <Icon icon={iconos[i]} className="stat-ico" />
+        {stats.map((s) => (
+          <div key={s.id} className="stat">
+            <Icon icon={iconos[s.icono] || faStar} className="stat-ico" />
             <div className="stat-v">{s.prefijo}<span className="stat-n">0</span>{s.sufijo}</div>
             <div className="stat-l">{s.label}</div>
           </div>

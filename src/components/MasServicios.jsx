@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { masServicios, waLink } from '../data.js'
-import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight } from '../icons.js'
+import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight, faScrewdriverWrench, faCar, faStar } from '../icons.js'
 
 const iconos = {
   audio: faVolumeHigh, corriente: faPowerOff, seguridad: faBell,
   luces: faLightbulb, electricidad: faBolt, grabado: faIdCard,
+  herramienta: faScrewdriverWrench, auto: faCar, estrella: faStar,
 }
 
 // Servicios adicionales de VP Unicars (todo se cotiza por el mismo WhatsApp).
@@ -40,7 +41,7 @@ export default function MasServicios() {
         {masServicios.map((s) => (
           <article key={s.id} className="ms-card" onPointerMove={brillo}>
             <div className="ms-media">
-              {s.foto ? <img src={s.foto} alt={s.titulo} loading="lazy" /> : <Icon icon={iconos[s.icono]} className="ms-ico" />}
+              {s.foto ? <img src={s.foto} alt={s.titulo} loading="lazy" /> : <Icon icon={iconos[s.icono] || faScrewdriverWrench} className="ms-ico" />}
             </div>
             <h3>{s.titulo}</h3>
             <p>{s.texto}</p>

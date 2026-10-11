@@ -10,6 +10,8 @@ interface UsuarioRow extends RowDataPacket {
   descripcion: string | null;
   color: string;
   activo: number;
+  sesion_version: number;
+  debe_cambiar_clave: number;
 }
 
 export interface UsuarioSesion {
@@ -21,6 +23,8 @@ export interface UsuarioSesion {
   descripcion: string | null;
   color: string;
   activo: boolean;
+  sesionVersion: number;
+  debeCambiarClave: boolean;
   permisos: string[];
 }
 
@@ -33,13 +37,15 @@ const aSesion = (u: UsuarioRow): UsuarioSesion => ({
   descripcion: u.descripcion,
   color: u.color,
   activo: Boolean(u.activo),
+  sesionVersion: Number(u.sesion_version),
+  debeCambiarClave: Boolean(u.debe_cambiar_clave),
   permisos: PERMISOS[u.rol] || [],
 });
 
 export const obtenerUsuarioParaLogin = async (pool: Pool, usuario: string) => {
   const [rows] = await pool.query<UsuarioRow[]>(
     `
-      SELECT id, nombre, usuario, clave_hash, rol, descripcion, color, activo
+      SELECT id, nombre, usuario, clave_hash, rol, descripcion, color, activo, sesion_version, debe_cambiar_clave
       FROM usuarios
       WHERE usuario = ?
       LIMIT 1
@@ -53,7 +59,7 @@ export const obtenerUsuarioParaLogin = async (pool: Pool, usuario: string) => {
 export const obtenerUsuarioSesionPorId = async (pool: Pool, id: number) => {
   const [rows] = await pool.query<UsuarioRow[]>(
     `
-      SELECT id, nombre, usuario, clave_hash, rol, descripcion, color, activo
+      SELECT id, nombre, usuario, clave_hash, rol, descripcion, color, activo, sesion_version, debe_cambiar_clave
       FROM usuarios
       WHERE id = ?
       LIMIT 1
@@ -75,7 +81,18 @@ export const obtenerHashClave = async (pool: Pool, id: number) => {
   return rows.length ? (rows[0].clave_hash as string) : null;
 };
 
-export const actualizarClave = async (pool: Pool, id: number, claveHash: string) => {
-  const [result] = await pool.query<ResultSetHeader>(`UPDATE usuarios SET clave_hash = ? WHERE id = ?`, [claveHash, id]);
+// Cambiar la clave siempre cierra las demás sesiones (sube sesion_version)
+export const actualizarClave = async (pool: Pool, id: number, claveHash: string, debeCambiar: boolean) => {
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE usuarios SET clave_hash = ?, debe_cambiar_clave = ?, sesion_version = sesion_version + 1 WHERE id = ?`,
+    [claveHash, debeCambiar ? 1 : 0, id],
+  );
   return result.affectedRows > 0;
 };
+
+export const cerrarSesiones = async (pool: Pool, id: number) => {
+  await pool.query(`UPDATE usuarios SET sesion_version = sesion_version + 1 WHERE id = ?`, [id]);
+};
+
+// Lo que va al panel: sin datos internos de la sesión
+export const sesionPublica = ({ sesionVersion: _v, ...u }: UsuarioSesion) => u;

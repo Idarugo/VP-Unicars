@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { generarToken } from "../utils/jwt";
 import {
-  actualizarClave, obtenerHashClave, obtenerUsuarioParaLogin, registrarAcceso, usuarioASesion,
+  actualizarClave, obtenerHashClave, obtenerUsuarioParaLogin, obtenerUsuarioSesionPorId, registrarAcceso, sesionPublica, usuarioASesion,
 } from "../models/authModel";
 import { registrarHistorial } from "../models/historialModel";
 
@@ -35,8 +35,8 @@ export const login = async (req: Request, res: Response) => {
     return res.status(200).json({
       ok: true,
       message: "Sesión iniciada",
-      token: generarToken({ id: row.id, usuario: row.usuario }),
-      usuario: sesion,
+      token: generarToken({ id: row.id, usuario: row.usuario, v: sesion.sesionVersion }),
+      usuario: sesionPublica(sesion),
     });
   } catch (error) {
     console.error("Error en login:", error);
@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const me = async (req: Request, res: Response) => {
-  return res.status(200).json({ ok: true, usuario: req.usuario });
+  return res.status(200).json({ ok: true, usuario: sesionPublica(req.usuario!) });
 };
 
 export const cambiarClave = async (req: Request, res: Response) => {
@@ -62,10 +62,21 @@ export const cambiarClave = async (req: Request, res: Response) => {
       return res.status(400).json({ ok: false, message: "La clave actual no es correcta" });
     }
 
-    await actualizarClave(pool, req.usuario!.id, await bcrypt.hash(claveNueva, 10));
+    if (claveNueva === claveActual) {
+      return res.status(400).json({ ok: false, message: "La clave nueva debe ser distinta a la actual" });
+    }
+
+    await actualizarClave(pool, req.usuario!.id, await bcrypt.hash(claveNueva, 10), false);
     await registrarHistorial(pool, req.usuario!, "Cambió su clave");
 
-    return res.status(200).json({ ok: true, message: "Clave actualizada" });
+    // Las otras sesiones quedan cerradas; esta sigue con un token nuevo
+    const sesion = (await obtenerUsuarioSesionPorId(pool, req.usuario!.id))!;
+    return res.status(200).json({
+      ok: true,
+      message: "Clave actualizada",
+      token: generarToken({ id: sesion.id, usuario: sesion.usuario, v: sesion.sesionVersion }),
+      usuario: sesionPublica(sesion),
+    });
   } catch (error) {
     console.error("Error al cambiar clave:", error);
     return res.status(500).json({ ok: false, message: "Error interno del servidor" });

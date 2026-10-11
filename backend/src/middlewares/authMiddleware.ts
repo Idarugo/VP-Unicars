@@ -20,6 +20,17 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return res.status(401).json({ ok: false, message: "Usuario no válido o desactivado" });
     }
 
+    // Token de antes de un cambio de clave o desactivación: ya no sirve
+    if (decoded.v !== usuario.sesionVersion) {
+      return res.status(401).json({ ok: false, message: "La sesión se cerró, vuelve a entrar" });
+    }
+
+    // Con clave temporal solo puede ver su sesión y cambiar la clave
+    const ruta = `${req.baseUrl}${req.path}`;
+    if (usuario.debeCambiarClave && !["/api/auth/me", "/api/auth/cambiar-clave"].includes(ruta)) {
+      return res.status(403).json({ ok: false, code: "CAMBIAR_CLAVE", message: "Debes cambiar tu clave temporal antes de continuar" });
+    }
+
     req.usuario = usuario;
     next();
   } catch {

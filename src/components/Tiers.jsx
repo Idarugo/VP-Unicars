@@ -49,7 +49,7 @@ export default function Tiers() {
       </div>
       <div className="tiers-grid">
         {niveles.map((n) => (
-          <article key={n.nombre} className={`tier ${n.destacado ? 'tier--hot' : ''}`} onPointerMove={tilt} onPointerLeave={reset} data-hover>
+          <article key={n.id} className={`tier ${n.destacado ? 'tier--hot' : ''}`} onPointerMove={tilt} onPointerLeave={reset} data-hover>
             {n.destacado && <span className="tier-badge">Más elegido</span>}
             <h3>{n.nombre}</h3>
             <p className="muted">{n.desc}</p>

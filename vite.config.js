@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
 
 const r = (p) => fileURLToPath(new URL(p, import.meta.url))
+
+// Las mismas cabeceras de seguridad de producción (vercel.json) en `npm run preview`, para probarlas en local
+const vercel = JSON.parse(readFileSync(r('./vercel.json'), 'utf8'))
+const cabeceras = Object.fromEntries(vercel.headers[0].headers.filter((h) => h.key !== 'Strict-Transport-Security')
+  .map((h) => [h.key, h.value.replace('; upgrade-insecure-requests', '')]))
 
 export default defineConfig({
   plugins: [react()],
@@ -10,9 +16,9 @@ export default defineConfig({
   optimizeDeps: { include: ['react', 'react-dom', 'zustand'] },
   server: {
     // En desarrollo, /api va al backend local (npm run dev en backend/)
-    proxy: { '/api': 'http://localhost:3001' },
+    proxy: { '/api': 'http://localhost:3001', '/uploads': 'http://localhost:3001' },
   },
-  preview: { proxy: { '/api': 'http://localhost:3001' } },
+  preview: { headers: cabeceras, proxy: { '/api': 'http://localhost:3001', '/uploads': 'http://localhost:3001' } },
   build: {
     rollupOptions: {
       input: { main: r('./index.html'), admin: r('./admin.html'), verificar: r('./verificar.html') },

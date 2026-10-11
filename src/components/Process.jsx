@@ -31,8 +31,8 @@ export default function Process() {
       <div className="process-line"><i /></div>
       <ol className="process-grid">
         {pasos.map((p, i) => (
-          <li key={p.t} className="process-step">
-            <span className="process-n"><Icon icon={iconos[i]} /></span>
+          <li key={p.id} className="process-step">
+            <span className="process-n"><Icon icon={iconos[i % iconos.length]} /></span>
             <strong>{p.t}</strong>
             <p>{p.d}</p>
           </li>

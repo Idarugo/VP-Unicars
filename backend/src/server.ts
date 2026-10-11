@@ -1,10 +1,12 @@
 import "dotenv/config";
+import "./config/zonaHoraria";
 import express, { type Application } from "express";
 import cors from "cors";
 import pool from "./config/database";
 import routes from "./routes";
 import { notFound } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
+import { CARPETA_FOTOS } from "./controllers/contenidoController";
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error("Falta JWT_SECRET en el .env (mínimo 32 caracteres)");
@@ -25,16 +27,22 @@ app.use(
     origin(origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error(`CORS bloqueado para: ${origin}`));
+      // Origen no permitido: sin cabeceras CORS el navegador bloquea la respuesta (no es un error del servidor)
+      return callback(null, false);
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.set("X-Content-Type-Options", "nosniff");
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.set("X-Frame-Options", "DENY");
+  res.set("Cross-Origin-Resource-Policy", "cross-origin"); // las fotos se muestran desde el dominio de la página
+  if (req.secure) res.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  // La API solo responde datos: ningún HTML ni script puede ejecutarse desde aquí
+  if (req.path.startsWith("/api")) res.set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
   next();
 });
 
@@ -50,6 +58,9 @@ app.get("/health", async (_req, res) => {
     res.status(503).json({ ok: false, message: "Sin conexión a la base de datos" });
   }
 });
+
+// Fotos subidas desde Mantención (nombres aleatorios: se pueden guardar en caché mucho tiempo)
+app.use("/uploads/fotos", express.static(CARPETA_FOTOS, { maxAge: "30d", immutable: true, index: false }));
 
 app.use("/api", routes);
 

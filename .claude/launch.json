@@ -1,6 +1,40 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "vp-unicars", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev", "--", "--port", "5173"], "port": 5173 }
+    {
+      "name": "vp-unicars",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5173"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "vp-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "backend",
+        "run",
+        "dev"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "vp-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "preview",
+        "--",
+        "--port",
+        "4173"
+      ],
+      "port": 4173
+    }
   ]
 }

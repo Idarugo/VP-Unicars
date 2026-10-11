@@ -1,0 +1,23 @@
+/* SweetAlert2 con el estilo del panel */
+.swal2-container { z-index: 200; }
+.swal2-container.swal2-backdrop-show { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
+.vp-swal.swal2-popup { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 20px; font-family: var(--font-b); padding: 28px 24px 24px; }
+.vp-swal .vp-swal-t, .vp-swal .swal2-title { color: var(--text); font-family: var(--font-d); font-size: 20px; font-weight: 600; }
+.vp-swal .vp-swal-txt, .vp-swal .swal2-html-container { color: var(--muted); font-size: 15px; line-height: 1.5; }
+.vp-swal .vp-swal-txt b { color: var(--text); }
+.vp-swal .vp-swal-acciones { gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.vp-swal .vp-swal-input, .vp-swal .swal2-input { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 12px; box-shadow: none; }
+.vp-swal .swal2-icon { border-width: 3px; transform: scale(0.8); margin-top: 0; }
+.vp-swal .swal2-icon.swal2-warning { border-color: var(--y); color: var(--y); }
+.vp-swal .swal2-icon.swal2-question { border-color: #3987e5; color: #3987e5; }
+.vp-swal .swal2-loader { border-color: var(--y) transparent var(--y) transparent; }
+.vp-swal-in { animation: vp-swal-in 0.35s var(--ease); }
+@keyframes vp-swal-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+.vp-swal code.vp-clave { display: inline-block; margin-top: 6px; padding: 10px 16px; border-radius: 10px; background: var(--panel-2); border: 1px dashed var(--y); color: var(--y); font-size: 20px; letter-spacing: 0.08em; user-select: all; }
+
+.vp-swal-toast.swal2-popup { padding: 10px 16px; border-radius: 14px; box-shadow: 0 20px 50px -10px #000; }
+.vp-swal-toast .swal2-title { font-family: var(--font-b); font-size: 14px; font-weight: 600; color: var(--text); margin: 0 6px; }
+.vp-swal-toast .swal2-timer-progress-bar { background: var(--y); }
+.vp-swal-toast .swal2-icon { transform: scale(0.6); margin: 0; }
+.adm-btn--danger { background: var(--bad) !important; color: #fff !important; }
+@media (prefers-reduced-motion: reduce) { .vp-swal-in { animation: none; } }
