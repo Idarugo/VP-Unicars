@@ -4,12 +4,25 @@
 #   curl -fsSL https://raw.githubusercontent.com/Idarugo/VP-Unicars/main/deploy/instalar.sh -o instalar.sh
 #   bash instalar.sh
 # Antes: el dominio vpunicars.cl (y www) debe apuntar a la IP del VPS (registro A en NIC Chile).
+#
+# Ensayo sin dominio (solo con la IP, sin HTTPS), por ejemplo desde otra rama:
+#   DOMINIO= RAMA=sistema-bd bash instalar.sh
 set -euo pipefail
 
-DOMINIO=vpunicars.cl
-REPO=https://github.com/Idarugo/VP-Unicars.git
+DOMINIO=${DOMINIO-vpunicars.cl}
+RAMA=${RAMA:-main}
+REPO=${REPO:-https://github.com/Idarugo/VP-Unicars.git}
 APP=/var/www/vpunicars
-read -rp "Correo para avisos del certificado SSL: " CORREO
+if [ -n "$DOMINIO" ]; then
+  read -rp "Correo para avisos del certificado SSL: " CORREO
+  ORIGEN="https://$DOMINIO,https://www.$DOMINIO"
+  URL="https://$DOMINIO"
+else
+  IP=$(hostname -I | awk '{print $1}')
+  ORIGEN="http://$IP"
+  URL="http://$IP"
+  echo "Modo ensayo: sin dominio ni HTTPS, en $URL"
+fi
 read -rp "Nombre del usuario soporte [Marcelo Hidalgo]: " SOPORTE_NOMBRE; SOPORTE_NOMBRE=${SOPORTE_NOMBRE:-Marcelo Hidalgo}
 
 echo "== 1/8 Sistema, firewall y actualizaciones automáticas de seguridad"
@@ -42,7 +55,7 @@ SQL
 printf "[client]\nuser=root\n" > /root/.my.cnf && chmod 600 /root/.my.cnf
 
 echo "== 5/8 Código y configuración"
-[ -d "$APP/.git" ] || sudo -u vp git clone "$REPO" "$APP"
+[ -d "$APP/.git" ] || sudo -u vp git clone -b "$RAMA" "$REPO" "$APP"
 CLAVE_SOPORTE=$(openssl rand -base64 12 | tr -d '/+=')
 CLAVE_ADMIN=$(openssl rand -base64 12 | tr -d '/+=')
 if [ ! -f "$APP/backend/.env" ]; then
@@ -54,7 +67,7 @@ DB_USER=vp_app
 DB_PASSWORD=$CLAVE_BD
 DB_NAME=vp_unicars
 JWT_SECRET=$(openssl rand -hex 32)
-CORS_ORIGIN=https://$DOMINIO,https://www.$DOMINIO
+CORS_ORIGIN=$ORIGEN
 SEED_SOPORTE_NOMBRE="$SOPORTE_NOMBRE"
 SEED_SOPORTE_USUARIO=soporte
 SEED_SOPORTE_CLAVE=$CLAVE_SOPORTE
@@ -80,13 +93,18 @@ cp "$APP/deploy/seguridad-headers.conf" /etc/nginx/snippets/vpunicars-seguridad.
 cp "$APP/deploy/nginx-vpunicars.conf" /etc/nginx/sites-available/vpunicars
 ln -sf /etc/nginx/sites-available/vpunicars /etc/nginx/sites-enabled/vpunicars
 rm -f /etc/nginx/sites-enabled/default
+if [ -z "$DOMINIO" ]; then
+  # Ensayo por IP: cualquier nombre y sin forzar HTTPS (no hay certificado)
+  sed -i 's/server_name .*/server_name _;/' /etc/nginx/sites-available/vpunicars
+  sed -i -e 's/; upgrade-insecure-requests//' -e '/Strict-Transport-Security/d' /etc/nginx/snippets/vpunicars-seguridad.conf
+fi
 nginx -t && systemctl reload nginx
-certbot --nginx -d "$DOMINIO" -d "www.$DOMINIO" --non-interactive --agree-tos -m "$CORREO" --redirect
+[ -z "$DOMINIO" ] || certbot --nginx -d "$DOMINIO" -d "www.$DOMINIO" --non-interactive --agree-tos -m "$CORREO" --redirect
 chmod +x "$APP/deploy/respaldo.sh" "$APP/deploy/actualizar.sh"
 ( crontab -l 2>/dev/null | grep -v respaldo.sh; echo "30 3 * * * $APP/deploy/respaldo.sh >> /var/log/vpunicars/respaldo.log 2>&1" ) | crontab -
 
 echo
-echo "================ LISTO: https://$DOMINIO ================"
+echo "================ LISTO: $URL ================"
 echo "Guarda estas claves en tu gestor de contraseñas (no se vuelven a mostrar):"
 echo "  Panel soporte -> usuario: soporte  clave: $CLAVE_SOPORTE"
 echo "  Panel Marco   -> usuario: marco    clave: $CLAVE_ADMIN  (deberá cambiarla al entrar)"

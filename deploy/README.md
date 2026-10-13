@@ -23,6 +23,18 @@ datacenter de Sudamérica). nginx sirve la página y pasa `/api` y `/uploads` al
 4. Guardar las claves que muestra al final. Marco cambia la suya en su primer ingreso.
 5. Probar: página, `/admin`, emitir un certificado, el QR de verificación, subir una foto y el indicador **En vivo**.
 
+## Ensayo sin dominio
+
+Para probar todo antes de tener `vpunicars.cl`: mismo instalador, solo con la IP y sin HTTPS.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Idarugo/VP-Unicars/sistema-bd/deploy/instalar.sh -o instalar.sh
+DOMINIO= RAMA=sistema-bd bash instalar.sh
+```
+
+Queda en `http://IP-DEL-VPS`. Es solo para ensayar (las claves viajan sin cifrar): al terminar, reinstalar
+Ubuntu desde el panel de Hostinger y hacer la instalación real con el dominio.
+
 ## Después
 
 - Publicar cambios: `sudo -u vp /var/www/vpunicars/deploy/actualizar.sh`
