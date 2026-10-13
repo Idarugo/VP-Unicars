@@ -1,6 +1,8 @@
 /* SweetAlert2 con el estilo del panel */
 .swal2-container { z-index: 200; }
 .swal2-container.swal2-backdrop-show { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
+/* Los avisos cortos no tapan la pantalla */
+.swal2-container.swal2-backdrop-show:has(.swal2-toast) { background: transparent; backdrop-filter: none; }
 .vp-swal.swal2-popup { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 20px; font-family: var(--font-b); padding: 28px 24px 24px; }
 .vp-swal .vp-swal-t, .vp-swal .swal2-title { color: var(--text); font-family: var(--font-d); font-size: 20px; font-weight: 600; }
 .vp-swal .vp-swal-txt, .vp-swal .swal2-html-container { color: var(--muted); font-size: 15px; line-height: 1.5; }

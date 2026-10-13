@@ -62,9 +62,9 @@ export async function mostrarDato({ titulo, html, copiar }) {
 }
 
 // Pide un texto (ej: motivo)
-export async function pedirTexto({ titulo, texto, placeholder, confirmar = 'Aceptar' }) {
+export async function pedirTexto({ titulo, texto, placeholder, valor = '', tipo = 'text', confirmar = 'Aceptar' }) {
   const r = await base.fire({
-    title: titulo, text: texto, input: 'text', inputPlaceholder: placeholder,
+    title: titulo, text: texto, input: tipo, inputPlaceholder: placeholder, inputValue: valor,
     showCancelButton: true, confirmButtonText: confirmar, cancelButtonText: 'Cancelar',
   })
   return r.isConfirmed ? r.value : null

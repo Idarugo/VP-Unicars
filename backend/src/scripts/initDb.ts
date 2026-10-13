@@ -33,6 +33,7 @@ async function main() {
   const columnas: [string, string, string][] = [
     ["usuarios", "sesion_version", "INT NOT NULL DEFAULT 0 AFTER activo"],
     ["usuarios", "debe_cambiar_clave", "TINYINT(1) NOT NULL DEFAULT 0 AFTER sesion_version"],
+    ["usuarios", "telefono", "VARCHAR(16) NULL AFTER descripcion"],
   ];
   for (const [tabla, columna, definicion] of columnas) {
     const [existe] = await conn.query<any[]>(

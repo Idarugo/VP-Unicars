@@ -8,7 +8,7 @@ import {
 import { actualizarClave, cerrarSesiones } from "../models/authModel";
 import { registrarHistorial } from "../models/historialModel";
 import { ROL_NOMBRE, type Rol } from "../utils/permisos";
-import { color, texto, textoOpcional } from "../utils/validar";
+import { color, telefono, texto, textoOpcional } from "../utils/validar";
 import { desconectarUsuario } from "../utils/tiempoReal";
 
 const ROLES: Rol[] = ["admin", "tecnico", "soporte"];
@@ -52,6 +52,7 @@ export const createUsuarioController = async (req: Request, res: Response) => {
       claveHash: await bcrypt.hash(clave, 10),
       rol,
       descripcion: textoOpcional(req.body?.descripcion, 120),
+      telefono: telefono(req.body?.telefono),
       color: color(req.body?.color),
     });
 
@@ -82,6 +83,7 @@ export const updateUsuarioController = async (req: Request, res: Response) => {
       nombre: req.body?.nombre !== undefined ? texto(req.body.nombre, 100) || actual.nombre : undefined,
       rol,
       descripcion: req.body?.descripcion !== undefined ? textoOpcional(req.body.descripcion, 120) : undefined,
+      telefono: req.body?.telefono !== undefined ? telefono(req.body.telefono) : undefined,
       color: req.body?.color !== undefined ? color(req.body.color, actual.color) : undefined,
     });
     await registrarHistorial(pool, req.usuario!, "Editó usuario", actual.nombre);

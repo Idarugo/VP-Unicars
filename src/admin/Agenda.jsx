@@ -84,7 +84,7 @@ function Modal({ t, nuevo, equipo, verTodo, guardando, onClose, onSave, onDelete
 
         {!nuevo && (
           <div className="ag-acciones">
-            <button className="adm-btn adm-btn--wa" onClick={() => abrirWa('', avisoEncargado(p, f))}><Icon icon={faWhatsapp} /> Avisar a {primerNombre(p.nombre)}</button>
+            {p.id && <button className="adm-btn adm-btn--wa" onClick={() => abrirWa(p.telefono, avisoEncargado(p, f))}><Icon icon={faWhatsapp} /> Avisar a {primerNombre(p.nombre)}</button>}
             <button className="adm-btn adm-btn--ghost" onClick={() => abrirWa(f.telefono, avisoCliente(f))}><Icon icon={faWhatsapp} /> Confirmar al cliente</button>
             {f.estado !== 'terminado' && (
               <button className="adm-btn adm-btn--ghost" onClick={() => { const x = { ...f, estado: 'terminado' }; setF(x); onSave(x, false) }}><Icon icon={faCheck} /> Marcar terminado</button>

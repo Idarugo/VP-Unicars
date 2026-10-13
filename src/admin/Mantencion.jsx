@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ContenidoWeb from './ContenidoWeb.jsx'
-import { exito, error as alertaError, confirmar, mostrarDato, escapar } from './alertas.js'
+import { exito, error as alertaError, confirmar, mostrarDato, pedirTexto, escapar } from './alertas.js'
 import { folio } from './config.js'
 import { fechaLocal } from './store.js'
 import { useMantencionStore } from '../stores/mantencionStore.js'
@@ -8,7 +8,7 @@ import { useConfiguracionStore } from '../stores/configuracionStore.js'
 import { useCertificadoStore } from '../stores/certificadoStore.js'
 import { useAuthStore } from '../stores/authStore.js'
 import {
-  Icon, faScrewdriverWrench, faCircleCheck, faTriangleExclamation, faCircleXmark, faGlobe, faServer, faDatabase, faFloppyDisk, faRotateLeft, faPlus, faDownload, faUserPlus, faKey, faMagnifyingGlass, faClockRotateLeft, faUsers, faGear, faPenToSquare, faHeartPulse,
+  Icon, faScrewdriverWrench, faCircleCheck, faTriangleExclamation, faCircleXmark, faGlobe, faServer, faDatabase, faFloppyDisk, faRotateLeft, faPlus, faDownload, faUserPlus, faKey, faMagnifyingGlass, faClockRotateLeft, faUsers, faGear, faPenToSquare, faHeartPulse, faWhatsapp,
 } from './iconos.js'
 
 const TABS = [
@@ -191,13 +191,17 @@ function Usuarios() {
     const r = await resetClave(u.id)
     if (r.ok) await verClave(u.nombre, u.usuario, r.data.claveTemporal); else resultado(r)
   }
+  const editarTelefono = async (u) => {
+    const tel = await pedirTexto({ titulo: `WhatsApp de ${u.nombre}`, texto: 'Se usa en la agenda para avisarle sus trabajos. Déjalo vacío para quitarlo.', placeholder: '9 1234 5678', valor: u.telefono || '', tipo: 'tel', confirmar: 'Guardar' })
+    if (tel !== null) resultado(await actualizarUsuario(u.id, { telefono: tel }), `WhatsApp de ${u.nombre} actualizado`)
+  }
 
   return (
     <div className="mt-contenido">
       <section className="st-card">
         <header>
           <h2>Usuarios del panel</h2>
-          <button className="adm-btn" onClick={() => setNuevo({ nombre: '', usuario: '', rol: 'tecnico', descripcion: '', color: COLORES[1] })}><Icon icon={faUserPlus} /> Nuevo usuario</button>
+          <button className="adm-btn" onClick={() => setNuevo({ nombre: '', usuario: '', rol: 'tecnico', descripcion: '', telefono: '', color: COLORES[1] })}><Icon icon={faUserPlus} /> Nuevo usuario</button>
         </header>
         {nuevo && (
           <form className="adm-form mt-nuevo" onSubmit={crear}>
@@ -210,6 +214,9 @@ function Usuarios() {
             </div>
             <div className="adm-row">
               <label>Especialidad <small>(se ve en la agenda)</small><input placeholder="Ej: Audio e iluminación" value={nuevo.descripcion} onChange={(e) => setNuevo({ ...nuevo, descripcion: e.target.value })} /></label>
+              <label>WhatsApp <small>(para avisarle sus trabajos)</small><input type="tel" placeholder="9 1234 5678" value={nuevo.telefono} onChange={(e) => setNuevo({ ...nuevo, telefono: e.target.value })} /></label>
+            </div>
+            <div className="adm-row">
               <label>Color en la agenda
                 <span className="mt-colores">{COLORES.map((c) => (
                   <button type="button" key={c} className={`mt-color ${nuevo.color === c ? 'is-on' : ''}`} style={{ background: c }} onClick={() => setNuevo({ ...nuevo, color: c })} aria-label={c} />
@@ -226,10 +233,11 @@ function Usuarios() {
           {usuarios.map((u) => (
             <li key={u.id} className={u.activo ? '' : 'is-off'}>
               <i className={`mt-av is-${u.rol}`} style={u.rol === 'soporte' ? undefined : { background: u.color }}>{u.nombre[0]}</i>
-              <div className="mt-u-info"><b>{u.nombre}</b><small>@{u.usuario}{u.descripcion ? ` · ${u.descripcion}` : ''} · {u.ultimoAcceso ? `último acceso ${fechaHora(u.ultimoAcceso.replace(' ', 'T'))}` : 'sin acceso aún'}</small></div>
+              <div className="mt-u-info"><b>{u.nombre}</b><small>@{u.usuario}{u.descripcion ? ` · ${u.descripcion}` : ''}{u.telefono ? ` · ${u.telefono}` : ''} · {u.ultimoAcceso ? `último acceso ${fechaHora(u.ultimoAcceso.replace(' ', 'T'))}` : 'sin acceso aún'}</small></div>
               <select value={u.rol} disabled={saving} onChange={async (e) => resultado(await actualizarUsuario(u.id, { rol: e.target.value }), `Rol de ${u.nombre} actualizado`)}>
                 {Object.entries(ROLES).map(([k, r]) => <option key={k} value={k}>{r.nombre}</option>)}
               </select>
+              <button className="adm-icon-btn" title={u.telefono ? 'Cambiar WhatsApp' : 'Agregar WhatsApp'} aria-label={u.telefono ? 'Cambiar WhatsApp' : 'Agregar WhatsApp'} disabled={saving} onClick={() => editarTelefono(u)}><Icon icon={faWhatsapp} /></button>
               <button className="adm-icon-btn" title="Generar clave nueva" disabled={saving} onClick={() => restablecer(u)}><Icon icon={faKey} /></button>
               <label className="mt-switch" title={u.id === yo?.id ? 'No puedes desactivarte a ti mismo' : u.activo ? 'Desactivar' : 'Activar'}>
                 <input type="checkbox" checked={u.activo} disabled={saving || u.id === yo?.id} onChange={async () => resultado(await setEstadoUsuario(u.id, !u.activo))} />

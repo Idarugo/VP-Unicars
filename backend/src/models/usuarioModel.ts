@@ -7,6 +7,7 @@ export interface UsuarioListaRow extends RowDataPacket {
   usuario: string;
   rol: Rol;
   descripcion: string | null;
+  telefono: string | null;
   color: string;
   activo: number;
   ultimoAcceso: string | null;
@@ -19,6 +20,7 @@ export interface CrearUsuarioData {
   claveHash: string;
   rol: Rol;
   descripcion: string | null;
+  telefono: string | null;
   color: string;
 }
 
@@ -26,13 +28,14 @@ export interface ActualizarUsuarioData {
   nombre?: string;
   rol?: Rol;
   descripcion?: string | null;
+  telefono?: string | null;
   color?: string;
 }
 
 export const getAllUsuarios = async (pool: Pool) => {
   const [rows] = await pool.query<UsuarioListaRow[]>(
     `
-      SELECT id, nombre, usuario, rol, descripcion, color, activo,
+      SELECT id, nombre, usuario, rol, descripcion, telefono, color, activo,
              ultimo_acceso AS ultimoAcceso, creado_en AS creadoEn
       FROM usuarios
       ORDER BY FIELD(rol, 'admin', 'tecnico', 'soporte'), nombre ASC
@@ -46,7 +49,7 @@ export const getAllUsuarios = async (pool: Pool) => {
 export const getEquipo = async (pool: Pool) => {
   const [rows] = await pool.query<UsuarioListaRow[]>(
     `
-      SELECT id, nombre, rol, descripcion, color
+      SELECT id, nombre, rol, descripcion, telefono, color
       FROM usuarios
       WHERE activo = 1 AND rol IN ('admin', 'tecnico')
       ORDER BY FIELD(rol, 'admin', 'tecnico'), nombre ASC
@@ -59,7 +62,7 @@ export const getEquipo = async (pool: Pool) => {
 export const getUsuarioById = async (pool: Pool, id: number) => {
   const [rows] = await pool.query<UsuarioListaRow[]>(
     `
-      SELECT id, nombre, usuario, rol, descripcion, color, activo,
+      SELECT id, nombre, usuario, rol, descripcion, telefono, color, activo,
              ultimo_acceso AS ultimoAcceso, creado_en AS creadoEn
       FROM usuarios
       WHERE id = ?
@@ -79,10 +82,10 @@ export const existsUsuarioByUsuario = async (pool: Pool, usuario: string) => {
 export const createUsuario = async (pool: Pool, data: CrearUsuarioData) => {
   const [result] = await pool.query<ResultSetHeader>(
     `
-      INSERT INTO usuarios (nombre, usuario, clave_hash, rol, descripcion, color, debe_cambiar_clave)
-      VALUES (?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO usuarios (nombre, usuario, clave_hash, rol, descripcion, telefono, color, debe_cambiar_clave)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     `,
-    [data.nombre, data.usuario, data.claveHash, data.rol, data.descripcion, data.color],
+    [data.nombre, data.usuario, data.claveHash, data.rol, data.descripcion, data.telefono, data.color],
   );
 
   return result.insertId;
@@ -95,6 +98,7 @@ export const updateUsuario = async (pool: Pool, id: number, data: ActualizarUsua
   if (data.nombre !== undefined) { fields.push("nombre = ?"); values.push(data.nombre) }
   if (data.rol !== undefined) { fields.push("rol = ?"); values.push(data.rol) }
   if (data.descripcion !== undefined) { fields.push("descripcion = ?"); values.push(data.descripcion) }
+  if (data.telefono !== undefined) { fields.push("telefono = ?"); values.push(data.telefono) }
   if (data.color !== undefined) { fields.push("color = ?"); values.push(data.color) }
 
   if (!fields.length) return false;

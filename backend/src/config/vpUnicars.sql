@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
   clave_hash VARCHAR(100) NOT NULL,
   rol ENUM('soporte', 'admin', 'tecnico') NOT NULL DEFAULT 'tecnico',
   descripcion VARCHAR(120) NULL,
+  -- WhatsApp para avisarle sus trabajos desde la agenda
+  telefono VARCHAR(16) NULL,
   color CHAR(7) NOT NULL DEFAULT '#ffc800',
   activo TINYINT(1) NOT NULL DEFAULT 1,
   -- Sube al cambiar/restablecer la clave o desactivar: invalida todas las sesiones abiertas
