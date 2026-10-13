@@ -5,6 +5,7 @@ const baseNegocio = {
   whatsapp: '56930235194',
   whatsappTexto: 'Hola VP Unicars! Quiero cotizar un trabajo para mi auto 🚘',
   instagram: 'https://www.instagram.com/vp_unicars/',
+  tiktok: 'https://www.tiktok.com/@vpunicars',
   direccion: 'Mall Plaza América, Rancagua',
   mapa: 'https://www.google.com/maps?q=Mall+Plaza+Am%C3%A9rica+Rancagua&output=embed',
   mapaLink: 'https://maps.google.com/?q=Mall+Plaza+America+Rancagua',

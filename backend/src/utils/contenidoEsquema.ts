@@ -40,6 +40,7 @@ export const SECCIONES: Seccion[] = [
       { clave: "whatsapp", etiqueta: "WhatsApp (con 56)", tipo: "telefono", requerido: true, placeholder: "56930235194", ayuda: "Todos los botones de cotizar van a este número." },
       { clave: "whatsappTexto", etiqueta: "Mensaje inicial de WhatsApp", tipo: "textoLargo", max: 200 },
       { clave: "instagram", etiqueta: "Link de Instagram", tipo: "url", max: 200 },
+      { clave: "tiktok", etiqueta: "Link de TikTok", tipo: "url", max: 200, ayuda: "Déjalo vacío para no mostrar TikTok." },
       { clave: "direccion", etiqueta: "Dirección", tipo: "texto", max: 120, requerido: true, ayuda: "El mapa de la página se arma con esta dirección." },
       { clave: "horario", etiqueta: "Horario", tipo: "texto", max: 80 },
       { clave: "horarioNota", etiqueta: "Nota del horario", tipo: "textoLargo", max: 200 },

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { negocio, waLink } from '../data.js'
 import Logo from './Logo.jsx'
-import { Icon, faLocationDot, faWhatsapp, faInstagram, faClock } from '../icons.js'
+import { Icon, faLocationDot, faWhatsapp, faInstagram, faTiktok, faClock } from '../icons.js'
 
 export default function Contact() {
   const root = useRef(null)
@@ -46,6 +46,7 @@ export default function Contact() {
           <div><span className="muted">WhatsApp</span><a href={waLink()} target="_blank" rel="noreferrer"><Icon icon={faWhatsapp} className="ico" /> +56 9 3023 5194</a></div>
           <div><span className="muted">Horario</span><span className="contact-txt"><Icon icon={faClock} className="ico" /> {negocio.horario}</span><small className="muted">{negocio.horarioNota}</small></div>
           <div><span className="muted">Instagram</span><a href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} className="ico" /> @vp_unicars</a></div>
+          {negocio.tiktok && <div><span className="muted">TikTok</span><a href={negocio.tiktok} target="_blank" rel="noreferrer"><Icon icon={faTiktok} className="ico" /> {negocio.tiktok.match(/@[\w.]+/)?.[0] || 'TikTok'}</a></div>}
         </div>
         <div className="contact-map">
           <iframe title="Mapa VP Unicars" src={negocio.mapa} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
@@ -56,6 +57,7 @@ export default function Contact() {
         <div className="footer-brand"><Logo /> <span>VP UNICARS</span></div>
         <div className="footer-social">
           <a href={negocio.instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Icon icon={faInstagram} /></a>
+          {negocio.tiktok && <a href={negocio.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"><Icon icon={faTiktok} /></a>}
           <a href={waLink()} target="_blank" rel="noreferrer" aria-label="WhatsApp"><Icon icon={faWhatsapp} /></a>
           <a href={negocio.mapaLink} target="_blank" rel="noreferrer" aria-label="Ubicación"><Icon icon={faLocationDot} /></a>
         </div>
