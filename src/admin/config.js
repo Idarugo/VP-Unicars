@@ -16,7 +16,7 @@ export const certificacion = {
     'En cumplimiento al Decreto 70-2019 de la Subsecretaría de Transportes, declaro la veracidad de los datos contenidos en este certificado.',
 }
 
-export const sistema = { folioInicial: 239, dominio: 'vpunicars.cl', venceDominio: '', hosting: '' }
+export const sistema = { folioInicial: 239, dominio: 'vpunicars.cl', venceDominio: '2029-10-13', hosting: '' }
 
 export const tiposVehiculo = ['Automóvil', 'SUV', 'Camioneta', 'Station wagon', 'Furgón', 'Camión', 'Moto', 'Otro']
 export const tonos = [5, 15, 20, 35, 50, 70, 80]

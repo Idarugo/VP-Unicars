@@ -17,7 +17,7 @@ export const CONFIG_DEFAULT = {
   sistema: {
     folioInicial: 239,
     dominio: "vpunicars.cl",
-    venceDominio: "2029-10-16",
+    venceDominio: "2029-10-13",
     hosting: "Por definir",
     ultimoRespaldo: null as string | null,
   },
