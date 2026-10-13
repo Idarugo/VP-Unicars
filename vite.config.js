@@ -5,10 +5,11 @@ import { readFileSync } from 'node:fs'
 
 const r = (p) => fileURLToPath(new URL(p, import.meta.url))
 
-// Las mismas cabeceras de seguridad de producción (vercel.json) en `npm run preview`, para probarlas en local
-const vercel = JSON.parse(readFileSync(r('./vercel.json'), 'utf8'))
-const cabeceras = Object.fromEntries(vercel.headers[0].headers.filter((h) => h.key !== 'Strict-Transport-Security')
-  .map((h) => [h.key, h.value.replace('; upgrade-insecure-requests', '')]))
+// Las mismas cabeceras de seguridad de producción (nginx) en `npm run preview`, para probarlas en local
+const nginx = readFileSync(r('./deploy/seguridad-headers.conf'), 'utf8')
+const cabeceras = Object.fromEntries([...nginx.matchAll(/^add_header\s+(\S+)\s+"([^"]*)"/gm)]
+  .filter(([, k]) => k !== 'Strict-Transport-Security')
+  .map(([, k, v]) => [k, v.replace('; upgrade-insecure-requests', '')]))
 
 export default defineConfig({
   plugins: [react()],
