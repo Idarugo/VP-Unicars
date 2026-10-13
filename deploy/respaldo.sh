@@ -2,6 +2,7 @@
 # Respaldo diario: base de datos + fotos subidas. Guarda los últimos 14 días.
 # Se programa con: sudo crontab -e  →  30 3 * * * /var/www/vpunicars/deploy/respaldo.sh
 set -euo pipefail
+umask 077 # los respaldos tienen datos de clientes: solo root puede leerlos
 DESTINO=/var/backups/vpunicars
 FECHA=$(date +%F)
 mkdir -p "$DESTINO"

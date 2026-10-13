@@ -43,12 +43,13 @@ id vp >/dev/null 2>&1 || adduser --system --group --home /home/vp --shell /bin/b
 mkdir -p "$APP" /var/log/vpunicars && chown -R vp:vp "$APP" /var/log/vpunicars
 
 echo "== 4/8 Base de datos (usuario propio, sin root)"
-CLAVE_BD=$(openssl rand -hex 24)
+# Si se vuelve a correr, reutiliza la clave del .env (si no, el backend queda sin acceso a la BD)
+if [ -f "$APP/backend/.env" ]; then CLAVE_BD=$(grep '^DB_PASSWORD=' "$APP/backend/.env" | cut -d= -f2-); else CLAVE_BD=$(openssl rand -hex 24); fi
 mysql <<SQL
 CREATE DATABASE IF NOT EXISTS vp_unicars CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS 'vp_app'@'localhost' IDENTIFIED BY '$CLAVE_BD';
 ALTER USER 'vp_app'@'localhost' IDENTIFIED BY '$CLAVE_BD';
-GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX ON vp_unicars.* TO 'vp_app'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON vp_unicars.* TO 'vp_app'@'localhost';
 FLUSH PRIVILEGES;
 SQL
 # Para los respaldos (solo root puede leerlo)
@@ -58,7 +59,9 @@ echo "== 5/8 Código y configuración"
 [ -d "$APP/.git" ] || sudo -u vp git clone -b "$RAMA" "$REPO" "$APP"
 CLAVE_SOPORTE=$(openssl rand -base64 12 | tr -d '/+=')
 CLAVE_ADMIN=$(openssl rand -base64 12 | tr -d '/+=')
+NUEVO=0
 if [ ! -f "$APP/backend/.env" ]; then
+  NUEVO=1
   cat > "$APP/backend/.env" <<ENV
 PORT=3001
 DB_HOST=127.0.0.1
@@ -84,7 +87,7 @@ cd "$APP/backend" && sudo -u vp npm ci && sudo -u vp npm run build && sudo -u vp
 mkdir -p "$APP/backend/uploads/fotos" && chown -R vp:vp "$APP/backend/uploads"
 
 echo "== 7/8 Backend siempre encendido (pm2)"
-sudo -u vp pm2 start "$APP/deploy/ecosystem.config.cjs"
+sudo -u vp pm2 startOrReload "$APP/deploy/ecosystem.config.cjs"
 sudo -u vp pm2 save
 env PATH=$PATH:/usr/bin pm2 startup systemd -u vp --hp /home/vp
 
@@ -101,10 +104,14 @@ fi
 nginx -t && systemctl reload nginx
 [ -z "$DOMINIO" ] || certbot --nginx -d "$DOMINIO" -d "www.$DOMINIO" --non-interactive --agree-tos -m "$CORREO" --redirect
 chmod +x "$APP/deploy/respaldo.sh" "$APP/deploy/actualizar.sh"
-( crontab -l 2>/dev/null | grep -v respaldo.sh; echo "30 3 * * * $APP/deploy/respaldo.sh >> /var/log/vpunicars/respaldo.log 2>&1" ) | crontab -
+( { crontab -l 2>/dev/null || true; } | { grep -v respaldo.sh || true; }; echo "30 3 * * * $APP/deploy/respaldo.sh >> /var/log/vpunicars/respaldo.log 2>&1" ) | crontab -
 
 echo
 echo "================ LISTO: $URL ================"
-echo "Guarda estas claves en tu gestor de contraseñas (no se vuelven a mostrar):"
-echo "  Panel soporte -> usuario: soporte  clave: $CLAVE_SOPORTE"
-echo "  Panel Marco   -> usuario: marco    clave: $CLAVE_ADMIN  (deberá cambiarla al entrar)"
+if [ "$NUEVO" = 1 ]; then
+  echo "Guarda estas claves en tu gestor de contraseñas (no se vuelven a mostrar):"
+  echo "  Panel soporte -> usuario: soporte  clave: $CLAVE_SOPORTE"
+  echo "  Panel Marco   -> usuario: marco    clave: $CLAVE_ADMIN  (deberá cambiarla al entrar)"
+else
+  echo "Instalación repetida: las claves iniciales del panel siguen en $APP/backend/.env (SEED_*_CLAVE)."
+fi
