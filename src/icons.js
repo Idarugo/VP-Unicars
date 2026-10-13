@@ -6,4 +6,4 @@ export {
   faUserCheck, faScrewdriverWrench, faKey, faPlus, faImages, faBolt, faCircleCheck,
   faVolumeHigh, faPowerOff, faBell, faIdCard, faClock,
 } from '@fortawesome/free-solid-svg-icons'
-export { faWhatsapp, faInstagram, faTiktok } from '@fortawesome/free-brands-svg-icons'
+export { faWhatsapp, faInstagram, faTiktok, faFacebook } from '@fortawesome/free-brands-svg-icons'
