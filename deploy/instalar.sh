@@ -102,12 +102,26 @@ if [ -z "$DOMINIO" ]; then
   sed -i -e 's/; upgrade-insecure-requests//' -e '/Strict-Transport-Security/d' /etc/nginx/snippets/vpunicars-seguridad.conf
 fi
 nginx -t && systemctl reload nginx
-[ -z "$DOMINIO" ] || certbot --nginx -d "$DOMINIO" -d "www.$DOMINIO" --non-interactive --agree-tos -m "$CORREO" --redirect
+HTTPS_PENDIENTE=""
+if [ -n "$DOMINIO" ]; then
+  # Let's Encrypt solo funciona si el dominio ya apunta a este servidor
+  IP_PUBLICA=$(curl -4 -fsS https://api.ipify.org || true)
+  if getent ahostsv4 "$DOMINIO" | awk '{print $1}' | grep -qx "$IP_PUBLICA"; then
+    certbot --nginx -d "$DOMINIO" -d "www.$DOMINIO" --non-interactive --agree-tos -m "$CORREO" --redirect
+  else
+    HTTPS_PENDIENTE="certbot --nginx -d $DOMINIO -d www.$DOMINIO --non-interactive --agree-tos -m $CORREO --redirect"
+  fi
+fi
 chmod +x "$APP/deploy/respaldo.sh" "$APP/deploy/actualizar.sh"
 ( { crontab -l 2>/dev/null || true; } | { grep -v respaldo.sh || true; }; echo "30 3 * * * $APP/deploy/respaldo.sh >> /var/log/vpunicars/respaldo.log 2>&1" ) | crontab -
 
 echo
 echo "================ LISTO: $URL ================"
+if [ -n "$HTTPS_PENDIENTE" ]; then
+  echo "HTTPS pendiente: $DOMINIO aún no apunta a este servidor ($IP_PUBLICA)."
+  echo "Cuando el DNS esté listo, ejecuta como root:"
+  echo "  $HTTPS_PENDIENTE"
+fi
 if [ "$NUEVO" = 1 ]; then
   echo "Guarda estas claves en tu gestor de contraseñas (no se vuelven a mostrar):"
   echo "  Panel soporte -> usuario: soporte  clave: $CLAVE_SOPORTE"
