@@ -201,7 +201,7 @@ export default function Estadisticas() {
         </div>
 
         <section className="st-card">
-          <header><h2>Visitas por día</h2><span>Pasa el mouse o usa las flechas para ver cada día</span></header>
+          <header><h2>Visitas por día</h2><span>Toca o pasa el mouse sobre el gráfico para ver cada día</span></header>
           <GraficoVisitas datos={actual} />
           <details className="st-tabla">
             <summary>Ver datos en tabla</summary>

@@ -218,7 +218,8 @@ export default function Agenda({ onCertificado }) {
           const iso = isoDias[i]
           const n = porDia(iso).length
           return (
-            <button key={iso} className={`ag-pill ${iso === diaSel ? 'is-on' : ''} ${iso === hoy ? 'is-hoy' : ''}`} onClick={() => setDiaMovil(iso)}>
+            <button key={iso} className={`ag-pill ${iso === diaSel ? 'is-on' : ''} ${iso === hoy ? 'is-hoy' : ''}`} onClick={() => setDiaMovil(iso)}
+              aria-label={`${DIAS_LARGO[i]} ${d.getDate()}: ${n ? `${n} trabajo${n > 1 ? 's' : ''}` : 'sin trabajos'}`} aria-pressed={iso === diaSel}>
               <span>{DIAS[i]}</span><b>{d.getDate()}</b><i>{n ? '•'.repeat(Math.min(n, 3)) : ' '}</i>
             </button>
           )
