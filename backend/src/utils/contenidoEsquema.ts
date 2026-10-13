@@ -43,6 +43,7 @@ export const SECCIONES: Seccion[] = [
       { clave: "tiktok", etiqueta: "Link de TikTok", tipo: "url", max: 200, ayuda: "Déjalo vacío para no mostrar TikTok." },
       { clave: "facebook", etiqueta: "Link de Facebook", tipo: "url", max: 200, ayuda: "Déjalo vacío para no mostrar Facebook." },
       { clave: "direccion", etiqueta: "Dirección", tipo: "texto", max: 120, requerido: true, ayuda: "El mapa de la página se arma con esta dirección." },
+      { clave: "ubicacion", etiqueta: "Ubicación dentro del mall", tipo: "texto", max: 80, placeholder: "Nivel -1 · Sector Hotel", ayuda: "Se muestra bajo la dirección para que el cliente llegue directo." },
       { clave: "horario", etiqueta: "Horario", tipo: "texto", max: 80 },
       { clave: "horarioNota", etiqueta: "Nota del horario", tipo: "textoLargo", max: 200 },
     ],

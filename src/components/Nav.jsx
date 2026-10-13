@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Logo from './Logo.jsx'
 import { waLink } from '../data.js'
 import { Icon, faWhatsapp } from '../icons.js'
 
@@ -31,7 +30,7 @@ export default function Nav() {
   return (
     <header className={`nav ${solido ? 'nav--solid' : ''} ${abierto ? 'nav--open' : ''}`}>
       <a href="#top" className="nav-brand" onClick={(e) => irA(e, '#top')}>
-        <Logo /> <span>VP UNICARS</span>
+        <img className="marca" src="/logo-vp.webp" alt="VP Unicars" width="360" height="171" />
       </a>
       <nav className="nav-links">
         {links.map(([h, t]) => (

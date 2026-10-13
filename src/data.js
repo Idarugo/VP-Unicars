@@ -8,6 +8,7 @@ const baseNegocio = {
   tiktok: 'https://www.tiktok.com/@vpunicars',
   facebook: 'https://www.facebook.com/profile.php?id=100064194631893',
   direccion: 'Mall Plaza América, Rancagua',
+  ubicacion: 'Nivel -1 · Sector Hotel',
   mapa: 'https://www.google.com/maps?q=Mall+Plaza+Am%C3%A9rica+Rancagua&output=embed',
   mapaLink: 'https://maps.google.com/?q=Mall+Plaza+America+Rancagua',
   horario: '10:00 a 18:00 aprox.',
@@ -192,7 +193,7 @@ const baseFaqs = [
   },
   {
     q: '¿Cómo agendo?',
-    a: 'Escríbenos por WhatsApp o por DM en Instagram y coordinamos tu hora en Mall Plaza América, Rancagua.',
+    a: 'Escríbenos por WhatsApp o por DM en Instagram y coordinamos tu hora en Mall Plaza América, Rancagua (nivel -1, sector Hotel).',
   },
 ]
 

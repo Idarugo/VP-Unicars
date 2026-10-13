@@ -45,7 +45,7 @@ function avisoEncargado(p, t) {
 }
 function avisoCliente(t) {
   const auto = autoTexto(t)
-  const lugar = t.lugar === 'domicilio' ? `Vamos a domicilio${t.direccion ? ` (${t.direccion})` : ''}` : '📍 Mall Plaza América, Rancagua'
+  const lugar = t.lugar === 'domicilio' ? `Vamos a domicilio${t.direccion ? ` (${t.direccion})` : ''}` : '📍 Mall Plaza América, nivel -1, sector Hotel (Rancagua)'
   return `Hola ${t.cliente.split(' ')[0]}! Te confirmamos tu hora en VP Unicars: ${diaTexto(t.fecha)} a las ${t.hora} para ${t.servicio}${auto ? ` de tu ${auto}` : ''}. ${lugar}. ¡Te esperamos! 🚘`
 }
 const abrirWa = (tel, texto) => window.open(`https://wa.me/${telWa(tel)}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener')

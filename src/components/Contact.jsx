@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { negocio, waLink } from '../data.js'
-import Logo from './Logo.jsx'
 import { Icon, faLocationDot, faWhatsapp, faInstagram, faTiktok, faFacebook, faClock } from '../icons.js'
 
 export default function Contact() {
@@ -42,7 +41,7 @@ export default function Contact() {
 
       <div className="contact-grid">
         <div className="contact-info">
-          <div><span className="muted">Dónde</span><a href={negocio.mapaLink} target="_blank" rel="noreferrer"><Icon icon={faLocationDot} className="ico" /> {negocio.direccion}</a></div>
+          <div><span className="muted">Dónde</span><a href={negocio.mapaLink} target="_blank" rel="noreferrer"><Icon icon={faLocationDot} className="ico" /> {negocio.direccion}</a>{negocio.ubicacion && <small className="muted">{negocio.ubicacion}</small>}</div>
           <div><span className="muted">WhatsApp</span><a href={waLink()} target="_blank" rel="noreferrer"><Icon icon={faWhatsapp} className="ico" /> +56 9 3023 5194</a></div>
           <div><span className="muted">Horario</span><span className="contact-txt"><Icon icon={faClock} className="ico" /> {negocio.horario}</span><small className="muted">{negocio.horarioNota}</small></div>
           <div><span className="muted">Instagram</span><a href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} className="ico" /> @vp_unicars</a></div>
@@ -55,7 +54,7 @@ export default function Contact() {
       </div>
 
       <footer className="footer">
-        <div className="footer-brand"><Logo /> <span>VP UNICARS</span></div>
+        <div className="footer-brand"><img className="marca" src="/logo-vp.webp" alt="VP Unicars" width="360" height="171" loading="lazy" /></div>
         <div className="footer-social">
           <a href={negocio.instagram} target="_blank" rel="noreferrer" aria-label="Instagram"><Icon icon={faInstagram} /></a>
           {negocio.tiktok && <a href={negocio.tiktok} target="_blank" rel="noreferrer" aria-label="TikTok"><Icon icon={faTiktok} /></a>}
@@ -63,6 +62,7 @@ export default function Contact() {
           <a href={waLink()} target="_blank" rel="noreferrer" aria-label="WhatsApp"><Icon icon={faWhatsapp} /></a>
           <a href={negocio.mapaLink} target="_blank" rel="noreferrer" aria-label="Ubicación"><Icon icon={faLocationDot} /></a>
         </div>
+        <p className="footer-lema">Protección y estilo en un solo lugar</p>
         <p className="muted">Polarizados • PPF • Vinilos • Láminas de Seguridad — Rancagua, Chile</p>
         <p className="muted small">© {new Date().getFullYear()} VP Unicars</p>
       </footer>

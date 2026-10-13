@@ -91,8 +91,8 @@ export default function HeroVideo({ listo }) {
           <span className="row"><Split text="VP" /> <span className="hv-stroke"><Split text="UNICARS" /></span></span>
         </h1>
         <p className="hv-sub">
-          Polarizados, PPF, vinilos, audio y sistemas de seguridad.<br />
-          <strong>Transformamos y protegemos</strong> autos, hogares y oficinas.
+          <strong>Protección y estilo</strong> en un solo lugar.<br />
+          Polarizados, PPF, vinilos, audio y sistemas de seguridad para autos, hogares y oficinas.
         </p>
         <div className="hv-ctas">
           <a className="btn" href={waLink()} target="_blank" rel="noreferrer"><Icon icon={faWhatsapp} />&nbsp; Agenda tu hora</a>
