@@ -77,13 +77,15 @@ vuelve a pedir esos datos con su propio token, así cada rol sigue viendo solo l
 
 ## Producción (lista para la puesta en marcha)
 
-**Recomendado: todo en un VPS** (página, panel, backend, MySQL y fotos). Guía e instalador automático en
-[`deploy/README.md`](deploy/README.md). Los pasos de abajo son el detalle de lo que hace el instalador.
+**En producción desde el 13/10/2026: https://vpunicars.cl** — todo en un VPS Hostinger KVM 1 (página, panel,
+backend, MySQL y fotos), DNS en Cloudflare (registros A en "Solo DNS", sin proxy, por el tiempo real) y HTTPS de
+Let's Encrypt con renovación automática. Guía e instalador en [`deploy/README.md`](deploy/README.md); publicar
+cambios: `sudo -u vp /var/www/vpunicars/deploy/actualizar.sh`. Los pasos de abajo son el detalle del instalador.
 
 1. **Base de datos**: MySQL 8 / MariaDB 10.4+. Crear un usuario solo para la app (nunca `root`):
    ```sql
    CREATE USER 'vp_app'@'localhost' IDENTIFIED BY 'una-clave-larga-y-aleatoria';
-   GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX ON vp_unicars.* TO 'vp_app'@'localhost';
+   GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON vp_unicars.* TO 'vp_app'@'localhost';
    ```
 2. **`backend/.env` de producción** (nunca se sube a git):
    - `JWT_SECRET` nuevo: `openssl rand -hex 32`
@@ -91,10 +93,11 @@ vuelve a pedir esos datos con su propio token, así cada rol sigue viendo solo l
    - `DB_USER=vp_app` y su clave; claves iniciales nuevas en `SEED_*_CLAVE`
 3. **Backend**: `npm ci && npm run build && npm run db:init && npm start` (con pm2 o el gestor del hosting).
    `db:init` también aplica las migraciones. El usuario admin inicial debe cambiar su clave al primer ingreso.
-4. **Vercel**: variable `VITE_API_URL=https://api.vpunicars.cl/api`. Las cabeceras de seguridad (CSP, HSTS,
-   anti-clickjacking) están en `vercel.json`; se prueban en local con `npm run build && npm run preview`.
+4. **nginx**: sirve la página y pasa `/api` y `/uploads` al backend; las cabeceras de seguridad (CSP, HSTS,
+   anti-clickjacking) están en `deploy/seguridad-headers.conf`. La antigua demo de Vercel solo redirige a vpunicars.cl
+   (`vercel.json`).
 5. **Datos de prueba**: `npm run db:limpiar` (muestra qué borra) y `npm run db:limpiar -- --confirmar`.
-6. **Respaldos**: además del botón de Mantención, programar un `mysqldump` diario y respaldar `backend/uploads/fotos`.
+6. **Respaldos**: `deploy/respaldo.sh` corre todos los días a las 3:30 (BD + fotos, 14 días en `/var/backups/vpunicars`).
 
 ### Seguridad incluida
 
