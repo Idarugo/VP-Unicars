@@ -3,7 +3,7 @@
 export const empresa = {
   nombre: 'VP Unicars',
   rut: '77.535.813-0',
-  direccion: 'Av. Nueva Einstein 290, Rancagua',
+  direccion: 'Av. Alberto Einstein 290, Rancagua',
   correo: 'vpunicarscl@gmail.com',
   telefono: '+56 9 3023 5194',
 }
