@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { aplicarContenido } from './data.js'
 import { publicService } from './services/publicService.js'
 import { iniciarMedicion } from './lib/medicion.js'
+import './fuentes.css'
 import './styles.css'
 
 const dibujar = () => ReactDOM.createRoot(document.getElementById('root')).render(<App />)

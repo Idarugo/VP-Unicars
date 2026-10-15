@@ -7,7 +7,7 @@ export default function Manifesto() {
   const root = useRef(null)
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.manifesto .w', { opacity: 0.12 }, {
+      gsap.fromTo('.manifesto .w', { opacity: 0.45 }, {
         opacity: 1, stagger: 0.05, ease: 'none',
         scrollTrigger: { trigger: root.current, start: 'top 70%', end: 'bottom 60%', scrub: true },
       })

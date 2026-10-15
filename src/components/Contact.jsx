@@ -46,7 +46,7 @@ export default function Contact() {
           <div><span className="muted">Horario</span><span className="contact-txt"><Icon icon={faClock} className="ico" /> {negocio.horario}</span><small className="muted">{negocio.horarioNota}</small></div>
           <div><span className="muted">Instagram</span><a href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} className="ico" /> @vp_unicars</a></div>
           {negocio.tiktok && <div><span className="muted">TikTok</span><a href={negocio.tiktok} target="_blank" rel="noreferrer"><Icon icon={faTiktok} className="ico" /> {negocio.tiktok.match(/@[\w.]+/)?.[0] || 'TikTok'}</a></div>}
-          {negocio.facebook && <div><span className="muted">Facebook</span><a href={negocio.facebook} target="_blank" rel="noreferrer"><Icon icon={faFacebook} className="ico" /> VP Unicars</a></div>}
+          {negocio.facebook && <div><span className="muted">Facebook</span><a href={negocio.facebook} target="_blank" rel="noreferrer" aria-label="Facebook de VP Unicars"><Icon icon={faFacebook} className="ico" /> VP Unicars</a></div>}
         </div>
         <div className="contact-map">
           <iframe title="Mapa VP Unicars" src={negocio.mapa} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
