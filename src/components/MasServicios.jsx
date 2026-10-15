@@ -45,7 +45,7 @@ export default function MasServicios() {
             </div>
             <h3>{s.titulo}</h3>
             <p>{s.texto}</p>
-            <a className="service-link" href={waLink(`Hola VP Unicars! Quiero cotizar ${s.titulo.toLowerCase()} 🚘`)} target="_blank" rel="noreferrer">
+            <a className="service-link" href={waLink(`Hola VP Unicars! Quiero cotizar ${s.titulo.toLowerCase()} 🚘`)} target="_blank" rel="noreferrer" aria-label={`Cotizar ${s.titulo} por WhatsApp`}>
               <Icon icon={faWhatsapp} /> Cotizar <span><Icon icon={faArrowRight} /></span>
             </a>
           </article>

@@ -77,7 +77,7 @@ export default function HeroVideo({ listo }) {
     if (!listo) return
     const ctx = gsap.context(() => {
       gsap.timeline({ defaults: { ease: 'expo.out' } })
-        .fromTo('.hv-canvas', { scale: 1.15, opacity: 0 }, { scale: 1, opacity: 1, duration: 2.2 }, 0)
+        .fromTo('.hv-canvas', { scale: 1.15, opacity: 0.35 }, { scale: 1, opacity: 1, duration: 1.4 }, 0)
         .from('.hv-title .ch', { yPercent: 120, opacity: 0, duration: 1.3, stagger: 0.04 }, 0.4)
         .from('.hv-kicker, .hv-ctas > *, .hv-scroll', { y: 30, opacity: 0, duration: 1, stagger: 0.08 }, 0.8)
         .from('.hv-sub', { y: 24, duration: 1 }, 0.85) // solo se desliza: sin desaparecer, para que se pinte desde el primer momento

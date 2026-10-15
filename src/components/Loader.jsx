@@ -10,7 +10,7 @@ export default function Loader({ onDone }) {
     // La presentación completa solo la primera vez en la visita; al volver a la página es casi instantánea
     let vista = false
     try { vista = sessionStorage.getItem('vp-intro') === '1'; sessionStorage.setItem('vp-intro', '1') } catch { /* sin almacenamiento */ }
-    const k = vista ? 0.35 : 0.7
+    const k = vista ? 0.3 : 0.5
     const ctx = gsap.context(() => {
       const contador = { v: 0 }
       const tl = gsap.timeline({ onComplete: onDone })
