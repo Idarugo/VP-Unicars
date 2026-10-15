@@ -32,23 +32,7 @@
     <link rel="preload" href="/api/public/contenido" as="fetch" crossorigin />
   </head>
   <body>
-    <div id="root">
-      <!-- Primera imagen de la página en HTML: se dibuja al instante mientras carga el JavaScript.
-           React la reemplaza por la portada real (mismo diseño). Si el JavaScript fallara,
-           la cortina negra se quita sola a los 6 s y queda el texto visible. -->
-      <div class="loader loader--estatico" aria-hidden="true">
-        <div class="loader-panel" style="left:0%"></div><div class="loader-panel" style="left:20%"></div><div class="loader-panel" style="left:40%"></div><div class="loader-panel" style="left:60%"></div><div class="loader-panel" style="left:80%"></div>
-      </div>
-      <section class="hv">
-        <div class="hv-shade"></div>
-        <div class="hv-copy">
-          <p class="hv-kicker">Rancagua · Mall Plaza América</p>
-          <h1 class="hv-title"><span class="row">VP <span class="hv-stroke">UNICARS</span></span></h1>
-          <p class="hv-sub"><strong>Protección y estilo</strong> en un solo lugar.<br />Polarizados, PPF, vinilos, audio y sistemas de seguridad para autos, hogares y oficinas.</p>
-          <div class="hv-ctas"><a class="btn" href="https://wa.me/56930235194">Agenda tu hora</a> <a class="btn btn--ghost" href="#servicios">Ver servicios</a></div>
-        </div>
-      </section>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

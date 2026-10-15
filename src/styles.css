@@ -79,8 +79,6 @@ img { display: block; max-width: 100%; }
 
 /* ---------- Loader ---------- */
 .loader { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; }
-.loader--estatico { animation: vp-sin-js 0s 6s forwards; }
-@keyframes vp-sin-js { to { visibility: hidden; } }
 .loader-panel { position: absolute; top: 0; width: 20.2%; height: 100%; background: #000; }
 .loader-inner { position: relative; display: grid; gap: 22px; width: min(320px, 70vw); }
 .loader .logo { width: 140px; margin: 0 auto; }
