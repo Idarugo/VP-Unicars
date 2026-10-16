@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /verificar
+
+Sitemap: https://vpunicars.cl/sitemap.xml
