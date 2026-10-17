@@ -35,6 +35,19 @@
         "4173"
       ],
       "port": 4173
+    },
+    {
+      "name": "vp-backend-guia",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "DB_NAME=vp_guia",
+        "npm",
+        "--prefix",
+        "backend",
+        "run",
+        "dev"
+      ],
+      "port": 3001
     }
   ]
 }
