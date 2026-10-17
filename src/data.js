@@ -168,6 +168,9 @@ const basePolarizado = {
 // Videos de la pantalla /videos (TV del local)
 const baseVideosTv = [
   { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
+  { id: 'tv-asi-trabajamos', titulo: 'Así trabajamos · procesos reales', video: '/tv/vp-asi-trabajamos.mp4' },
+  { id: 'tv-elige-tu-polarizado', titulo: 'Elige tu polarizado', video: '/tv/vp-elige-tu-polarizado.mp4' },
+  { id: 'tv-clientes-felices', titulo: 'Clientes felices · reseñas', video: '/tv/vp-clientes-felices.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
