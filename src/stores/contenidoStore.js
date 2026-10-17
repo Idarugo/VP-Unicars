@@ -9,6 +9,7 @@ export const useContenidoStore = create((set, get) => ({
   guardado: null, // lo que está en la BD (solo las secciones cambiadas)
   versiones: [],
   fotos: [],
+  videos: [],
   loading: false,
   saving: false,
   subiendo: false,
@@ -17,10 +18,10 @@ export const useContenidoStore = create((set, get) => ({
   fetchTodo: async () => {
     set({ loading: true, error: null })
     try {
-      const [e, c, v, f] = await Promise.all([
-        contenidoService.getEsquema(), contenidoService.get(), contenidoService.getVersiones(), contenidoService.getFotos(),
+      const [e, c, v, f, vid] = await Promise.all([
+        contenidoService.getEsquema(), contenidoService.get(), contenidoService.getVersiones(), contenidoService.getFotos(), contenidoService.getVideos(),
       ])
-      set({ esquema: e.data || [], guardado: c.data || {}, versiones: v.data || [], fotos: f.data || [], loading: false })
+      set({ esquema: e.data || [], guardado: c.data || {}, versiones: v.data || [], fotos: f.data || [], videos: vid.data || [], loading: false })
     } catch (e) {
       set({ loading: false, error: mensaje(e, 'Error al cargar el contenido') })
     }
@@ -49,6 +50,24 @@ export const useContenidoStore = create((set, get) => ({
   guardar: (contenido) => get().accion(() => contenidoService.update(contenido), 'No se pudo guardar el contenido'),
   restaurarOriginal: () => get().accion(() => contenidoService.restaurar(), 'No se pudo restaurar el contenido'),
   restaurarVersion: (id) => get().accion(() => contenidoService.restaurarVersion(id), 'No se pudo restaurar la versión'),
+
+  subirVideo: async (archivo) => {
+    set({ subiendo: true })
+    try {
+      const r = await contenidoService.subirVideo(archivo)
+      const v = await contenidoService.getVideos()
+      set({ videos: v.data || [], subiendo: false })
+      return { ok: true, url: r.data.url }
+    } catch (e) {
+      set({ subiendo: false })
+      return { ok: false, message: mensaje(e, 'No se pudo subir el video') }
+    }
+  },
+  eliminarVideo: async (nombre) => {
+    const r = await get().accion(() => contenidoService.eliminarVideo(nombre), 'No se pudo eliminar el video')
+    if (r.ok) { const v = await contenidoService.getVideos().catch(() => null); if (v) set({ videos: v.data || [] }) }
+    return r
+  },
 
   subirFoto: async (archivo) => {
     set({ subiendo: true })

@@ -3,7 +3,7 @@
 // Para que el cliente pueda editar algo nuevo basta con agregar el campo o la sección aquí
 // (y que el componente de la página lo use).
 
-export type TipoCampo = "texto" | "textoLargo" | "numero" | "tags" | "foto" | "color" | "opcion" | "booleano" | "url" | "telefono";
+export type TipoCampo = "texto" | "textoLargo" | "numero" | "tags" | "foto" | "video" | "color" | "opcion" | "booleano" | "url" | "telefono";
 
 export interface Campo {
   clave: string;
@@ -46,6 +46,10 @@ export const SECCIONES: Seccion[] = [
       { clave: "ubicacion", etiqueta: "Ubicación dentro del mall", tipo: "texto", max: 80, placeholder: "Nivel -1 · Sector Hotel", ayuda: "Se muestra bajo la dirección para que el cliente llegue directo." },
       { clave: "horario", etiqueta: "Horario", tipo: "texto", max: 80 },
       { clave: "horarioNota", etiqueta: "Nota del horario", tipo: "textoLargo", max: 200 },
+      { clave: "resenaUrl", etiqueta: "Link para dejar reseña en Google", tipo: "url", max: 300, ayuda: "El botón “Dejar mi reseña” abre este link (ficha de Google del negocio)." },
+      { clave: "googleUrl", etiqueta: "Link de la ficha en Google Maps", tipo: "url", max: 300, ayuda: "Para el botón “Ver todas en Google”." },
+      { clave: "calificacion", etiqueta: "Calificación en Google", tipo: "numero", min: 0, max: 5, ayuda: "Ej: 5 o 4,9. Se actualiza sola si está conectada la API de Google." },
+      { clave: "totalResenas", etiqueta: "Cantidad de reseñas en Google", tipo: "numero", min: 0, max: 100000 },
     ],
   },
   {
@@ -144,20 +148,31 @@ export const SECCIONES: Seccion[] = [
   },
   {
     clave: "niveles",
-    titulo: "Niveles de polarizado",
-    descripcion: "Las tarjetas comparativas (Estándar, Nanocarbon, Nanocerámico).",
+    titulo: "Tipos de polarizado",
+    descripcion: "Las tarjetas de Estándar, Nanocarbón y Nanocerámico con sus datos técnicos.",
     tipo: "lista",
     maxItems: 5,
-    nombreItem: "nivel",
+    nombreItem: "tipo",
     titular: "nombre",
     campos: [
-      { clave: "nombre", etiqueta: "Nombre", tipo: "texto", max: 40, requerido: true },
-      { clave: "desc", etiqueta: "Descripción", tipo: "textoLargo", max: 200 },
-      { clave: "calor", etiqueta: "Rechazo de calor (0-100)", tipo: "numero", min: 0, max: 100 },
-      { clave: "uv", etiqueta: "Protección UV (0-100)", tipo: "numero", min: 0, max: 100 },
-      { clave: "claridad", etiqueta: "Claridad (0-100)", tipo: "numero", min: 0, max: 100 },
-      { clave: "durabilidad", etiqueta: "Durabilidad (0-100)", tipo: "numero", min: 0, max: 100 },
-      { clave: "destacado", etiqueta: "Marcar como recomendado", tipo: "booleano" },
+      { clave: "nombre", etiqueta: "Nombre", tipo: "texto", max: 40, requerido: true, placeholder: "Ej: Nanocerámico" },
+      { clave: "nivel", etiqueta: "Nivel", tipo: "texto", max: 20, placeholder: "Básico, Intermedio, Premium" },
+      { clave: "desc", etiqueta: "Descripción corta", tipo: "textoLargo", max: 200 },
+      { clave: "uv", etiqueta: "Protección UV (%)", tipo: "numero", min: 0, max: 100, ayuda: "Déjalo vacío si no aplica." },
+      { clave: "ir", etiqueta: "Rechazo infrarrojo / calor (%)", tipo: "numero", min: 0, max: 100, ayuda: "Déjalo vacío si no aplica." },
+      { clave: "beneficios", etiqueta: "Beneficios", tipo: "tags", max: 40, ayuda: "Escribe y presiona Enter. Máximo 8." },
+      { clave: "foto", etiqueta: "Foto", tipo: "foto", ayuda: FOTO_AYUDA },
+      { clave: "destacado", etiqueta: "Marcar como “Más elegido”", tipo: "booleano" },
+    ],
+  },
+  {
+    clave: "polarizado",
+    titulo: "Tonos y garantías del polarizado",
+    descripcion: "Los tonos disponibles y los sellos que aparecen bajo los tipos de polarizado.",
+    tipo: "objeto",
+    campos: [
+      { clave: "tonos", etiqueta: "Tonos disponibles (% de luz que pasa)", tipo: "tags", max: 4, ayuda: "Solo el número. Ej: 5, 20, 35, 50, 70." },
+      { clave: "sellos", etiqueta: "Sellos", tipo: "tags", max: 30, ayuda: "Ej: Material americano, Instalación profesional." },
     ],
   },
   {
@@ -171,6 +186,34 @@ export const SECCIONES: Seccion[] = [
     campos: [
       { clave: "t", etiqueta: "Título", tipo: "texto", max: 40, requerido: true },
       { clave: "d", etiqueta: "Descripción", tipo: "textoLargo", max: 200 },
+    ],
+  },
+  {
+    clave: "resenas",
+    titulo: "Reseñas de clientes",
+    descripcion: "El carrusel de reseñas. Copia aquí las reseñas de Google (si la API de Google está conectada, se muestran solas).",
+    tipo: "lista",
+    maxItems: 40,
+    nombreItem: "reseña",
+    titular: "autor",
+    campos: [
+      { clave: "autor", etiqueta: "Nombre", tipo: "texto", max: 60, requerido: true },
+      { clave: "texto", etiqueta: "Reseña", tipo: "textoLargo", max: 600, requerido: true },
+      { clave: "estrellas", etiqueta: "Estrellas (1 a 5)", tipo: "numero", min: 1, max: 5 },
+      { clave: "fecha", etiqueta: "Fecha", tipo: "texto", max: 30, placeholder: "Ej: ago 2026" },
+    ],
+  },
+  {
+    clave: "videosTv",
+    titulo: "Videos de la TV (/videos)",
+    descripcion: "Los videos que se repiten en vpunicars.cl/videos, para la televisión del local. Se reproducen en este orden.",
+    tipo: "lista",
+    maxItems: 30,
+    nombreItem: "video",
+    titular: "titulo",
+    campos: [
+      { clave: "titulo", etiqueta: "Nombre (solo para ordenarlos)", tipo: "texto", max: 60, requerido: true },
+      { clave: "video", etiqueta: "Video", tipo: "video", requerido: true, ayuda: "MP4 horizontal (16:9) para la TV. Se puede subir desde aquí." },
     ],
   },
   {
@@ -190,6 +233,7 @@ export const SECCIONES: Seccion[] = [
 
 /* ------------------------------ Validación ------------------------------ */
 const FOTO_VALIDA = /^\/(fotos|uploads\/fotos)\/[\w.-]+$/;
+const VIDEO_VALIDO = /^\/(tv|uploads\/videos)\/[\w.-]+$/;
 const COLOR_VALIDO = /^#[0-9a-fA-F]{6}$/;
 const URL_VALIDA = /^https:\/\/[^\s"'<>]+$/;
 
@@ -206,6 +250,8 @@ const limpiarCampo = (campo: Campo, v: unknown): unknown => {
       return Array.isArray(v) ? v.map((t) => String(t ?? "").trim().slice(0, campo.max ?? 30)).filter(Boolean).slice(0, 8) : [];
     case "foto":
       return FOTO_VALIDA.test(String(v ?? "")) ? String(v) : "";
+    case "video":
+      return VIDEO_VALIDO.test(String(v ?? "")) ? String(v) : "";
     case "color":
       return COLOR_VALIDO.test(String(v ?? "")) ? String(v) : "";
     case "url":

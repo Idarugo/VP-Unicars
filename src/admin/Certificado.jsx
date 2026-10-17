@@ -33,13 +33,13 @@ function AutoVidrios({ d, t, l }) {
       {/* parabrisas */}
       <path d="M212 30 Q238 75 212 120 L190 112 Q204 75 190 38 Z" fill="rgba(150,185,215,.55)" />
       {/* luneta */}
-      <path d="M78 34 Q60 75 78 116 L96 108 Q86 75 96 42 Z" fill={tinte(l)} stroke="#ffc800" strokeWidth="1.5" />
+      <path d="M78 34 Q60 75 78 116 L96 108 Q86 75 96 42 Z" fill={tinte(l)} stroke="#ffe600" strokeWidth="1.5" />
       {/* laterales delanteros */}
-      <path d="M150 22 L196 26 L186 38 L150 36 Z" fill={tinte(d)} stroke="#ffc800" strokeWidth="1.5" />
-      <path d="M150 128 L196 124 L186 112 L150 114 Z" fill={tinte(d)} stroke="#ffc800" strokeWidth="1.5" />
+      <path d="M150 22 L196 26 L186 38 L150 36 Z" fill={tinte(d)} stroke="#ffe600" strokeWidth="1.5" />
+      <path d="M150 128 L196 124 L186 112 L150 114 Z" fill={tinte(d)} stroke="#ffe600" strokeWidth="1.5" />
       {/* laterales traseros */}
-      <path d="M100 26 L146 22 L146 36 L106 38 Z" fill={tinte(t)} stroke="#ffc800" strokeWidth="1.5" />
-      <path d="M100 124 L146 128 L146 114 L106 112 Z" fill={tinte(t)} stroke="#ffc800" strokeWidth="1.5" />
+      <path d="M100 26 L146 22 L146 36 L106 38 Z" fill={tinte(t)} stroke="#ffe600" strokeWidth="1.5" />
+      <path d="M100 124 L146 128 L146 114 L106 112 Z" fill={tinte(t)} stroke="#ffe600" strokeWidth="1.5" />
       {/* techo */}
       <rect x="98" y="42" width="90" height="66" rx="10" fill="#1b1b1f" />
       {/* espejos y focos */}

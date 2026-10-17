@@ -24,7 +24,7 @@ export function crearEscena(canvas, { movil = false } = {}) {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
 
   // Luces de acento (amarilla y fría) para reflejos tipo estudio de autos
-  const key = new THREE.PointLight(0xffc800, 60, 40)
+  const key = new THREE.PointLight(0xffe600, 60, 40)
   key.position.set(-6, 4, 6)
   const rim = new THREE.PointLight(0x7fb8ff, 40, 40)
   rim.position.set(7, -2, 4)
@@ -65,7 +65,7 @@ export function crearEscena(canvas, { movil = false } = {}) {
     new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }),
     N,
   )
-  const colA = new THREE.Color(0xffc800).multiplyScalar(2.2)
+  const colA = new THREE.Color(0xffe600).multiplyScalar(2.2)
   const colB = new THREE.Color(0xffffff).multiplyScalar(1.6)
   const pos = []
   const dummy = new THREE.Object3D()

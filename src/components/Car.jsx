@@ -11,7 +11,7 @@ const Car = forwardRef(function Car({ id = 'car', className = '' }, ref) {
           <stop offset="1" stopColor="#050506" />
         </linearGradient>
         <linearGradient id={`${id}-paint`} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" style={{ stopColor: 'var(--wrap-a, #FFC800)', transition: 'stop-color .8s' }} />
+          <stop offset="0" style={{ stopColor: 'var(--wrap-a, #FFE600)', transition: 'stop-color .8s' }} />
           <stop offset="1" style={{ stopColor: 'var(--wrap-b, #ff8a00)', transition: 'stop-color .8s' }} />
         </linearGradient>
         <linearGradient id={`${id}-glass`} x1="0" y1="0" x2="1" y2="1">
@@ -74,7 +74,7 @@ const Car = forwardRef(function Car({ id = 'car', className = '' }, ref) {
           {[0, 72, 144, 216, 288].map((a) => (
             <rect key={a} x={cx - 4} y="266" width="8" height="40" rx="3" fill="#8a8a94" transform={`rotate(${a} ${cx} 306)`} />
           ))}
-          <circle cx={cx} cy="306" r="10" fill="#FFC800" />
+          <circle cx={cx} cy="306" r="10" fill="#FFE600" />
         </g>
       ))}
     </svg>

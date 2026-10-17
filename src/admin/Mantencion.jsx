@@ -167,7 +167,7 @@ const ROLES = {
   tecnico: { nombre: 'Técnico', permisos: ['Solo su agenda', 'Ver y emitir certificados'] },
   soporte: { nombre: 'Soporte técnico', permisos: ['Todo lo anterior', 'Mantención', 'Usuarios', 'Respaldos'] },
 }
-const COLORES = ['#ffc800', '#38bdf8', '#c084fc', '#34d399', '#fb7185', '#f97316']
+const COLORES = ['#ffe600', '#38bdf8', '#c084fc', '#34d399', '#fb7185', '#f97316']
 
 function Usuarios() {
   const { usuarios, saving, fetchUsuarios, crearUsuario, actualizarUsuario, setEstadoUsuario, resetClave } = useMantencionStore()

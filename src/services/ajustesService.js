@@ -16,4 +16,7 @@ export const contenidoService = {
   getFotos: () => apiClient.get('/contenido/fotos'),
   subirFoto: (archivo) => apiClient.upload('/contenido/fotos', archivo),
   eliminarFoto: (nombre) => apiClient.delete(`/contenido/fotos/${encodeURIComponent(nombre)}`),
+  getVideos: () => apiClient.get('/contenido/videos'),
+  subirVideo: (archivo) => apiClient.upload('/contenido/videos', archivo),
+  eliminarVideo: (nombre) => apiClient.delete(`/contenido/videos/${encodeURIComponent(nombre)}`),
 }

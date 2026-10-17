@@ -4,7 +4,8 @@ import { requirePermission } from "../middlewares/permissionMiddleware";
 import express from "express";
 import { getConfiguracion, restaurarConfiguracion, updateConfiguracion } from "../controllers/ajustesController";
 import {
-  eliminarFoto, getContenido, getEsquema, getFotos, getVersiones, restaurarContenido, restaurarVersion, subirFoto, updateContenido,
+  eliminarFoto, eliminarVideo, getContenido, getEsquema, getFotos, getVideos, getVersiones, restaurarContenido, restaurarVersion, subirFoto,
+  subirVideo, updateContenido,
 } from "../controllers/contenidoController";
 
 export const configuracionRoutes = Router();
@@ -25,3 +26,6 @@ contenidoRoutes.post(
   express.raw({ type: ["image/jpeg", "image/png", "image/webp"], limit: "6mb" }), subirFoto,
 );
 contenidoRoutes.delete("/fotos/:nombre", authMiddleware, requirePermission("contenido.editar"), eliminarFoto);
+contenidoRoutes.get("/videos", authMiddleware, requirePermission("contenido.editar"), getVideos);
+contenidoRoutes.post("/videos", authMiddleware, requirePermission("contenido.editar"), subirVideo);
+contenidoRoutes.delete("/videos/:nombre", authMiddleware, requirePermission("contenido.editar"), eliminarVideo);

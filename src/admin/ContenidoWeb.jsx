@@ -21,7 +21,7 @@ const vacioPara = (campo) => {
   if (campo.tipo === 'booleano') return false
   if (campo.tipo === 'numero') return null
   if (campo.tipo === 'opcion') return campo.opciones?.[0]?.valor ?? ''
-  if (campo.tipo === 'color') return '#ffc800'
+  if (campo.tipo === 'color') return '#ffe600'
   return ''
 }
 const normalizarObjeto = (seccion, obj = {}) =>
@@ -103,6 +103,56 @@ function SelectorFotos({ actual, onElegir, onClose }) {
   )
 }
 
+/* ------------------------------- Selector de videos (TV) ------------------------------- */
+const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4']
+const nombreVideo = (u) => u.split('/').pop()
+
+function SelectorVideos({ actual, onElegir, onClose }) {
+  const { videos, subiendo, subirVideo, eliminarVideo } = useContenidoStore()
+  const archivo = useRef(null)
+  const subir = async (f) => {
+    if (!f) return
+    if (!/^video\/(mp4|webm|quicktime)$/.test(f.type)) return alertaError('Formato no permitido', 'El video debe ser MP4 o WEBM.')
+    if (f.size > 400 * 1024 * 1024) return alertaError('Video muy pesado', 'El máximo es 400 MB.')
+    const r = await subirVideo(f)
+    if (!r.ok) return alertaError('No se pudo subir', r.message)
+    exito('Video subido')
+    onElegir(r.url)
+  }
+  const borrar = async (v) => {
+    if (!(await confirmar({ titulo: '¿Eliminar este video?', text: v.nombre, confirmar: 'Sí, eliminar', peligro: true }))) return
+    const r = await eliminarVideo(v.nombre)
+    if (r.ok) exito('Video eliminado'); else alertaError('No se pudo eliminar', r.message)
+  }
+  const Item = ({ url, v }) => (
+    <li className={`cw-video-item ${actual === url ? 'is-on' : ''}`}>
+      <video src={urlFoto(url)} muted preload="metadata" />
+      <span>{v ? `${Math.round(v.tamano / 1048576)} MB` : 'Incluido en la página'}</span>
+      <button type="button" className="adm-btn" onClick={() => onElegir(url)}>{actual === url ? 'Elegido' : 'Elegir'}</button>
+      {v && <button type="button" className="adm-icon-btn adm-icon-btn--danger" title="Eliminar video" onClick={() => borrar(v)}><Icon icon={faTrash} /></button>}
+    </li>
+  )
+  return (
+    <div className="ag-modal-bg" onClick={onClose}>
+      <div className="ag-modal cw-fotos-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true"
+        onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); subir(e.dataTransfer.files?.[0]) }}>
+        <div className="ag-modal-head">
+          <h2>Elegir video</h2>
+          <button className="adm-icon-btn" onClick={onClose} aria-label="Cerrar"><Icon icon={faXmark} /></button>
+        </div>
+        <button type="button" className="cw-drop" onClick={() => archivo.current.click()} disabled={subiendo}>
+          <Icon icon={faUpload} /> {subiendo ? 'Subiendo… (puede tardar unos minutos)' : 'Subir video nuevo'} <small>o arrástralo aquí · MP4 horizontal 16:9, hasta 400 MB</small>
+        </button>
+        <input ref={archivo} type="file" accept="video/mp4,video/webm,video/quicktime" hidden onChange={(e) => { subir(e.target.files?.[0]); e.target.value = '' }} />
+        <ul className="cw-videos">
+          {videos.map((v) => <Item key={v.url} url={v.url} v={v} />)}
+          {VIDEOS_PAGINA.map((u) => <Item key={u} url={u} />)}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 /* ------------------------------------ Campos ------------------------------------ */
 function Tags({ valor, onChange, max }) {
   const [t, setT] = useState('')
@@ -142,7 +192,7 @@ function Campo({ campo, valor, onChange }) {
       control = <span className="mt-switch"><input type="checkbox" checked={Boolean(valor)} onChange={(e) => onChange(e.target.checked)} /><span /></span>
       break
     case 'color':
-      control = <span className="cw-color"><input type="color" value={valor || '#ffc800'} onChange={(e) => onChange(e.target.value)} /><code>{valor}</code></span>
+      control = <span className="cw-color"><input type="color" value={valor || '#ffe600'} onChange={(e) => onChange(e.target.value)} /><code>{valor}</code></span>
       break
     case 'opcion':
       control = <select value={valor} onChange={(e) => onChange(e.target.value)}>{campo.opciones.map((o) => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}</select>
@@ -154,6 +204,16 @@ function Campo({ campo, valor, onChange }) {
           <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setElegir(true)}><Icon icon={faImage} /> {valor ? 'Cambiar foto' : 'Elegir foto'}</button>
           {valor && <button type="button" className="adm-icon-btn" title="Quitar foto" onClick={() => onChange('')}><Icon icon={faXmark} /></button>}
           {elegir && <SelectorFotos actual={valor} onClose={() => setElegir(false)} onElegir={(u) => { onChange(u); setElegir(false) }} />}
+        </span>
+      )
+      break
+    case 'video':
+      control = (
+        <span className="cw-foto">
+          {valor ? <video className="cw-video-prev" src={urlFoto(valor)} muted preload="metadata" /> : <span className="cw-foto-vacia"><Icon icon={faImage} /></span>}
+          <button type="button" className="adm-btn adm-btn--ghost" onClick={() => setElegir(true)}><Icon icon={faUpload} /> {valor ? 'Cambiar video' : 'Elegir o subir video'}</button>
+          {valor && <small className="cw-ayuda">{nombreVideo(valor)}</small>}
+          {elegir && <SelectorVideos actual={valor} onClose={() => setElegir(false)} onElegir={(u) => { onChange(u); setElegir(false) }} />}
         </span>
       )
       break

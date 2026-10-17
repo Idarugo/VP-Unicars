@@ -19,7 +19,7 @@ export default function Loader({ onDone }) {
           v: 100, duration: 1.6 * k, ease: 'power3.inOut',
           onUpdate: () => num.current && (num.current.textContent = String(Math.round(contador.v)).padStart(3, '0')),
         }, 0)
-        .to('.logo path', { fill: '#FFC800', duration: 0.4 * k }, 1.3 * k)
+        .to('.logo path', { fill: '#FFE600', duration: 0.4 * k }, 1.3 * k)
         .to('.loader-bar i', { scaleX: 1, duration: 1.6 * k, ease: 'power3.inOut' }, 0)
         .to('.loader-inner', { y: -40, opacity: 0, duration: 0.5 * k, ease: 'power2.in' }, 1.9 * k)
         .to('.loader-panel', { yPercent: -100, duration: 0.9 * k, ease: 'expo.inOut', stagger: 0.06 * k }, 2.2 * k)

@@ -5,7 +5,7 @@ import { fechaLocal } from './store.js'
 import { useEstadisticaStore } from '../stores/estadisticaStore.js'
 import { Icon, faChartLine, faFilePdf, faCircleInfo, faArrowTrendUp, faArrowTrendDown } from './iconos.js'
 
-const C_VISITAS = '#ffc800' // serie única del gráfico de línea
+const C_VISITAS = '#ffe600' // serie única del gráfico de línea
 const C_COTIZ = '#3987e5'   // serie única de barras (validado contra el fondo #111114)
 const RANGOS = [[7, '7 días'], [30, '30 días'], [90, '90 días']]
 

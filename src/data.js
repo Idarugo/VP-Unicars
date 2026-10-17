@@ -13,6 +13,11 @@ const baseNegocio = {
   mapaLink: 'https://maps.google.com/?q=Mall+Plaza+America+Rancagua',
   horario: '10:00 a 18:00 aprox.',
   horarioNota: 'Algunos días hacemos trabajos a domicilio: agenda por WhatsApp.',
+  // Ficha del negocio en Google (Place ID ChIJL1YlIyZFY5YRbpPpe5mwCnY)
+  resenaUrl: 'https://search.google.com/local/writereview?placeid=ChIJL1YlIyZFY5YRbpPpe5mwCnY',
+  googleUrl: 'https://www.google.com/maps/place/?q=place_id:ChIJL1YlIyZFY5YRbpPpe5mwCnY',
+  calificacion: 5,
+  totalResenas: 22,
 }
 
 export const waLink = (texto = negocio.whatsappTexto) =>
@@ -110,32 +115,63 @@ const baseMasServicios = [
   { id: 'grabado', titulo: 'Grabado de patentes', texto: 'Grabado de patente en los vidrios de tu auto.', icono: 'grabado' },
 ]
 
+// Datos de los afiches de VP Unicars (octubre 2026)
 const baseNiveles = [
   {
+    id: 'estandar',
     nombre: 'Estándar',
+    nivel: 'Básico',
     desc: 'La entrada perfecta: privacidad y estética al mejor precio.',
-    calor: 40,
-    uv: 99,
-    claridad: 70,
-    durabilidad: 65,
+    uv: null,
+    ir: null,
+    beneficios: ['Mayor privacidad', 'Mejor estética', 'Mayor comodidad al conducir'],
+    foto: '/fotos/polarizado-estandar.webp',
   },
   {
-    nombre: 'Nanocarbon',
-    desc: 'Excelente desempeño térmico y apariencia elegante que no se decolora.',
-    calor: 70,
+    id: 'nanocarbon',
+    nombre: 'Nanocarbón',
+    nivel: 'Intermedio',
+    desc: 'Tecnología carbono que protege y da estilo.',
     uv: 99,
-    claridad: 85,
-    durabilidad: 85,
+    ir: 34,
+    beneficios: ['Excelente rechazo de calor', 'Tecnología nanocarbón avanzada', 'Acabado elegante', 'Confort térmico en cada viaje'],
+    foto: '/fotos/polarizado-nanocarbon.webp',
     destacado: true,
   },
   {
-    nombre: 'Nanocerámico Premium',
-    desc: 'Lo máximo: el mayor rechazo de calor sin interferir señales.',
-    calor: 92,
-    uv: 99,
-    claridad: 96,
-    durabilidad: 98,
+    id: 'nanoceramico',
+    nombre: 'Nanocerámico',
+    nivel: 'Premium',
+    desc: 'Máxima tecnología y confort térmico.',
+    uv: 100,
+    ir: 89,
+    beneficios: ['Máximo rechazo de calor', 'Mayor claridad y visibilidad', 'Acabado premium', 'Mayor confort al conducir'],
+    foto: '/fotos/polarizado-nanoceramico.webp',
   },
+]
+
+const basePolarizado = {
+  tonos: ['5', '20', '35', '50', '70'],
+  sellos: ['Material americano', 'Instalación profesional', 'Trabajo garantizado', 'Previa agenda'],
+}
+
+// Videos de la pantalla /videos (TV del local)
+const baseVideosTv = [
+  { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
+]
+
+// Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
+const baseResenas = [
+  { autor: 'Nathalie Chavarri', estrellas: 5, fecha: 'ago 2026', texto: 'Me recomendó nano cerámicos y sin duda fue la mejor decisión, agradecida por la atención excelente servicio sin duda lo recomendaré' },
+  { autor: 'derwin w muñoz d', estrellas: 5, fecha: 'ago 2026', texto: 'Excelente trabajo tuve la oportunidad de obtener un buen servicio de lámina de seguridad para mi auto impecable nada que decir 100 % recomendado' },
+  { autor: 'Marina Birot', estrellas: 5, fecha: 'ago 2026', texto: 'Muy profesionales y amables, hacen un buen trabajo.! Los recomiendo' },
+  { autor: 'Lisbeth Lamas', estrellas: 5, fecha: 'ago 2026', texto: 'Súper profesional y capacitado!!! A demás cobra lo justo… Súper recomendable' },
+  { autor: 'Ronald Cortez', estrellas: 5, fecha: 'jun 2026', texto: 'Excelente servicio 100% recomendado. La atencion y el trabajo de otro nivel' },
+  { autor: 'Mauricio Moya', estrellas: 5, fecha: 'oct 2025', texto: 'Lejos el mejor lugar para hacer los retoques a tú auto, láminas de seguridad, para proteger del sol y más lo recomiendo' },
+  { autor: 'elberth camaño', estrellas: 5, fecha: 'jun 2026', texto: 'Excelente servicio, calidad de materiales y atención' },
+  { autor: 'Mile Rivas', estrellas: 5, fecha: 'oct 2024', texto: 'Excelente profesional, super atento y con un acabado final impecable!.... Muy recomendable!' },
+  { autor: 'Enyer Ramirez', estrellas: 5, fecha: 'ago 2026', texto: 'Es un buen trato y atiende super bien' },
+  { autor: 'gonzalo javier hernandez lobos', estrellas: 5, fecha: 'jun 2026', texto: 'Exelente trabajo muchas Gracias los mejores' },
 ]
 
 const baseAutos = [
@@ -157,7 +193,7 @@ const baseTrabajos = [
   { auto: 'BMW 520i', trabajo: 'Nanocarbon + Nanocerámica', tono: '#3b82f6', foto: '/fotos/bmw-520i.jpg' },
   { auto: 'Ford Territory 2026', trabajo: 'PPF protector piano black', tono: '#a3a3a3', foto: '/fotos/territory-ppf.jpg' },
   { auto: 'VW Golf GTI', trabajo: 'Polarizado tornasol', tono: '#e5e5e5', foto: '/fotos/tornasol.webp' },
-  { auto: 'Polarizado Infiel', trabajo: 'Nanocerámico 20% · máxima privacidad', tono: '#ffc800', foto: '/fotos/nanoceramico.jpg' },
+  { auto: 'Polarizado Infiel', trabajo: 'Nanocerámico 20% · máxima privacidad', tono: '#ffe600', foto: '/fotos/nanoceramico.jpg' },
   { auto: 'Personalización', trabajo: 'PPF ahumado + kill chrome', tono: '#ef4444', foto: '/fotos/personalizacion.jpg' },
   { auto: 'Carbono forjado', trabajo: 'Pianos black en carbono', tono: '#22c55e', foto: '/fotos/pilares-carbono.jpg' },
   { auto: 'Hogar', trabajo: 'Polarizado arquitectónico', tono: '#a16207', foto: '/fotos/arquitectonico.webp' },
@@ -213,6 +249,9 @@ export const base = {
   autos: baseAutos.map((nombre, i) => ({ id: `auto-${i + 1}`, nombre })),
   stats: baseStats,
   niveles: conId(baseNiveles, 'nivel'),
+  polarizado: basePolarizado,
+  resenas: conId(baseResenas, 'resena'),
+  videosTv: baseVideosTv,
   pasos: conId(basePasos, 'paso'),
   faqs: conId(baseFaqs, 'faq'),
 }
@@ -225,6 +264,9 @@ export const trabajos = []
 export const autos = []
 export const stats = []
 export const niveles = []
+export const polarizado = { ...basePolarizado }
+export const resenas = []
+export const videosTv = []
 export const pasos = []
 export const faqs = []
 
@@ -242,10 +284,15 @@ export function aplicarContenido(c = {}) {
     ...s, num: String(i + 1).padStart(2, '0'), tags: s.tags || [], foto: urlFoto(s.foto),
   })))
   reemplazar(masServicios, seccion(c, 'masServicios').map((s) => ({ ...s, foto: urlFoto(s.foto) })))
-  reemplazar(trabajos, seccion(c, 'trabajos').map((t) => ({ ...t, tono: t.tono || '#ffc800', foto: urlFoto(t.foto) })))
+  reemplazar(trabajos, seccion(c, 'trabajos').map((t) => ({ ...t, tono: t.tono || '#ffe600', foto: urlFoto(t.foto) })))
   reemplazar(autos, seccion(c, 'autos').map((a) => a.nombre))
   reemplazar(stats, seccion(c, 'stats').map((s) => ({ ...s, valor: Number(s.valor) || 0, decimales: Number(s.decimales) || 0 })))
-  reemplazar(niveles, seccion(c, 'niveles'))
+  reemplazar(niveles, seccion(c, 'niveles').map((n) => ({ ...n, beneficios: n.beneficios || [], foto: urlFoto(n.foto) })))
+  Object.assign(polarizado, basePolarizado, c.polarizado || {})
+  reemplazar(resenas, seccion(c, 'resenas').map((r) => ({ ...r, estrellas: Math.min(5, Math.max(1, Number(r.estrellas) || 5)) })))
+  reemplazar(videosTv, seccion(c, 'videosTv').filter((v) => v.video).map((v) => ({ ...v, video: urlFoto(v.video) })))
+  negocio.calificacion = Number(negocio.calificacion) || 0
+  negocio.totalResenas = Number(negocio.totalResenas) || 0
   reemplazar(pasos, seccion(c, 'pasos'))
   reemplazar(faqs, seccion(c, 'faqs'))
 }

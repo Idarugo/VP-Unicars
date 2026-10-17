@@ -18,6 +18,7 @@ import Spaces from './components/Spaces.jsx'
 import Competition from './components/Competition.jsx'
 import Process from './components/Process.jsx'
 import Faq from './components/Faq.jsx'
+import Resenas from './components/Resenas.jsx'
 import Contact from './components/Contact.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
 import ZoomThrough from './components/ZoomThrough.jsx'
@@ -105,6 +106,7 @@ export default function App() {
         <Spaces />
         <Competition />
         <Process />
+        <Resenas />
         <Faq />
         <Contact />
       </main>

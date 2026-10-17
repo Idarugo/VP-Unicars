@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { promises as fs } from "fs";
+import { promises as fs, createWriteStream } from "fs";
 import path from "path";
 import crypto from "crypto";
 import { guardarContenido, leerContenido, leerVersiones } from "../models/contenidoModel";
@@ -149,6 +149,91 @@ export const eliminarFoto = async (req: Request, res: Response) => {
     return res.status(200).json({ ok: true, message: "Foto eliminada" });
   } catch (error) {
     console.error("Error al eliminar foto:", error);
+    return res.status(500).json({ ok: false, message: "Error interno del servidor" });
+  }
+};
+
+/* -------------------------------- Videos (pantalla /videos) -------------------------------- */
+export const CARPETA_VIDEOS = path.join(__dirname, "..", "..", "uploads", "videos");
+const MAX_VIDEO = 400 * 1024 * 1024; // 400 MB
+const TIPOS_VIDEO: Record<string, "mp4" | "webm"> = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mp4" };
+
+// mp4/mov: "ftyp" en los bytes 4-8 · webm: cabecera EBML 1A 45 DF A3
+const esVideo = (b: Buffer) =>
+  (b.length >= 8 && b.subarray(4, 8).toString("latin1") === "ftyp") || (b.length >= 4 && b.readUInt32BE(0) === 0x1a45dfa3);
+
+export const getVideos = async (_req: Request, res: Response) => {
+  try {
+    await fs.mkdir(CARPETA_VIDEOS, { recursive: true });
+    const archivos = (await fs.readdir(CARPETA_VIDEOS)).filter((a) => /\.(mp4|webm)$/.test(a));
+    const videos = await Promise.all(archivos.map(async (a) => {
+      const st = await fs.stat(path.join(CARPETA_VIDEOS, a));
+      return { nombre: a, url: `/uploads/videos/${a}`, tamano: st.size, fecha: st.mtime.toISOString() };
+    }));
+    videos.sort((a, b) => b.fecha.localeCompare(a.fecha));
+    return res.status(200).json({ ok: true, data: videos });
+  } catch (error) {
+    console.error("Error al listar videos:", error);
+    return res.status(500).json({ ok: false, message: "Error interno del servidor" });
+  }
+};
+
+// El video se escribe a disco mientras llega (no se guarda entero en memoria)
+export const subirVideo = async (req: Request, res: Response) => {
+  const ext = TIPOS_VIDEO[String(req.headers["content-type"] || "").split(";")[0]];
+  if (!ext) return res.status(400).json({ ok: false, message: "El video debe ser MP4 o WEBM" });
+  const declarado = Number(req.headers["content-length"] || 0);
+  if (declarado > MAX_VIDEO) return res.status(413).json({ ok: false, message: "El video supera los 400 MB" });
+
+  await fs.mkdir(CARPETA_VIDEOS, { recursive: true });
+  const nombre = `${Date.now().toString(36)}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
+  const destino = path.join(CARPETA_VIDEOS, nombre);
+  const salida = createWriteStream(destino);
+  let total = 0;
+  let inicio = Buffer.alloc(0);
+  let error: string | null = null;
+
+  const cortar = (msg: string) => {
+    error = msg;
+    req.unpipe(salida);
+    salida.destroy();
+    req.resume();
+  };
+  req.on("data", (trozo: Buffer) => {
+    total += trozo.length;
+    if (inicio.length < 16) inicio = Buffer.concat([inicio, trozo]).subarray(0, 16);
+    if (total > MAX_VIDEO && !error) cortar("El video supera los 400 MB");
+  });
+  req.pipe(salida);
+
+  const terminar = async () => {
+    if (res.headersSent) return;
+    if (!error && !esVideo(inicio)) error = "El archivo no es un video válido";
+    if (error || total === 0) {
+      await fs.unlink(destino).catch(() => {});
+      return res.status(400).json({ ok: false, message: error || "No llegó ningún video" });
+    }
+    await registrarHistorial(req.app.get("pool"), req.usuario!, "Subió video", nombre);
+    return res.status(201).json({ ok: true, message: "Video subido", data: { nombre, url: `/uploads/videos/${nombre}`, tamano: total } });
+  };
+  salida.on("finish", () => { terminar().catch(() => res.status(500).end()); });
+  salida.on("close", () => { if (error && !res.headersSent) terminar().catch(() => res.status(500).end()); });
+  req.on("aborted", () => { error = "La subida se cortó"; salida.destroy(); fs.unlink(destino).catch(() => {}); });
+};
+
+export const eliminarVideo = async (req: Request, res: Response) => {
+  try {
+    const nombre = String(req.params.nombre);
+    if (!/^[\w-]+\.(mp4|webm)$/.test(nombre)) return res.status(400).json({ ok: false, message: "Nombre inválido" });
+    const pool = req.app.get("pool");
+    if (JSON.stringify(await leerContenido(pool)).includes(`/uploads/videos/${nombre}`)) {
+      return res.status(409).json({ ok: false, message: "Ese video está en la lista de /videos: quítalo primero de la lista" });
+    }
+    await fs.unlink(path.join(CARPETA_VIDEOS, nombre)).catch(() => {});
+    await registrarHistorial(pool, req.usuario!, "Eliminó video", nombre);
+    return res.status(200).json({ ok: true, message: "Video eliminado" });
+  } catch (error) {
+    console.error("Error al eliminar video:", error);
     return res.status(500).json({ ok: false, message: "Error interno del servidor" });
   }
 };

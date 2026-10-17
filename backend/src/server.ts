@@ -6,7 +6,7 @@ import pool from "./config/database";
 import routes from "./routes";
 import { notFound } from "./middlewares/notFound";
 import { errorHandler } from "./middlewares/errorHandler";
-import { CARPETA_FOTOS } from "./controllers/contenidoController";
+import { CARPETA_FOTOS, CARPETA_VIDEOS } from "./controllers/contenidoController";
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   console.error("Falta JWT_SECRET en el .env (mínimo 32 caracteres)");
@@ -61,6 +61,7 @@ app.get("/health", async (_req, res) => {
 
 // Fotos subidas desde Mantención (nombres aleatorios: se pueden guardar en caché mucho tiempo)
 app.use("/uploads/fotos", express.static(CARPETA_FOTOS, { maxAge: "30d", immutable: true, index: false }));
+app.use("/uploads/videos", express.static(CARPETA_VIDEOS, { maxAge: "30d", immutable: true, index: false }));
 
 app.use("/api", routes);
 

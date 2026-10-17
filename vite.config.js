@@ -22,7 +22,7 @@ export default defineConfig({
   preview: { headers: cabeceras, proxy: { '/api': 'http://localhost:3001', '/uploads': 'http://localhost:3001' } },
   build: {
     rollupOptions: {
-      input: { main: r('./index.html'), admin: r('./admin.html'), verificar: r('./verificar.html') },
+      input: { main: r('./index.html'), admin: r('./admin.html'), verificar: r('./verificar.html'), videos: r('./videos.html') },
     },
   },
 })

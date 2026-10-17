@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /verificar
+Disallow: /videos
 
 Sitemap: https://vpunicars.cl/sitemap.xml
