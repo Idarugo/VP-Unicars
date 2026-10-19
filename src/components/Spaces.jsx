@@ -8,6 +8,12 @@ const espacios = [
   { ico: faBuilding, t: 'Oficinas', d: 'Polarizado arquitectónico espejo, bronce y vinilos con publicidad para tu marca.' },
 ]
 
+const hogares = [
+  ['hogar-antes-despues.webp', 'Sin lámina · Con lámina'],
+  ['hogar-espejo-patio.webp', 'Espejo exterior'],
+  ['hogar-instalacion.webp', 'Instalación a domicilio'],
+]
+
 export default function Spaces() {
   const root = useRef(null)
 
@@ -19,6 +25,10 @@ export default function Spaces() {
       tl.to('.facade-win', {
         rotateY: 180, duration: 1,
         stagger: { each: 0.03, grid: [6, 8], from: 'start' },
+      })
+      gsap.from('.spaces-fotos figure', {
+        y: 50, opacity: 0, duration: 1, stagger: 0.1, ease: 'expo.out',
+        scrollTrigger: { trigger: '.spaces-fotos', start: 'top 88%' },
       })
       gsap.from('.space', {
         x: -60, opacity: 0, duration: 1, stagger: 0.12, ease: 'expo.out',
@@ -38,6 +48,12 @@ export default function Spaces() {
             <li key={e.t} className="space"><span className="space-ico"><Icon icon={e.ico} /></span><div><strong>{e.t}</strong><p>{e.d}</p></div></li>
           ))}
         </ul>
+        {/* Trabajos reales en hogares */}
+        <div className="spaces-fotos">
+          {hogares.map(([f, t]) => (
+            <figure key={f}><img src={`/fotos/${f}`} alt={t} loading="lazy" /><figcaption>{t}</figcaption></figure>
+          ))}
+        </div>
       </div>
       <div className="facade" aria-hidden="true">
         {Array.from({ length: 48 }).map((_, i) => (

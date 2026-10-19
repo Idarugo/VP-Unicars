@@ -8,6 +8,7 @@ const fotos = [
   'porsche-ppf.jpg', 'tornasol.webp', 'bmw-520i.jpg', 'ahumado-focos.webp', 'nanocarbon.jpg', 'arquitectonico-bronce.webp',
   'kill-chrome.jpg', 'fibra-carbono.webp', 'territory-ppf.jpg', 'polarizado-5.webp', 'pilares-carbono.jpg', 'ppf-moto.webp',
   'nanoceramico.jpg', 'laminas-seguridad.webp', 'privacidad.jpg', 'pilares-ppf.webp', 'arquitectonico.webp', 'piano-black.jpg',
+  'hogar-espejo-patio.webp', 'hogar-instalacion.webp', 'hogar-espejo-ladrillo.webp', 'hogar-espejo-madera.webp',
 ]
 
 // Anillo 3D de fotos: gira con el scroll y se puede arrastrar.

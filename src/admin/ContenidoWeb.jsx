@@ -104,7 +104,7 @@ function SelectorFotos({ actual, onElegir, onClose }) {
 }
 
 /* ------------------------------- Selector de videos (TV) ------------------------------- */
-const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4']
+const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4']
 const nombreVideo = (u) => u.split('/').pop()
 
 function SelectorVideos({ actual, onElegir, onClose }) {

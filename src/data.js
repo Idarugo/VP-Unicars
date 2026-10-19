@@ -94,12 +94,12 @@ const baseServicios = [
   },
   {
     id: 'arquitectonico',
-    foto: '/fotos/arquitectonico-bronce.webp',
+    foto: '/fotos/hogar-espejo-madera.webp',
     num: '06',
     titulo: 'Arquitectónico',
     sub: 'Hogar · Oficinas · Locales',
-    texto: 'Polarizado espejo, bronce y control solar para casas y oficinas. Privacidad máxima, menos calor, cero cortinas.',
-    tags: ['Espejo', 'Bronce', 'Tornasol', 'Publicidad'],
+    texto: 'Polarizado espejo y control solar para casas y oficinas: de día ves hacia afuera y desde la calle solo se ve el reflejo. Menos calor, protección UV y cero cortinas. Vamos a domicilio.',
+    tags: ['Espejo', 'Bronce', 'Control solar', 'A domicilio'],
     art: 'building',
   },
   {
@@ -171,6 +171,7 @@ const baseVideosTv = [
   { id: 'tv-asi-trabajamos', titulo: 'Así trabajamos · procesos reales', video: '/tv/vp-asi-trabajamos.mp4' },
   { id: 'tv-elige-tu-polarizado', titulo: 'Elige tu polarizado', video: '/tv/vp-elige-tu-polarizado.mp4' },
   { id: 'tv-clientes-felices', titulo: 'Clientes felices · reseñas', video: '/tv/vp-clientes-felices.mp4' },
+  { id: 'tv-tu-hogar', titulo: 'Polarizado para tu hogar', video: '/tv/vp-tu-hogar.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
@@ -209,7 +210,9 @@ const baseTrabajos = [
   { auto: 'Polarizado Infiel', trabajo: 'Nanocerámico 20% · máxima privacidad', tono: '#ffe600', foto: '/fotos/nanoceramico.jpg' },
   { auto: 'Personalización', trabajo: 'PPF ahumado + kill chrome', tono: '#ef4444', foto: '/fotos/personalizacion.jpg' },
   { auto: 'Carbono forjado', trabajo: 'Pianos black en carbono', tono: '#22c55e', foto: '/fotos/pilares-carbono.jpg' },
-  { auto: 'Hogar', trabajo: 'Polarizado arquitectónico', tono: '#a16207', foto: '/fotos/arquitectonico.webp' },
+  { auto: 'Hogar · ventanales', trabajo: 'Polarizado espejo · privacidad de día', tono: '#a16207', foto: '/fotos/hogar-ventanales.webp' },
+  { auto: 'Casa de ladrillo', trabajo: 'Polarizado espejo exterior', tono: '#ef4444', foto: '/fotos/hogar-espejo-ladrillo.webp' },
+  { auto: 'Antes y después', trabajo: 'Vidrio sin lámina vs. con lámina espejo', tono: '#38bdf8', foto: '/fotos/hogar-antes-despues.webp' },
 ]
 
 const basePasos = [
