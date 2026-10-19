@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { masServicios, waLink } from '../data.js'
-import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight, faScrewdriverWrench, faCar, faStar } from '../icons.js'
+import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight, faScrewdriverWrench, faCar, faStar, faTruck, faMotorcycle, faBorderAll } from '../icons.js'
 
 const iconos = {
   audio: faVolumeHigh, corriente: faPowerOff, seguridad: faBell,
   luces: faLightbulb, electricidad: faBolt, grabado: faIdCard,
   herramienta: faScrewdriverWrench, auto: faCar, estrella: faStar,
+  empavonado: faBorderAll, flota: faTruck, moto: faMotorcycle,
 }
 
 // Servicios adicionales de VP Unicars (todo se cotiza por el mismo WhatsApp).

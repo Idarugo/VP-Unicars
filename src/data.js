@@ -123,6 +123,10 @@ const baseMasServicios = [
   { id: 'iluminacion', titulo: 'Iluminación', texto: 'Luces y todo lo que sea iluminación para tu auto.', icono: 'luces' },
   { id: 'electricidad', titulo: 'Electricidad automotriz', texto: 'Instalaciones y trabajos eléctricos en tu vehículo.', icono: 'electricidad' },
   { id: 'grabado', titulo: 'Grabado de patentes', texto: 'Grabado de patente en los vidrios de tu auto.', icono: 'grabado' },
+  { id: 'cielo-estrellado', titulo: 'Cielo estrellado', texto: 'Techo con fibra óptica que convierte el interior de tu auto en un cielo de estrellas.', icono: 'estrella' },
+  { id: 'empavonado', titulo: 'Empavonado de vidrios', texto: 'Vinilo esmerilado para puertas, baños y oficinas: privacidad sin perder luz. También con tu logo.', icono: 'empavonado' },
+  { id: 'flotas', titulo: 'Branding de flotas', texto: 'Cambio de color y ploteo de furgones y vehículos de empresa con la imagen de tu marca.', icono: 'flota' },
+  { id: 'motos', titulo: 'Ahumado de micas de moto', texto: 'Parabrisas y micas de moto ahumados con vinilo o PPF: más estilo y protección.', icono: 'moto' },
 ]
 
 // Datos de los afiches de VP Unicars (octubre 2026)
@@ -165,6 +169,47 @@ const basePolarizado = {
   sellos: ['Material americano', 'Instalación profesional', 'Trabajo garantizado', 'Previa agenda'],
 }
 
+// Portafolio: trabajos reales de VP Unicars (fotos de octubre 2026). La foto "-mini" se usa en la grilla.
+const P = (n) => `/fotos/portafolio/${n}.webp`
+const basePortafolio = [
+  ['cielo-estrellado-2', 'Cielo estrellado con fibra óptica', 'personalizacion'],
+  ['furgon-personalizacion-2', 'Furgón con cambio de color completo', 'flotas'],
+  ['polarizado-espejo-caseta-de-vigilancia', 'Polarizado espejo en caseta de vigilancia', 'hogar'],
+  ['ahumado-de-mica-moto', 'Ahumado de mica en moto deportiva', 'motos'],
+  ['polarizado-full-black', 'Polarizado full black', 'polarizado'],
+  ['personalizacion-de-consola-central-con-fibra-de-carbono', 'Consola central en fibra de carbono', 'personalizacion'],
+  ['empovanado-con-logo-para-oficina', 'Empavonado con logo para oficina', 'hogar'],
+  ['ppf-en-volante', 'PPF en volante BMW', 'ppf'],
+  ['polarizado-nanoceramico-certificado', 'Polarizado nanocerámico certificado', 'polarizado'],
+  ['personalizacion-con-vinilo-fucsia', 'Detalles en vinilo fucsia', 'personalizacion'],
+  ['furgon-personalizacion-3', 'Instalación de vinilo en furgón', 'flotas'],
+  ['polarizado-espejo-maxima-privacidad', 'Polarizado espejo: máxima privacidad', 'hogar'],
+  ['cielo-estrellado', 'Instalando un cielo estrellado', 'personalizacion'],
+  ['polarizado-5-infiel', 'Polarizado 5% “infiel”', 'polarizado'],
+  ['ahumado-de-mica-1', 'Ahumado de mica: en proceso', 'motos'],
+  ['personalizacion-de-pilares', 'Pilares en carbono forjado', 'personalizacion'],
+  ['empavonado-oficina', 'Empavonado en puertas de oficina', 'hogar'],
+  ['polarizado-oscuro', 'Polarizado oscuro en SUV', 'polarizado'],
+  ['furgon-personalizacion', 'Furgón de empresa con franjas reflectivas', 'flotas'],
+  ['personalizacion-de-espejos-con-vinilos', 'Espejos en vinilo', 'personalizacion'],
+  ['personalizacion-con-fibra-de-carbono', 'Interior en fibra de carbono', 'personalizacion'],
+  ['polarizado', 'Polarizado en Dodge', 'polarizado'],
+  ['empavonado-casa', 'Empavonado en puerta de casa', 'hogar'],
+  ['ahumado-de-mica-moto-3', 'Mica ahumada lista para instalar', 'motos'],
+  ['personalizacion-de-consola-3', 'Consola con vinilo carbono', 'personalizacion'],
+  ['furgon-personalizacion-1', 'Furgón: de blanco a amarillo', 'flotas'],
+  ['personalizacion-de-interior-con-vinilo', 'Interior con vinilo carbono forjado', 'personalizacion'],
+  ['polarizado-espejo-maxima', 'Polarizado espejo en casa', 'hogar'],
+  ['personalizacion-con-vinilo', 'Parrilla y detalles en vinilo', 'personalizacion'],
+  ['personalizacion-de-consola-2', 'Consola desmontada para personalizar', 'personalizacion'],
+].map(([n, titulo, categoria]) => ({ id: n, titulo, categoria, foto: P(n) }))
+  .concat([
+    { id: 'hogar-antes-despues', titulo: 'Antes y después: vidrio con y sin lámina', categoria: 'hogar', foto: '/fotos/hogar-antes-despues.webp' },
+    { id: 'hogar-espejo-madera', titulo: 'Casa con polarizado espejo', categoria: 'hogar', foto: '/fotos/hogar-espejo-madera.webp' },
+    { id: 'ppf-moto', titulo: 'PPF en tablero de moto', categoria: 'ppf', foto: '/fotos/ppf-moto.webp' },
+    { id: 'ppf-trabajos', titulo: 'PPF en interior', categoria: 'ppf', foto: '/fotos/ppf-trabajos.webp' },
+  ])
+
 // Videos de la pantalla /videos (TV del local)
 const baseVideosTv = [
   { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
@@ -172,6 +217,7 @@ const baseVideosTv = [
   { id: 'tv-elige-tu-polarizado', titulo: 'Elige tu polarizado', video: '/tv/vp-elige-tu-polarizado.mp4' },
   { id: 'tv-clientes-felices', titulo: 'Clientes felices · reseñas', video: '/tv/vp-clientes-felices.mp4' },
   { id: 'tv-tu-hogar', titulo: 'Polarizado para tu hogar', video: '/tv/vp-tu-hogar.mp4' },
+  { id: 'tv-hazlo-unico', titulo: 'Hazlo único · personalización', video: '/tv/vp-hazlo-unico.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
@@ -268,6 +314,7 @@ export const base = {
   polarizado: basePolarizado,
   resenas: conId(baseResenas, 'resena'),
   videosTv: baseVideosTv,
+  portafolio: basePortafolio,
   pasos: conId(basePasos, 'paso'),
   faqs: conId(baseFaqs, 'faq'),
 }
@@ -283,6 +330,7 @@ export const niveles = []
 export const polarizado = { ...basePolarizado }
 export const resenas = []
 export const videosTv = []
+export const portafolio = []
 export const pasos = []
 export const faqs = []
 
@@ -306,6 +354,7 @@ export function aplicarContenido(c = {}) {
   reemplazar(niveles, seccion(c, 'niveles').map((n) => ({ ...n, beneficios: n.beneficios || [], foto: urlFoto(n.foto) })))
   Object.assign(polarizado, basePolarizado, c.polarizado || {})
   reemplazar(resenas, seccion(c, 'resenas').map((r) => ({ ...r, estrellas: Math.min(5, Math.max(1, Number(r.estrellas) || 5)) })))
+  reemplazar(portafolio, seccion(c, 'portafolio').filter((x) => x.foto).map((x) => ({ ...x, foto: urlFoto(x.foto), mini: x.foto.startsWith('/fotos/portafolio/') ? x.foto.replace(/\.webp$/, '-mini.webp') : urlFoto(x.foto) })))
   reemplazar(videosTv, seccion(c, 'videosTv').filter((v) => v.video).map((v) => ({ ...v, video: urlFoto(v.video) })))
   negocio.calificacion = Number(negocio.calificacion) || 0
   negocio.totalResenas = Number(negocio.totalResenas) || 0

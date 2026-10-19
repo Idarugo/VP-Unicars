@@ -93,6 +93,7 @@ export const SECCIONES: Seccion[] = [
           { valor: "audio", etiqueta: "Parlante" }, { valor: "corriente", etiqueta: "Encendido" }, { valor: "seguridad", etiqueta: "Alarma" },
           { valor: "luces", etiqueta: "Ampolleta" }, { valor: "electricidad", etiqueta: "Rayo" }, { valor: "grabado", etiqueta: "Patente" },
           { valor: "herramienta", etiqueta: "Herramienta" }, { valor: "auto", etiqueta: "Auto" }, { valor: "estrella", etiqueta: "Estrella" },
+          { valor: "empavonado", etiqueta: "Ventana" }, { valor: "flota", etiqueta: "Furgón" }, { valor: "moto", etiqueta: "Moto" },
         ],
       },
       { clave: "foto", etiqueta: "Foto (opcional, reemplaza al ícono)", tipo: "foto", ayuda: FOTO_AYUDA },
@@ -111,6 +112,26 @@ export const SECCIONES: Seccion[] = [
       { clave: "trabajo", etiqueta: "Trabajo realizado", tipo: "texto", max: 80, placeholder: "Ej: Nanocerámico 20%" },
       { clave: "foto", etiqueta: "Foto", tipo: "foto", ayuda: FOTO_AYUDA },
       { clave: "tono", etiqueta: "Color de acento", tipo: "color" },
+    ],
+  },
+  {
+    clave: "portafolio",
+    titulo: "Portafolio (galería con filtros)",
+    descripcion: "Fotos de trabajos reales que se filtran por categoría y se abren en grande.",
+    tipo: "lista",
+    maxItems: 120,
+    nombreItem: "foto",
+    titular: "titulo",
+    campos: [
+      { clave: "titulo", etiqueta: "Qué se hizo", tipo: "texto", max: 70, requerido: true, placeholder: "Ej: Cielo estrellado" },
+      { clave: "foto", etiqueta: "Foto", tipo: "foto", requerido: true, ayuda: FOTO_AYUDA },
+      {
+        clave: "categoria", etiqueta: "Categoría", tipo: "opcion",
+        opciones: [
+          { valor: "polarizado", etiqueta: "Polarizado" }, { valor: "ppf", etiqueta: "PPF" }, { valor: "personalizacion", etiqueta: "Personalización" },
+          { valor: "hogar", etiqueta: "Hogar y oficina" }, { valor: "flotas", etiqueta: "Flotas y furgones" }, { valor: "motos", etiqueta: "Motos" },
+        ],
+      },
     ],
   },
   {
@@ -232,7 +253,7 @@ export const SECCIONES: Seccion[] = [
 ];
 
 /* ------------------------------ Validación ------------------------------ */
-const FOTO_VALIDA = /^\/(fotos|uploads\/fotos)\/[\w.-]+$/;
+const FOTO_VALIDA = /^\/(fotos(\/portafolio)?|uploads\/fotos)\/[\w.-]+$/;
 const VIDEO_VALIDO = /^\/(tv|uploads\/videos)\/[\w.-]+$/;
 const COLOR_VALIDO = /^#[0-9a-fA-F]{6}$/;
 const URL_VALIDA = /^https:\/\/[^\s"'<>]+$/;

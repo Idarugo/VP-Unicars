@@ -13,6 +13,8 @@ const FOTOS_PAGINA = [
   'laminas-seguridad.webp', 'nanocarbon.jpg', 'nanoceramico.jpg', 'personalizacion.jpg', 'piano-black.jpg', 'pilares-carbono.jpg',
   'pilares-ppf.webp', 'polarizado-5.webp', 'porsche-ppf.jpg', 'ppf-moto.webp', 'ppf-trabajos.webp', 'privacidad.jpg', 'tecnica.webp',
   'territory-ppf.jpg', 'tornasol.webp',
+  // Fotos del portafolio
+  'portafolio/ahumado-de-mica-1.webp', 'portafolio/ahumado-de-mica-moto-3.webp', 'portafolio/ahumado-de-mica-moto.webp', 'portafolio/cielo-estrellado-2.webp', 'portafolio/cielo-estrellado.webp', 'portafolio/empavonado-casa.webp', 'portafolio/empavonado-oficina.webp', 'portafolio/empovanado-con-logo-para-oficina.webp', 'portafolio/furgon-personalizacion-1.webp', 'portafolio/furgon-personalizacion-2.webp', 'portafolio/furgon-personalizacion-3.webp', 'portafolio/furgon-personalizacion.webp', 'portafolio/personalizacion-con-fibra-de-carbono.webp', 'portafolio/personalizacion-con-vinilo-fucsia.webp', 'portafolio/personalizacion-con-vinilo.webp', 'portafolio/personalizacion-de-consola-2.webp', 'portafolio/personalizacion-de-consola-3.webp', 'portafolio/personalizacion-de-consola-central-con-fibra-de-carbono.webp', 'portafolio/personalizacion-de-espejos-con-vinilos.webp', 'portafolio/personalizacion-de-interior-con-vinilo.webp', 'portafolio/personalizacion-de-pilares.webp', 'portafolio/polarizado-5-infiel.webp', 'portafolio/polarizado-espejo-caseta-de-vigilancia.webp', 'portafolio/polarizado-espejo-maxima-privacidad.webp', 'portafolio/polarizado-espejo-maxima.webp', 'portafolio/polarizado-full-black.webp', 'portafolio/polarizado-nanoceramico-certificado.webp', 'portafolio/polarizado-oscuro.webp', 'portafolio/polarizado.webp', 'portafolio/ppf-en-volante.webp',
 ].map((f) => `/fotos/${f}`)
 
 /* ---------------------- Normalización según el esquema ---------------------- */
@@ -104,7 +106,7 @@ function SelectorFotos({ actual, onElegir, onClose }) {
 }
 
 /* ------------------------------- Selector de videos (TV) ------------------------------- */
-const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4']
+const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4', '/tv/vp-hazlo-unico.mp4']
 const nombreVideo = (u) => u.split('/').pop()
 
 function SelectorVideos({ actual, onElegir, onClose }) {

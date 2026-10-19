@@ -6,7 +6,7 @@ const links = [
   ['#servicios', 'Servicios'],
   ['#polarizados', 'Polarizados'],
   ['#ppf', 'PPF'],
-  ['#trabajos', 'Trabajos'],
+  ['#portafolio', 'Trabajos'],
   ['#contacto', 'Contacto'],
 ]
 

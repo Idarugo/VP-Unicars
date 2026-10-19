@@ -19,6 +19,7 @@ import Competition from './components/Competition.jsx'
 import Process from './components/Process.jsx'
 import Faq from './components/Faq.jsx'
 import Resenas from './components/Resenas.jsx'
+import Portafolio from './components/Portafolio.jsx'
 import Contact from './components/Contact.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
 import ZoomThrough from './components/ZoomThrough.jsx'
@@ -104,6 +105,7 @@ export default function App() {
         <Ring />
         <FrameScroll id="proceso-bmw" carpeta="bmw" total={90} kicker="Proceso real · BMW" titulo={<>Precisión en<br /><em>cada vidrio</em>.</>} beats={beatsBmw} lado="der" />
         <Spaces />
+        <Portafolio />
         <Competition />
         <Process />
         <Resenas />
