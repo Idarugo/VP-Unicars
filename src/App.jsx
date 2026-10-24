@@ -19,6 +19,7 @@ import Competition from './components/Competition.jsx'
 import Process from './components/Process.jsx'
 import Faq from './components/Faq.jsx'
 import Resenas from './components/Resenas.jsx'
+import Tecnologia from './components/Tecnologia.jsx'
 import Portafolio from './components/Portafolio.jsx'
 import Contact from './components/Contact.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
@@ -96,6 +97,7 @@ export default function App() {
         <TintReveal />
         <Services />
         <MasServicios />
+        <Tecnologia />
         <PPFShield />
         <FrameScroll id="proceso-ppf" carpeta="porsche" total={120} kicker="Proceso real · PPF en parabrisas" titulo={<>Así se protege<br />un <em>911 Turbo S</em>.</>} beats={beatsPorsche} />
         <Tiers />

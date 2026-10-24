@@ -106,7 +106,9 @@ function SelectorFotos({ actual, onElegir, onClose }) {
 }
 
 /* ------------------------------- Selector de videos (TV) ------------------------------- */
-const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4', '/tv/vp-hazlo-unico.mp4']
+const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4', '/tv/vp-hazlo-unico.mp4', '/tv/vp-tecnologia.mp4',
+  // Clips verticales de la sección Tecnología y seguridad
+  '/clips/alarma.mp4', '/clips/audio.mp4', '/clips/camara-retroceso.mp4', '/clips/carplay.mp4', '/clips/cielo-estrellado.mp4', '/clips/faros-led.mp4', '/clips/inmovilizador.mp4', '/clips/luces-ambiente.mp4', '/clips/pantalla-android.mp4', '/clips/pulido-focos.mp4']
 const nombreVideo = (u) => u.split('/').pop()
 
 function SelectorVideos({ actual, onElegir, onClose }) {

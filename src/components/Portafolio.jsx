@@ -11,6 +11,7 @@ gsap.registerPlugin(Flip)
 const CATEGORIAS = [
   ['polarizado', 'Polarizado'], ['ppf', 'PPF'], ['personalizacion', 'Personalización'],
   ['hogar', 'Hogar y oficina'], ['flotas', 'Flotas y furgones'], ['motos', 'Motos'],
+  ['tecnologia', 'Pantallas y seguridad'], ['nautico', 'Náutico'],
 ]
 const NOMBRE = Object.fromEntries(CATEGORIAS)
 const POR_PAGINA = 12

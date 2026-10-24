@@ -126,6 +126,10 @@ const baseMasServicios = [
   { id: 'cielo-estrellado', titulo: 'Cielo estrellado', texto: 'Techo con fibra óptica que convierte el interior de tu auto en un cielo de estrellas.', icono: 'estrella' },
   { id: 'empavonado', titulo: 'Empavonado de vidrios', texto: 'Vinilo esmerilado para puertas, baños y oficinas: privacidad sin perder luz. También con tu logo.', icono: 'empavonado' },
   { id: 'flotas', titulo: 'Branding de flotas', texto: 'Cambio de color y ploteo de furgones y vehículos de empresa con la imagen de tu marca.', icono: 'flota' },
+  { id: 'pantallas', titulo: 'Pantallas Android y CarPlay', texto: 'Radios con pantalla táctil, GPS, Apple CarPlay y Android Auto, con terminación de fábrica.', icono: 'pantalla' },
+  { id: 'camaras', titulo: 'Cámaras de retroceso', texto: 'Cámara con guías de estacionamiento conectada a tu pantalla.', icono: 'camara' },
+  { id: 'pulido-focos', titulo: 'Pulido de focos', texto: 'Focos amarillos u opacos vuelven a quedar transparentes: mejor luz y mejor look.', icono: 'luces' },
+  { id: 'nautico', titulo: 'Polarizado náutico', texto: 'Láminas para lanchas y yates: menos calor, protección UV y privacidad a bordo.', icono: 'barco' },
   { id: 'motos', titulo: 'Ahumado de micas de moto', texto: 'Parabrisas y micas de moto ahumados con vinilo o PPF: más estilo y protección.', icono: 'moto' },
 ]
 
@@ -172,6 +176,10 @@ const basePolarizado = {
 // Portafolio: trabajos reales de VP Unicars (fotos de octubre 2026). La foto "-mini" se usa en la grilla.
 const P = (n) => `/fotos/portafolio/${n}.webp`
 const basePortafolio = [
+  ['pantalla-volvo-despues', 'Pantalla Android en Volvo: después', 'tecnologia'],
+  ['polarizado-lancha', 'Polarizado en lancha', 'nautico'],
+  ['pulido-de-focos', 'Pulido de focos', 'tecnologia'],
+  ['hogar-ventanal-instalacion', 'Instalando lámina en ventanal', 'hogar'],
   ['cielo-estrellado-2', 'Cielo estrellado con fibra óptica', 'personalizacion'],
   ['furgon-personalizacion-2', 'Furgón con cambio de color completo', 'flotas'],
   ['polarizado-espejo-caseta-de-vigilancia', 'Polarizado espejo en caseta de vigilancia', 'hogar'],
@@ -202,6 +210,13 @@ const basePortafolio = [
   ['polarizado-espejo-maxima', 'Polarizado espejo en casa', 'hogar'],
   ['personalizacion-con-vinilo', 'Parrilla y detalles en vinilo', 'personalizacion'],
   ['personalizacion-de-consola-2', 'Consola desmontada para personalizar', 'personalizacion'],
+  ['pantalla-volvo-antes', 'Volvo antes de la pantalla nueva', 'tecnologia'],
+  ['faros-ojos-de-angel', 'Faros con ojos de ángel', 'tecnologia'],
+  ['polarizado-lancha-2', 'Lámina en vidrios de yate', 'nautico'],
+  ['pantalla-android-cruze', 'Pantalla vertical en Chevrolet Cruze', 'tecnologia'],
+  ['instalacion-inmovilizador', 'Instalación de inmovilizador', 'tecnologia'],
+  ['polarizado-luneta', 'Polarizado de luneta trasera', 'polarizado'],
+  ['hogar-ventanal-lamina', 'Lámina de control solar en casa', 'hogar'],
 ].map(([n, titulo, categoria]) => ({ id: n, titulo, categoria, foto: P(n) }))
   .concat([
     { id: 'hogar-antes-despues', titulo: 'Antes y después: vidrio con y sin lámina', categoria: 'hogar', foto: '/fotos/hogar-antes-despues.webp' },
@@ -211,6 +226,20 @@ const basePortafolio = [
   ])
 
 // Videos de la pantalla /videos (TV del local)
+// Tecnología y seguridad: videos cortos verticales (en /public/clips, con su póster .jpg)
+const baseTecnologia = [
+  ['pantalla-android', 'Pantallas Android', 'Pantallas táctiles grandes, con cámara, GPS y apps.', 'Multimedia'],
+  ['carplay', 'Apple CarPlay y Android Auto', 'Tu celular en la pantalla del auto: mapas, música y llamadas.', 'Multimedia'],
+  ['camara-retroceso', 'Cámara de retroceso', 'Estaciona con guías en pantalla, sin adivinar.', 'Seguridad'],
+  ['inmovilizador', 'Inmovilizador inalámbrico', 'Si no estás tú, el auto no arranca.', 'Seguridad'],
+  ['alarma', 'Alarmas y cierre centralizado', 'Control remoto, sensores y bloqueo de puertas.', 'Seguridad'],
+  ['faros-led', 'Luces LED', 'Más luz y un look moderno de noche.', 'Iluminación'],
+  ['pulido-focos', 'Pulido de focos', 'Del amarillo opaco a transparente como nuevo.', 'Estética'],
+  ['luces-ambiente', 'Luces de ambiente', 'Tiras LED RGB en el interior, del color que quieras.', 'Iluminación'],
+  ['audio', 'Audio', 'Parlantes, radios y amplificadores bien instalados.', 'Audio'],
+  ['cielo-estrellado', 'Cielo estrellado', 'Fibra óptica con colores en el techo.', 'Personalización'],
+].map(([n, titulo, texto, etiqueta]) => ({ id: `tec-${n}`, titulo, texto, etiqueta, video: `/clips/${n}.mp4` }))
+
 const baseVideosTv = [
   { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
   { id: 'tv-asi-trabajamos', titulo: 'Así trabajamos · procesos reales', video: '/tv/vp-asi-trabajamos.mp4' },
@@ -218,6 +247,7 @@ const baseVideosTv = [
   { id: 'tv-clientes-felices', titulo: 'Clientes felices · reseñas', video: '/tv/vp-clientes-felices.mp4' },
   { id: 'tv-tu-hogar', titulo: 'Polarizado para tu hogar', video: '/tv/vp-tu-hogar.mp4' },
   { id: 'tv-hazlo-unico', titulo: 'Hazlo único · personalización', video: '/tv/vp-hazlo-unico.mp4' },
+  { id: 'tv-tecnologia', titulo: 'Tecnología y seguridad', video: '/tv/vp-tecnologia.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
@@ -315,6 +345,7 @@ export const base = {
   resenas: conId(baseResenas, 'resena'),
   videosTv: baseVideosTv,
   portafolio: basePortafolio,
+  tecnologia: baseTecnologia,
   pasos: conId(basePasos, 'paso'),
   faqs: conId(baseFaqs, 'faq'),
 }
@@ -331,6 +362,7 @@ export const polarizado = { ...basePolarizado }
 export const resenas = []
 export const videosTv = []
 export const portafolio = []
+export const tecnologia = []
 export const pasos = []
 export const faqs = []
 
@@ -355,6 +387,7 @@ export function aplicarContenido(c = {}) {
   Object.assign(polarizado, basePolarizado, c.polarizado || {})
   reemplazar(resenas, seccion(c, 'resenas').map((r) => ({ ...r, estrellas: Math.min(5, Math.max(1, Number(r.estrellas) || 5)) })))
   reemplazar(portafolio, seccion(c, 'portafolio').filter((x) => x.foto).map((x) => ({ ...x, foto: urlFoto(x.foto), mini: x.foto.startsWith('/fotos/portafolio/') ? x.foto.replace(/\.webp$/, '-mini.webp') : urlFoto(x.foto) })))
+  reemplazar(tecnologia, seccion(c, 'tecnologia').filter((x) => x.video).map((x) => ({ ...x, video: urlFoto(x.video), poster: x.video.startsWith('/clips/') ? x.video.replace(/\.mp4$/, '.jpg') : undefined })))
   reemplazar(videosTv, seccion(c, 'videosTv').filter((v) => v.video).map((v) => ({ ...v, video: urlFoto(v.video) })))
   negocio.calificacion = Number(negocio.calificacion) || 0
   negocio.totalResenas = Number(negocio.totalResenas) || 0

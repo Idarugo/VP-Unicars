@@ -4,6 +4,6 @@ export {
   faArrowRight, faArrowDown, faLocationDot, faTrophy, faStar, faShieldHalved, faSun, faLock,
   faLightbulb, faFillDrip, faBuilding, faWandMagicSparkles, faCar, faHouse, faComments,
   faUserCheck, faScrewdriverWrench, faKey, faPlus, faImages, faBolt, faCircleCheck,
-  faVolumeHigh, faPowerOff, faBell, faIdCard, faClock, faChevronLeft, faChevronRight, faPen, faQuoteLeft, faXmark, faTruck, faMotorcycle, faBorderAll,
+  faVolumeHigh, faPowerOff, faBell, faIdCard, faClock, faChevronLeft, faChevronRight, faPen, faQuoteLeft, faXmark, faTruck, faMotorcycle, faBorderAll, faTv, faVideo, faShip, faPlay, faPause,
 } from '@fortawesome/free-solid-svg-icons'
 export { faWhatsapp, faInstagram, faTiktok, faFacebook, faGoogle } from '@fortawesome/free-brands-svg-icons'

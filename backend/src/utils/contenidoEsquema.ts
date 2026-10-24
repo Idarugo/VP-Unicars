@@ -94,6 +94,7 @@ export const SECCIONES: Seccion[] = [
           { valor: "luces", etiqueta: "Ampolleta" }, { valor: "electricidad", etiqueta: "Rayo" }, { valor: "grabado", etiqueta: "Patente" },
           { valor: "herramienta", etiqueta: "Herramienta" }, { valor: "auto", etiqueta: "Auto" }, { valor: "estrella", etiqueta: "Estrella" },
           { valor: "empavonado", etiqueta: "Ventana" }, { valor: "flota", etiqueta: "Furgón" }, { valor: "moto", etiqueta: "Moto" },
+          { valor: "pantalla", etiqueta: "Pantalla" }, { valor: "camara", etiqueta: "Cámara" }, { valor: "barco", etiqueta: "Lancha" },
         ],
       },
       { clave: "foto", etiqueta: "Foto (opcional, reemplaza al ícono)", tipo: "foto", ayuda: FOTO_AYUDA },
@@ -130,8 +131,24 @@ export const SECCIONES: Seccion[] = [
         opciones: [
           { valor: "polarizado", etiqueta: "Polarizado" }, { valor: "ppf", etiqueta: "PPF" }, { valor: "personalizacion", etiqueta: "Personalización" },
           { valor: "hogar", etiqueta: "Hogar y oficina" }, { valor: "flotas", etiqueta: "Flotas y furgones" }, { valor: "motos", etiqueta: "Motos" },
+          { valor: "tecnologia", etiqueta: "Pantallas y seguridad" }, { valor: "nautico", etiqueta: "Náutico" },
         ],
       },
+    ],
+  },
+  {
+    clave: "tecnologia",
+    titulo: "Tecnología y seguridad (videos)",
+    descripcion: "Tarjetas con videos cortos de pantallas, cámaras, inmovilizadores, luces y audio. Se reproducen solas y sin sonido.",
+    tipo: "lista",
+    maxItems: 20,
+    nombreItem: "tarjeta",
+    titular: "titulo",
+    campos: [
+      { clave: "titulo", etiqueta: "Nombre", tipo: "texto", max: 50, requerido: true, placeholder: "Ej: Pantallas Android" },
+      { clave: "texto", etiqueta: "Descripción corta", tipo: "textoLargo", max: 160 },
+      { clave: "etiqueta", etiqueta: "Etiqueta", tipo: "texto", max: 24, placeholder: "Ej: Seguridad" },
+      { clave: "video", etiqueta: "Video", tipo: "video", requerido: true, ayuda: "MP4 vertical (9:16), corto (5 a 10 segundos) y sin sonido." },
     ],
   },
   {
@@ -254,7 +271,7 @@ export const SECCIONES: Seccion[] = [
 
 /* ------------------------------ Validación ------------------------------ */
 const FOTO_VALIDA = /^\/(fotos(\/portafolio)?|uploads\/fotos)\/[\w.-]+$/;
-const VIDEO_VALIDO = /^\/(tv|uploads\/videos)\/[\w.-]+$/;
+const VIDEO_VALIDO = /^\/(tv|clips|uploads\/videos)\/[\w.-]+$/;
 const COLOR_VALIDO = /^#[0-9a-fA-F]{6}$/;
 const URL_VALIDA = /^https:\/\/[^\s"'<>]+$/;
 
