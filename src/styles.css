@@ -556,6 +556,8 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
 .tr-hud { position: absolute; left: var(--pad); bottom: 8vh; }
 .tr-vlt { display: block; font-family: var(--font-d); font-weight: 900; font-size: clamp(56px, 8vw, 120px); line-height: 0.9; color: var(--y); letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
 .tr-label { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #bbb; }
+.tr-hud .tr-label { display: block; margin-bottom: 8px; }
+.tr-estado { display: block; font-family: var(--font-d); font-weight: 900; font-size: clamp(30px, 4.4vw, 64px); line-height: 0.95; color: var(--y); letter-spacing: -0.04em; }
 .tr-end { position: absolute; right: var(--pad); bottom: 8vh; text-align: right; }
 .tr-end .eyebrow::before { display: none; }
 .tr-end-t { font-family: var(--font-d); font-weight: 800; font-size: clamp(26px, 3.4vw, 52px); letter-spacing: -0.03em; }
