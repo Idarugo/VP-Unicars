@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { Flip } from 'gsap/Flip'
 import { portafolio, waLink } from '../data.js'
+import AntesDespues from './AntesDespues.jsx'
 import { Icon, faWhatsapp, faChevronLeft, faChevronRight, faXmark, faImages } from '../icons.js'
 
 gsap.registerPlugin(Flip)
@@ -90,8 +91,10 @@ export default function Portafolio() {
       <div className="pf-head">
         <p className="eyebrow">Portafolio</p>
         <h2 className="h2">Trabajos <em>reales</em>.</h2>
-        <p className="muted">{portafolio.length} trabajos hechos en nuestro taller y a domicilio. Toca uno para verlo en grande.</p>
+        <p className="muted">Arrastra la línea para comparar. Abajo, {portafolio.length} trabajos hechos en nuestro taller y a domicilio.</p>
       </div>
+
+      <AntesDespues />
 
       <div className="pf-filtros" role="group" aria-label="Filtrar por categoría">
         <button type="button" className={filtro === 'todos' ? 'is-on' : ''} onClick={() => cambiar('todos')}>Todos <small>{portafolio.length}</small></button>

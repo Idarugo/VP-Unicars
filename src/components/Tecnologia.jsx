@@ -3,7 +3,7 @@ import { gsap } from 'gsap'
 import { tecnologia, waLink } from '../data.js'
 import { Icon, faWhatsapp, faChevronLeft, faChevronRight } from '../icons.js'
 
-// Tecnología y seguridad: tarjetas verticales con videos reales del taller, estilo "reels".
+// Riel de videos reales (pantallas, seguridad, luces, audio) dentro de "Más servicios", estilo reels.
 // Cada video se reproduce solo mientras está en pantalla (y nunca si el usuario pidió menos movimiento).
 // Se editan en Mantención → Contenido web → Tecnología y seguridad.
 export default function Tecnologia() {
@@ -22,7 +22,6 @@ export default function Tecnologia() {
     videos.forEach((v) => io.observe(v))
 
     const ctx = gsap.context(() => {
-      gsap.from('.tec-head > *', { y: 40, opacity: 0, duration: 1, stagger: 0.08, ease: 'expo.out', scrollTrigger: { trigger: root.current, start: 'top 75%' } })
       gsap.from('.tec-card', { x: 120, opacity: 0, duration: 1.1, stagger: 0.07, ease: 'expo.out', scrollTrigger: { trigger: riel.current, start: 'top 85%' } })
     }, root)
     return () => { io.disconnect(); ctx.revert() }
@@ -37,18 +36,9 @@ export default function Tecnologia() {
   if (!tecnologia.length) return null
 
   return (
-    <section id="tecnologia" className="tec" ref={root}>
-      <div className="tec-head">
-        <div>
-          <p className="eyebrow">Tecnología y seguridad</p>
-          <h2 className="h2">Tu auto, <em>más inteligente</em>.</h2>
-          <p className="muted">Pantallas, cámaras, inmovilizadores, luces y audio. Videos reales de nuestro taller.</p>
-        </div>
-        <div className="tec-flechas">
-          <button type="button" onClick={() => mover(-1)} aria-label="Anteriores"><Icon icon={faChevronLeft} /></button>
-          <button type="button" onClick={() => mover(1)} aria-label="Siguientes"><Icon icon={faChevronRight} /></button>
-        </div>
-      </div>
+    <div id="tecnologia" className="tec" ref={root}>
+      <button type="button" className="tec-flecha tec-flecha--izq" onClick={() => mover(-1)} aria-label="Anteriores"><Icon icon={faChevronLeft} /></button>
+      <button type="button" className="tec-flecha tec-flecha--der" onClick={() => mover(1)} aria-label="Siguientes"><Icon icon={faChevronRight} /></button>
 
       <ul className="tec-riel" ref={riel}>
         {tecnologia.map((x) => (
@@ -65,6 +55,6 @@ export default function Tecnologia() {
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   )
 }

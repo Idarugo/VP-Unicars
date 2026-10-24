@@ -78,7 +78,7 @@ export const SECCIONES: Seccion[] = [
   },
   {
     clave: "masServicios",
-    titulo: "Más servicios",
+    titulo: "Más servicios: tarjetas",
     descripcion: "Audio, seguridad, iluminación… las tarjetas chicas.",
     tipo: "lista",
     maxItems: 30,
@@ -137,8 +137,25 @@ export const SECCIONES: Seccion[] = [
     ],
   },
   {
+    clave: "comparaciones",
+    titulo: "Portafolio: antes y después (comparador)",
+    descripcion: "Pares de fotos del mismo auto, sacadas desde el mismo lugar: el cliente arrastra la línea para comparar. Mientras más parecido el encuadre, mejor se ve.",
+    tipo: "lista",
+    maxItems: 12,
+    nombreItem: "comparación",
+    titular: "titulo",
+    campos: [
+      { clave: "titulo", etiqueta: "Auto o trabajo", tipo: "texto", max: 60, requerido: true, placeholder: "Ej: Audi A4 · polarizado" },
+      { clave: "detalle", etiqueta: "Detalle", tipo: "texto", max: 120, placeholder: "Ej: Mismo auto, mismo lugar, sin filtros." },
+      { clave: "antes", etiqueta: "Foto ANTES", tipo: "foto", requerido: true, ayuda: FOTO_AYUDA },
+      { clave: "despues", etiqueta: "Foto DESPUÉS", tipo: "foto", requerido: true, ayuda: FOTO_AYUDA },
+      { clave: "etiquetaAntes", etiqueta: "Texto del antes", tipo: "texto", max: 30, placeholder: "Sin polarizado" },
+      { clave: "etiquetaDespues", etiqueta: "Texto del después", tipo: "texto", max: 30, placeholder: "Con polarizado" },
+    ],
+  },
+  {
     clave: "tecnologia",
-    titulo: "Tecnología y seguridad (videos)",
+    titulo: "Más servicios: videos (pantallas, seguridad, luces)",
     descripcion: "Tarjetas con videos cortos de pantallas, cámaras, inmovilizadores, luces y audio. Se reproducen solas y sin sonido.",
     tipo: "lista",
     maxItems: 20,
@@ -270,7 +287,7 @@ export const SECCIONES: Seccion[] = [
 ];
 
 /* ------------------------------ Validación ------------------------------ */
-const FOTO_VALIDA = /^\/(fotos(\/portafolio)?|uploads\/fotos)\/[\w.-]+$/;
+const FOTO_VALIDA = /^\/(fotos(\/(portafolio|comparar))?|uploads\/fotos)\/[\w.-]+$/;
 const VIDEO_VALIDO = /^\/(tv|clips|uploads\/videos)\/[\w.-]+$/;
 const COLOR_VALIDO = /^#[0-9a-fA-F]{6}$/;
 const URL_VALIDA = /^https:\/\/[^\s"'<>]+$/;

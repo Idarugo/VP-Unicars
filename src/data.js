@@ -117,18 +117,10 @@ const baseServicios = [
 // Servicios adicionales: todo se cotiza y agenda por el WhatsApp de VP Unicars.
 // icono: nombre del ícono de Font Awesome definido en components/MasServicios.jsx
 const baseMasServicios = [
-  { id: 'audio', titulo: 'Audio', texto: 'Instalación de parlantes, radios, subwoofers y amplificadores.', icono: 'audio' },
-  { id: 'corta-corriente', titulo: 'Corta corriente e inmovilizadores', texto: 'Protección antirrobo que impide que tu auto arranque sin ti.', icono: 'corriente' },
-  { id: 'seguridad', titulo: 'Sistemas de seguridad', texto: 'Alarmas y soluciones para que tu auto esté siempre protegido.', icono: 'seguridad' },
-  { id: 'iluminacion', titulo: 'Iluminación', texto: 'Luces y todo lo que sea iluminación para tu auto.', icono: 'luces' },
   { id: 'electricidad', titulo: 'Electricidad automotriz', texto: 'Instalaciones y trabajos eléctricos en tu vehículo.', icono: 'electricidad' },
   { id: 'grabado', titulo: 'Grabado de patentes', texto: 'Grabado de patente en los vidrios de tu auto.', icono: 'grabado' },
-  { id: 'cielo-estrellado', titulo: 'Cielo estrellado', texto: 'Techo con fibra óptica que convierte el interior de tu auto en un cielo de estrellas.', icono: 'estrella' },
   { id: 'empavonado', titulo: 'Empavonado de vidrios', texto: 'Vinilo esmerilado para puertas, baños y oficinas: privacidad sin perder luz. También con tu logo.', icono: 'empavonado' },
   { id: 'flotas', titulo: 'Branding de flotas', texto: 'Cambio de color y ploteo de furgones y vehículos de empresa con la imagen de tu marca.', icono: 'flota' },
-  { id: 'pantallas', titulo: 'Pantallas Android y CarPlay', texto: 'Radios con pantalla táctil, GPS, Apple CarPlay y Android Auto, con terminación de fábrica.', icono: 'pantalla' },
-  { id: 'camaras', titulo: 'Cámaras de retroceso', texto: 'Cámara con guías de estacionamiento conectada a tu pantalla.', icono: 'camara' },
-  { id: 'pulido-focos', titulo: 'Pulido de focos', texto: 'Focos amarillos u opacos vuelven a quedar transparentes: mejor luz y mejor look.', icono: 'luces' },
   { id: 'nautico', titulo: 'Polarizado náutico', texto: 'Láminas para lanchas y yates: menos calor, protección UV y privacidad a bordo.', icono: 'barco' },
   { id: 'motos', titulo: 'Ahumado de micas de moto', texto: 'Parabrisas y micas de moto ahumados con vinilo o PPF: más estilo y protección.', icono: 'moto' },
 ]
@@ -178,6 +170,7 @@ const P = (n) => `/fotos/portafolio/${n}.webp`
 const basePortafolio = [
   ['pantalla-volvo-despues', 'Pantalla Android en Volvo: después', 'tecnologia'],
   ['polarizado-lancha', 'Polarizado en lancha', 'nautico'],
+  ['polarizado-audi-a4', 'Polarizado en Audi A4', 'polarizado'],
   ['pulido-de-focos', 'Pulido de focos', 'tecnologia'],
   ['hogar-ventanal-instalacion', 'Instalando lámina en ventanal', 'hogar'],
   ['cielo-estrellado-2', 'Cielo estrellado con fibra óptica', 'personalizacion'],
@@ -240,6 +233,12 @@ const baseTecnologia = [
   ['cielo-estrellado', 'Cielo estrellado', 'Fibra óptica con colores en el techo.', 'Personalización'],
 ].map(([n, titulo, texto, etiqueta]) => ({ id: `tec-${n}`, titulo, texto, etiqueta, video: `/clips/${n}.mp4` }))
 
+// Comparador antes / después: fotos alineadas del mismo auto (en /public/fotos/comparar)
+const baseComparaciones = [
+  { id: 'cmp-audi-a4', titulo: 'Audi A4 · polarizado', detalle: 'Mismo auto, mismo lugar, sin filtros. Foto real de nuestro taller.',
+    antes: '/fotos/comparar/audi-a4-antes.webp', despues: '/fotos/comparar/audi-a4-despues.webp', etiquetaAntes: 'Sin polarizado', etiquetaDespues: 'Con polarizado' },
+]
+
 const baseVideosTv = [
   { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
   { id: 'tv-asi-trabajamos', titulo: 'Así trabajamos · procesos reales', video: '/tv/vp-asi-trabajamos.mp4' },
@@ -248,6 +247,7 @@ const baseVideosTv = [
   { id: 'tv-tu-hogar', titulo: 'Polarizado para tu hogar', video: '/tv/vp-tu-hogar.mp4' },
   { id: 'tv-hazlo-unico', titulo: 'Hazlo único · personalización', video: '/tv/vp-hazlo-unico.mp4' },
   { id: 'tv-tecnologia', titulo: 'Tecnología y seguridad', video: '/tv/vp-tecnologia.mp4' },
+  { id: 'tv-antes-despues', titulo: 'Antes y después · Audi A4', video: '/tv/vp-antes-despues.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
@@ -346,6 +346,7 @@ export const base = {
   videosTv: baseVideosTv,
   portafolio: basePortafolio,
   tecnologia: baseTecnologia,
+  comparaciones: baseComparaciones,
   pasos: conId(basePasos, 'paso'),
   faqs: conId(baseFaqs, 'faq'),
 }
@@ -363,6 +364,7 @@ export const resenas = []
 export const videosTv = []
 export const portafolio = []
 export const tecnologia = []
+export const comparaciones = []
 export const pasos = []
 export const faqs = []
 
@@ -388,6 +390,7 @@ export function aplicarContenido(c = {}) {
   reemplazar(resenas, seccion(c, 'resenas').map((r) => ({ ...r, estrellas: Math.min(5, Math.max(1, Number(r.estrellas) || 5)) })))
   reemplazar(portafolio, seccion(c, 'portafolio').filter((x) => x.foto).map((x) => ({ ...x, foto: urlFoto(x.foto), mini: x.foto.startsWith('/fotos/portafolio/') ? x.foto.replace(/\.webp$/, '-mini.webp') : urlFoto(x.foto) })))
   reemplazar(tecnologia, seccion(c, 'tecnologia').filter((x) => x.video).map((x) => ({ ...x, video: urlFoto(x.video), poster: x.video.startsWith('/clips/') ? x.video.replace(/\.mp4$/, '.jpg') : undefined })))
+  reemplazar(comparaciones, seccion(c, 'comparaciones').filter((x) => x.antes && x.despues).map((x) => ({ ...x, antes: urlFoto(x.antes), despues: urlFoto(x.despues) })))
   reemplazar(videosTv, seccion(c, 'videosTv').filter((v) => v.video).map((v) => ({ ...v, video: urlFoto(v.video) })))
   negocio.calificacion = Number(negocio.calificacion) || 0
   negocio.totalResenas = Number(negocio.totalResenas) || 0

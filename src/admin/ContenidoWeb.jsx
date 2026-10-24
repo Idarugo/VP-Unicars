@@ -13,6 +13,8 @@ const FOTOS_PAGINA = [
   'laminas-seguridad.webp', 'nanocarbon.jpg', 'nanoceramico.jpg', 'personalizacion.jpg', 'piano-black.jpg', 'pilares-carbono.jpg',
   'pilares-ppf.webp', 'polarizado-5.webp', 'porsche-ppf.jpg', 'ppf-moto.webp', 'ppf-trabajos.webp', 'privacidad.jpg', 'tecnica.webp',
   'territory-ppf.jpg', 'tornasol.webp',
+  // Comparador antes / después
+  'comparar/audi-a4-antes.webp', 'comparar/audi-a4-despues.webp',
   // Fotos del portafolio
   'portafolio/ahumado-de-mica-1.webp', 'portafolio/ahumado-de-mica-moto-3.webp', 'portafolio/ahumado-de-mica-moto.webp', 'portafolio/cielo-estrellado-2.webp', 'portafolio/cielo-estrellado.webp', 'portafolio/empavonado-casa.webp', 'portafolio/empavonado-oficina.webp', 'portafolio/empovanado-con-logo-para-oficina.webp', 'portafolio/furgon-personalizacion-1.webp', 'portafolio/furgon-personalizacion-2.webp', 'portafolio/furgon-personalizacion-3.webp', 'portafolio/furgon-personalizacion.webp', 'portafolio/personalizacion-con-fibra-de-carbono.webp', 'portafolio/personalizacion-con-vinilo-fucsia.webp', 'portafolio/personalizacion-con-vinilo.webp', 'portafolio/personalizacion-de-consola-2.webp', 'portafolio/personalizacion-de-consola-3.webp', 'portafolio/personalizacion-de-consola-central-con-fibra-de-carbono.webp', 'portafolio/personalizacion-de-espejos-con-vinilos.webp', 'portafolio/personalizacion-de-interior-con-vinilo.webp', 'portafolio/personalizacion-de-pilares.webp', 'portafolio/polarizado-5-infiel.webp', 'portafolio/polarizado-espejo-caseta-de-vigilancia.webp', 'portafolio/polarizado-espejo-maxima-privacidad.webp', 'portafolio/polarizado-espejo-maxima.webp', 'portafolio/polarizado-full-black.webp', 'portafolio/polarizado-nanoceramico-certificado.webp', 'portafolio/polarizado-oscuro.webp', 'portafolio/polarizado.webp', 'portafolio/ppf-en-volante.webp',
 ].map((f) => `/fotos/${f}`)
@@ -106,7 +108,7 @@ function SelectorFotos({ actual, onElegir, onClose }) {
 }
 
 /* ------------------------------- Selector de videos (TV) ------------------------------- */
-const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4', '/tv/vp-hazlo-unico.mp4', '/tv/vp-tecnologia.mp4',
+const VIDEOS_PAGINA = ['/tv/vp-unicars.mp4', '/tv/vp-asi-trabajamos.mp4', '/tv/vp-elige-tu-polarizado.mp4', '/tv/vp-clientes-felices.mp4', '/tv/vp-tu-hogar.mp4', '/tv/vp-hazlo-unico.mp4', '/tv/vp-tecnologia.mp4', '/tv/vp-antes-despues.mp4',
   // Clips verticales de la sección Tecnología y seguridad
   '/clips/alarma.mp4', '/clips/audio.mp4', '/clips/camara-retroceso.mp4', '/clips/carplay.mp4', '/clips/cielo-estrellado.mp4', '/clips/faros-led.mp4', '/clips/inmovilizador.mp4', '/clips/luces-ambiente.mp4', '/clips/pantalla-android.mp4', '/clips/pulido-focos.mp4']
 const nombreVideo = (u) => u.split('/').pop()

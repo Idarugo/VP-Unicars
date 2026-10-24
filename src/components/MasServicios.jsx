@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { masServicios, waLink } from '../data.js'
+import Tecnologia from './Tecnologia.jsx'
 import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight, faScrewdriverWrench, faCar, faStar, faTruck, faMotorcycle, faBorderAll, faTv, faVideo, faShip } from '../icons.js'
 
 const iconos = {
@@ -37,8 +38,10 @@ export default function MasServicios() {
       <div className="section-head">
         <p className="eyebrow">Más que polarizado</p>
         <h2 className="h2">Todo para tu auto, <em>en un solo lugar</em>.</h2>
-        <p className="muted">Audio, seguridad, iluminación y más. Cotiza y agenda todo por el mismo WhatsApp.</p>
+        <p className="muted">Pantallas, seguridad, luces y audio, en videos reales de nuestro taller. Cotiza y agenda todo por el mismo WhatsApp.</p>
       </div>
+      <Tecnologia />
+      {masServicios.length > 0 && <p className="ms-sub">También hacemos</p>}
       <div className="ms-grid">
         {masServicios.map((s) => (
           <article key={s.id} className="ms-card" onPointerMove={brillo}>
