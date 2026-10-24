@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { trabajos, autos, negocio } from '../data.js'
-import Car from './Car.jsx'
-import { Icon, faInstagram, faStar } from '../icons.js'
+import { portafolio, categoriasPortafolio, autos, negocio } from '../data.js'
+import { Icon, faInstagram, faStar, faArrowDown } from '../icons.js'
+
+const NOMBRE = Object.fromEntries(categoriasPortafolio)
 
 // Tarjetas que vuelan desde el fondo hacia la cámara mientras haces scroll.
+// Muestra los trabajos marcados como "destacados" del Portafolio (si no hay, los primeros 8).
 export default function Garage() {
   const root = useRef(null)
 
@@ -27,24 +29,28 @@ export default function Garage() {
     return () => ctx.revert()
   }, [])
 
+  const destacados = portafolio.filter((x) => x.destacado)
+  const tarjetas = (destacados.length ? destacados : portafolio.slice(0, 8)).slice(0, 12)
+
   return (
     <section id="trabajos" className="garage" ref={root}>
       <div className="garage-pin">
         <h2 className="garage-title">El <em>garage</em></h2>
         <div className="garage-space">
-          {trabajos.map((t) => (
-            <article key={t.id} className="garage-card" style={{ '--tono': t.tono }}>
-              <div className="garage-media">
-                {t.foto ? <img src={t.foto} alt={t.auto} loading="lazy" /> : <Car id={`g-${t.auto.replace(/\W/g, '')}`} className="garage-car" />}
-              </div>
+          {tarjetas.map((t) => (
+            <article key={t.id} className="garage-card">
+              <div className="garage-media"><img src={t.foto} alt={t.titulo} loading="lazy" /></div>
               <div className="garage-info">
-                <h3>{t.auto}</h3>
-                <p>{t.trabajo}</p>
+                <h3>{t.titulo}</h3>
+                <p>{NOMBRE[t.categoria]}</p>
               </div>
             </article>
           ))}
         </div>
-        <a className="garage-ig" href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} /> Ver +1.900 trabajos en Instagram</a>
+        <div className="garage-links">
+          <a href="#portafolio"><Icon icon={faArrowDown} /> Ver todos los trabajos</a>
+          <a href={negocio.instagram} target="_blank" rel="noreferrer"><Icon icon={faInstagram} /> +1.900 en Instagram</a>
+        </div>
       </div>
 
       <div className="marquee" aria-label="Autos trabajados">

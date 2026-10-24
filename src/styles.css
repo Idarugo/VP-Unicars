@@ -322,12 +322,11 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
 .garage-media { aspect-ratio: 4 / 5; max-height: 62vh; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--tono) 40%, transparent), transparent 70%), #08080a; padding: 6% 8%; }
 .garage-media:has(img) { padding: 0; }
 .garage-media img { width: 100%; height: 100%; object-fit: cover; }
-.garage-car { --wrap-a: var(--tono); --wrap-b: #111; }
-.garage-car .car-wrap { opacity: 0.85; }
 .garage-info { padding: 16px 20px 20px; display: grid; gap: 2px; }
 .garage-info h3 { font-family: var(--font-d); font-size: 20px; font-weight: 700; }
 .garage-info p { color: var(--muted); font-size: 14px; }
-.garage-ig { position: absolute; bottom: 40px; font-size: 14px; color: var(--y); border-bottom: 1px solid currentColor; padding-bottom: 2px; z-index: 5; }
+.garage-links { position: absolute; bottom: 40px; z-index: 5; display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+.garage-links a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--y); border-bottom: 1px solid currentColor; padding-bottom: 2px; }
 .marquee { display: flex; overflow: hidden; padding: 30px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--y); color: #000; }
 .marquee-track { display: flex; flex-shrink: 0; animation: marquee 30s linear infinite; }
 .marquee-track span { font-family: var(--font-d); font-weight: 800; font-size: clamp(22px, 3vw, 40px); white-space: nowrap; padding: 0 20px; display: inline-flex; gap: 40px; align-items: center; letter-spacing: -0.02em; }
@@ -445,7 +444,6 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
   .hero-stage { bottom: 44vh; }
   .hero-copy--bottom { flex-direction: column; align-items: flex-start; bottom: 24px; right: var(--pad); }
   .hero-ctas .btn { --h: 48px; padding: 0 22px; }
-  .ring { padding-bottom: 4vh; }
   .hero-scroll { display: none; }
   .tint { padding-top: 90px; }
   .tint-steps li { padding: 10px; }
@@ -493,21 +491,6 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
 .zt-caption .small-line { font-family: var(--font-b); font-weight: 600; font-size: 14px; letter-spacing: 0.25em; text-transform: uppercase; color: #ddd; margin-top: 20px; }
 
 /* ---------- Ring 3D ---------- */
-.ring { position: relative; padding: 16vh 0 8vh; overflow: hidden; cursor: grab; touch-action: pan-y; user-select: none; }
-.ring.is-drag { cursor: grabbing; }
-.ring .section-head { text-align: center; margin-bottom: 4vh; }
-.ring .eyebrow::before { display: none; }
-.ring-stage { --w: 280px; --r: 800px; position: relative; height: calc(var(--w) * 1.6 + 120px); perspective: 1500px; transform-style: preserve-3d; }
-.ring-track { position: absolute; left: 50%; top: 40px; width: var(--w); height: calc(var(--w) * 1.5); margin-left: calc(var(--w) / -2); transform-style: preserve-3d; }
-.ring-item {
-  position: absolute; inset: 0; border-radius: 18px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--r));
-  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  -webkit-box-reflect: below 10px linear-gradient(transparent 65%, rgba(0, 0, 0, 0.35));
-}
-.ring-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.ring-floor { position: absolute; left: 10%; right: 10%; bottom: 0; height: 120px; background: radial-gradient(ellipse at 50% 0%, rgba(255, 230, 0, 0.22), transparent 70%); filter: blur(10px); }
-.ring-ig { display: block; width: max-content; margin: 4vh auto 0; color: var(--y); border-bottom: 1px solid currentColor; font-size: 14px; }
 
 /* ---------- Efectos globales ---------- */
 .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 200; pointer-events: none; }
@@ -519,7 +502,6 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
 @keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-5%, 3%); } 40% { transform: translate(4%, -6%); } 60% { transform: translate(-3%, 5%); } 80% { transform: translate(6%, 2%); } 100% { transform: translate(0, 0); } }
 
 @media (max-width: 899px) {
-  .ring-stage { --w: 150px; --r: 430px; perspective: 1000px; }
   .zt-word { font-size: 46vw; }
 }
 
@@ -625,15 +607,13 @@ html:not(.has-cursor) .cursor-dot, html:not(.has-cursor) .cursor-glow { display:
 .hv-pin { color: var(--y); }
 .hv-arrow { color: var(--y); font-size: 16px; animation: bob 1.8s var(--ease) infinite; }
 @keyframes bob { 50% { transform: translateY(6px); } }
-.garage-ig, .ring-ig { display: inline-flex; align-items: center; gap: 8px; }
-.ring-ig { display: flex; }
 .footer-social { display: flex; gap: 10px; }
 .footer-social a { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); color: #ddd; font-size: 17px; transition: all 0.4s var(--ease); }
 .footer-social a:hover { background: var(--y); border-color: var(--y); color: #000; transform: translateY(-3px); }
 
 /* Rendimiento */
 .seq-frame, .hv-canvas, .tr-media { transform: translateZ(0); }
-@media (max-width: 899px) { .grain { display: none; } .ring-item { -webkit-box-reflect: unset; } }
+@media (max-width: 899px) { .grain { display: none; } }
 
 /* ---------- Más servicios ---------- */
 .ms { padding: 14vh 0 10vh; }

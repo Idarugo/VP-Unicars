@@ -166,7 +166,14 @@ const basePolarizado = {
 }
 
 // Portafolio: trabajos reales de VP Unicars (fotos de octubre 2026). La foto "-mini" se usa en la grilla.
+export const categoriasPortafolio = [
+  ['polarizado', 'Polarizado'], ['ppf', 'PPF'], ['personalizacion', 'Personalización'],
+  ['hogar', 'Hogar y oficina'], ['flotas', 'Flotas y furgones'], ['motos', 'Motos'],
+  ['tecnologia', 'Pantallas y seguridad'], ['nautico', 'Náutico'],
+]
 const P = (n) => `/fotos/portafolio/${n}.webp`
+const DESTACADOS = ['porsche-ppf', 'polarizado-audi-a4', 'furgon-personalizacion-2', 'cielo-estrellado-2', 'bmw-520i', 'pantalla-volvo-despues',
+  'tornasol', 'polarizado-lancha', 'territory-ppf', 'hogar-ventanales']
 const basePortafolio = [
   ['pantalla-volvo-despues', 'Pantalla Android en Volvo: después', 'tecnologia'],
   ['polarizado-lancha', 'Polarizado en lancha', 'nautico'],
@@ -212,11 +219,36 @@ const basePortafolio = [
   ['hogar-ventanal-lamina', 'Lámina de control solar en casa', 'hogar'],
 ].map(([n, titulo, categoria]) => ({ id: n, titulo, categoria, foto: P(n) }))
   .concat([
-    { id: 'hogar-antes-despues', titulo: 'Antes y después: vidrio con y sin lámina', categoria: 'hogar', foto: '/fotos/hogar-antes-despues.webp' },
-    { id: 'hogar-espejo-madera', titulo: 'Casa con polarizado espejo', categoria: 'hogar', foto: '/fotos/hogar-espejo-madera.webp' },
-    { id: 'ppf-moto', titulo: 'PPF en tablero de moto', categoria: 'ppf', foto: '/fotos/ppf-moto.webp' },
-    { id: 'ppf-trabajos', titulo: 'PPF en interior', categoria: 'ppf', foto: '/fotos/ppf-trabajos.webp' },
-  ])
+    ['porsche-ppf.jpg', 'PPF en Porsche 911 Turbo S', 'ppf'],
+    ['bmw-520i.jpg', 'BMW 520i: nanocarbon + nanocerámica', 'polarizado'],
+    ['tornasol.webp', 'Polarizado tornasol en VW Golf GTI', 'polarizado'],
+    ['territory-ppf.jpg', 'PPF en piano black de Ford Territory', 'ppf'],
+    ['piano-black.jpg', 'Porsche 911: PPF en piano black', 'ppf'],
+    ['nanoceramico.jpg', 'Nanocerámico 20%: máxima privacidad', 'polarizado'],
+    ['kill-chrome.jpg', 'Kill chrome: del cromo al negro', 'personalizacion'],
+    ['personalizacion.jpg', 'PPF ahumado + kill chrome', 'personalizacion'],
+    ['pilares-carbono.jpg', 'Pilares en carbono forjado', 'personalizacion'],
+    ['fibra-carbono.webp', 'Detalles en fibra de carbono', 'personalizacion'],
+    ['ahumado-focos.webp', 'Ahumado de focos', 'personalizacion'],
+    ['nanocarbon.jpg', 'Polarizado nanocarbon', 'polarizado'],
+    ['polarizado-5.webp', 'Polarizado 5%', 'polarizado'],
+    ['privacidad.jpg', 'Polarizado de privacidad', 'polarizado'],
+    ['laminas-seguridad.webp', 'Lámina de seguridad', 'polarizado'],
+    ['pilares-ppf.webp', 'PPF en pilares', 'ppf'],
+    ['ppf-moto.webp', 'PPF en tablero de moto', 'ppf'],
+    ['ppf-trabajos.webp', 'PPF en interior', 'ppf'],
+    ['hogar-ventanales.webp', 'Ventanales con polarizado espejo', 'hogar'],
+    ['hogar-espejo-ladrillo.webp', 'Casa de ladrillo con lámina espejo', 'hogar'],
+    ['hogar-espejo-madera.webp', 'Casa con polarizado espejo', 'hogar'],
+    ['hogar-espejo-patio.webp', 'Lámina espejo hacia el patio', 'hogar'],
+    ['hogar-instalacion.webp', 'Instalación a domicilio', 'hogar'],
+    ['hogar-antes-despues.webp', 'Antes y después: vidrio con y sin lámina', 'hogar'],
+    ['arquitectonico-bronce.webp', 'Lámina bronce en edificio', 'hogar'],
+  ].map(([f, titulo, categoria]) => ({ id: f.replace(/\.\w+$/, ''), titulo, categoria, foto: P(f.replace(/\.\w+$/, '')) })))
+  // Los destacados también se muestran en "El garage"
+  .map((x) => ({ ...x, destacado: DESTACADOS.includes(x.id) }))
+  // Primero los destacados (en el orden de DESTACADOS), después el resto
+  .sort((x, y) => (DESTACADOS.indexOf(x.id) + 1 || 99) - (DESTACADOS.indexOf(y.id) + 1 || 99))
 
 // Videos de la pantalla /videos (TV del local)
 // Tecnología y seguridad: videos cortos verticales (en /public/clips, con su póster .jpg)
@@ -278,19 +310,6 @@ const baseAutos = [
 ]
 
 // Trabajos destacados (sacados del Instagram). Agrega "foto" para mostrar la imagen real.
-const baseTrabajos = [
-  { auto: 'Porsche 911 Turbo S', trabajo: 'PPF en interior piano black', tono: '#c9a227', foto: '/fotos/piano-black.jpg' },
-  { auto: 'BMW 520i', trabajo: 'Nanocarbon + Nanocerámica', tono: '#3b82f6', foto: '/fotos/bmw-520i.jpg' },
-  { auto: 'Ford Territory 2026', trabajo: 'PPF protector piano black', tono: '#a3a3a3', foto: '/fotos/territory-ppf.jpg' },
-  { auto: 'VW Golf GTI', trabajo: 'Polarizado tornasol', tono: '#e5e5e5', foto: '/fotos/tornasol.webp' },
-  { auto: 'Polarizado Infiel', trabajo: 'Nanocerámico 20% · máxima privacidad', tono: '#ffe600', foto: '/fotos/nanoceramico.jpg' },
-  { auto: 'Personalización', trabajo: 'PPF ahumado + kill chrome', tono: '#ef4444', foto: '/fotos/personalizacion.jpg' },
-  { auto: 'Carbono forjado', trabajo: 'Pianos black en carbono', tono: '#22c55e', foto: '/fotos/pilares-carbono.jpg' },
-  { auto: 'Hogar · ventanales', trabajo: 'Polarizado espejo · privacidad de día', tono: '#a16207', foto: '/fotos/hogar-ventanales.webp' },
-  { auto: 'Casa de ladrillo', trabajo: 'Polarizado espejo exterior', tono: '#ef4444', foto: '/fotos/hogar-espejo-ladrillo.webp' },
-  { auto: 'Antes y después', trabajo: 'Vidrio sin lámina vs. con lámina espejo', tono: '#38bdf8', foto: '/fotos/hogar-antes-despues.webp' },
-]
-
 const basePasos = [
   { t: 'Escríbenos', d: 'Por WhatsApp o DM. Cuéntanos tu auto y lo que buscas.' },
   { t: 'Asesoría', d: 'Te recomendamos la lámina ideal para tu uso y presupuesto.' },
@@ -337,7 +356,6 @@ export const base = {
   negocio: baseNegocio,
   servicios: baseServicios,
   masServicios: baseMasServicios,
-  trabajos: conId(baseTrabajos, 'trabajo'),
   autos: baseAutos.map((nombre, i) => ({ id: `auto-${i + 1}`, nombre })),
   stats: baseStats,
   niveles: conId(baseNiveles, 'nivel'),
@@ -355,7 +373,6 @@ export const base = {
 export const negocio = { ...baseNegocio }
 export const servicios = []
 export const masServicios = []
-export const trabajos = []
 export const autos = []
 export const stats = []
 export const niveles = []
@@ -382,7 +399,6 @@ export function aplicarContenido(c = {}) {
     ...s, num: String(i + 1).padStart(2, '0'), tags: s.tags || [], foto: urlFoto(s.foto),
   })))
   reemplazar(masServicios, seccion(c, 'masServicios').map((s) => ({ ...s, foto: urlFoto(s.foto) })))
-  reemplazar(trabajos, seccion(c, 'trabajos').map((t) => ({ ...t, tono: t.tono || '#ffe600', foto: urlFoto(t.foto) })))
   reemplazar(autos, seccion(c, 'autos').map((a) => a.nombre))
   reemplazar(stats, seccion(c, 'stats').map((s) => ({ ...s, valor: Number(s.valor) || 0, decimales: Number(s.decimales) || 0 })))
   reemplazar(niveles, seccion(c, 'niveles').map((n) => ({ ...n, beneficios: n.beneficios || [], foto: urlFoto(n.foto) })))

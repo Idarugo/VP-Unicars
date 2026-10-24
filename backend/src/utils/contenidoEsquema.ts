@@ -101,24 +101,9 @@ export const SECCIONES: Seccion[] = [
     ],
   },
   {
-    clave: "trabajos",
-    titulo: "Trabajos destacados (garage)",
-    descripcion: "Las fotos de trabajos reales de la sección “El garage”.",
-    tipo: "lista",
-    maxItems: 24,
-    nombreItem: "trabajo",
-    titular: "auto",
-    campos: [
-      { clave: "auto", etiqueta: "Auto o proyecto", tipo: "texto", max: 60, requerido: true, placeholder: "Ej: BMW 520i" },
-      { clave: "trabajo", etiqueta: "Trabajo realizado", tipo: "texto", max: 80, placeholder: "Ej: Nanocerámico 20%" },
-      { clave: "foto", etiqueta: "Foto", tipo: "foto", ayuda: FOTO_AYUDA },
-      { clave: "tono", etiqueta: "Color de acento", tipo: "color" },
-    ],
-  },
-  {
     clave: "portafolio",
     titulo: "Portafolio (galería con filtros)",
-    descripcion: "Fotos de trabajos reales que se filtran por categoría y se abren en grande.",
+    descripcion: "Todas las fotos de trabajos: se filtran por categoría y se abren en grande. Las marcadas como destacadas también aparecen en “El garage”.",
     tipo: "lista",
     maxItems: 120,
     nombreItem: "foto",
@@ -134,6 +119,7 @@ export const SECCIONES: Seccion[] = [
           { valor: "tecnologia", etiqueta: "Pantallas y seguridad" }, { valor: "nautico", etiqueta: "Náutico" },
         ],
       },
+      { clave: "destacado", etiqueta: "Destacar en “El garage”", tipo: "booleano", ayuda: "Las fotos destacadas vuelan hacia la cámara en la sección El garage (se recomiendan 8 a 12)." },
     ],
   },
   {

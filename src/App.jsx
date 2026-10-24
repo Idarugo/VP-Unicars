@@ -23,7 +23,6 @@ import Portafolio from './components/Portafolio.jsx'
 import Contact from './components/Contact.jsx'
 import WhatsAppFab from './components/WhatsAppFab.jsx'
 import ZoomThrough from './components/ZoomThrough.jsx'
-import Ring from './components/Ring.jsx'
 import Fx from './components/Fx.jsx'
 import FrameScroll from './components/FrameScroll.jsx'
 
@@ -102,7 +101,6 @@ export default function App() {
         <Stats />
         <FrameScroll id="proceso-cromos" carpeta="cromos" total={150} kicker="Antes y después · Kill chrome" titulo={<>Del cromo<br />al <em>negro</em>.</>} beats={beatsCromos} lado="der" />
         <Garage />
-        <Ring />
         <FrameScroll id="proceso-bmw" carpeta="bmw" total={90} kicker="Proceso real · BMW" titulo={<>Precisión en<br /><em>cada vidrio</em>.</>} beats={beatsBmw} lado="der" />
         <Spaces />
         <Portafolio />

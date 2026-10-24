@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { Flip } from 'gsap/Flip'
-import { portafolio, waLink } from '../data.js'
+import { portafolio, categoriasPortafolio, waLink } from '../data.js'
 import AntesDespues from './AntesDespues.jsx'
 import { Icon, faWhatsapp, faChevronLeft, faChevronRight, faXmark, faImages } from '../icons.js'
 
@@ -9,11 +9,7 @@ gsap.registerPlugin(Flip)
 
 // Portafolio de trabajos reales con filtros por categoría y visor a pantalla completa.
 // Las fotos se editan en Mantención → Contenido web → Portafolio.
-const CATEGORIAS = [
-  ['polarizado', 'Polarizado'], ['ppf', 'PPF'], ['personalizacion', 'Personalización'],
-  ['hogar', 'Hogar y oficina'], ['flotas', 'Flotas y furgones'], ['motos', 'Motos'],
-  ['tecnologia', 'Pantallas y seguridad'], ['nautico', 'Náutico'],
-]
+const CATEGORIAS = categoriasPortafolio
 const NOMBRE = Object.fromEntries(CATEGORIAS)
 const POR_PAGINA = 12
 
