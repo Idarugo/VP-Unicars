@@ -265,12 +265,6 @@ const baseTecnologia = [
   ['cielo-estrellado', 'Cielo estrellado', 'Fibra óptica con colores en el techo.', 'Personalización'],
 ].map(([n, titulo, texto, etiqueta]) => ({ id: `tec-${n}`, titulo, texto, etiqueta, video: `/clips/${n}.mp4` }))
 
-// Comparador antes / después: fotos alineadas del mismo auto (en /public/fotos/comparar)
-const baseComparaciones = [
-  { id: 'cmp-audi-a4', titulo: 'Audi A4 · polarizado', detalle: 'Mismo auto, mismo lugar, sin filtros. Foto real de nuestro taller.',
-    antes: '/fotos/comparar/audi-a4-antes.webp', despues: '/fotos/comparar/audi-a4-despues.webp', etiquetaAntes: 'Sin polarizado', etiquetaDespues: 'Con polarizado' },
-]
-
 const baseVideosTv = [
   { id: 'tv-vp-unicars', titulo: 'VP Unicars · promocional', video: '/tv/vp-unicars.mp4' },
   { id: 'tv-asi-trabajamos', titulo: 'Así trabajamos · procesos reales', video: '/tv/vp-asi-trabajamos.mp4' },
@@ -364,7 +358,6 @@ export const base = {
   videosTv: baseVideosTv,
   portafolio: basePortafolio,
   tecnologia: baseTecnologia,
-  comparaciones: baseComparaciones,
   pasos: conId(basePasos, 'paso'),
   faqs: conId(baseFaqs, 'faq'),
 }
@@ -381,7 +374,6 @@ export const resenas = []
 export const videosTv = []
 export const portafolio = []
 export const tecnologia = []
-export const comparaciones = []
 export const pasos = []
 export const faqs = []
 
@@ -406,7 +398,6 @@ export function aplicarContenido(c = {}) {
   reemplazar(resenas, seccion(c, 'resenas').map((r) => ({ ...r, estrellas: Math.min(5, Math.max(1, Number(r.estrellas) || 5)) })))
   reemplazar(portafolio, seccion(c, 'portafolio').filter((x) => x.foto).map((x) => ({ ...x, foto: urlFoto(x.foto), mini: x.foto.startsWith('/fotos/portafolio/') ? x.foto.replace(/\.webp$/, '-mini.webp') : urlFoto(x.foto) })))
   reemplazar(tecnologia, seccion(c, 'tecnologia').filter((x) => x.video).map((x) => ({ ...x, video: urlFoto(x.video), poster: x.video.startsWith('/clips/') ? x.video.replace(/\.mp4$/, '.jpg') : undefined })))
-  reemplazar(comparaciones, seccion(c, 'comparaciones').filter((x) => x.antes && x.despues).map((x) => ({ ...x, antes: urlFoto(x.antes), despues: urlFoto(x.despues) })))
   reemplazar(videosTv, seccion(c, 'videosTv').filter((v) => v.video).map((v) => ({ ...v, video: urlFoto(v.video) })))
   negocio.calificacion = Number(negocio.calificacion) || 0
   negocio.totalResenas = Number(negocio.totalResenas) || 0

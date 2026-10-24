@@ -123,23 +123,6 @@ export const SECCIONES: Seccion[] = [
     ],
   },
   {
-    clave: "comparaciones",
-    titulo: "Portafolio: antes y después (comparador)",
-    descripcion: "Pares de fotos del mismo auto, sacadas desde el mismo lugar: el cliente arrastra la línea para comparar. Mientras más parecido el encuadre, mejor se ve.",
-    tipo: "lista",
-    maxItems: 12,
-    nombreItem: "comparación",
-    titular: "titulo",
-    campos: [
-      { clave: "titulo", etiqueta: "Auto o trabajo", tipo: "texto", max: 60, requerido: true, placeholder: "Ej: Audi A4 · polarizado" },
-      { clave: "detalle", etiqueta: "Detalle", tipo: "texto", max: 120, placeholder: "Ej: Mismo auto, mismo lugar, sin filtros." },
-      { clave: "antes", etiqueta: "Foto ANTES", tipo: "foto", requerido: true, ayuda: FOTO_AYUDA },
-      { clave: "despues", etiqueta: "Foto DESPUÉS", tipo: "foto", requerido: true, ayuda: FOTO_AYUDA },
-      { clave: "etiquetaAntes", etiqueta: "Texto del antes", tipo: "texto", max: 30, placeholder: "Sin polarizado" },
-      { clave: "etiquetaDespues", etiqueta: "Texto del después", tipo: "texto", max: 30, placeholder: "Con polarizado" },
-    ],
-  },
-  {
     clave: "tecnologia",
     titulo: "Más servicios: videos (pantallas, seguridad, luces)",
     descripcion: "Tarjetas con videos cortos de pantallas, cámaras, inmovilizadores, luces y audio. Se reproducen solas y sin sonido.",
