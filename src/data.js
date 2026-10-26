@@ -172,12 +172,16 @@ export const categoriasPortafolio = [
   ['tecnologia', 'Pantallas y seguridad'], ['nautico', 'Náutico'],
 ]
 const P = (n) => `/fotos/portafolio/${n}.webp`
-const DESTACADOS = ['porsche-ppf', 'polarizado-audi-a4', 'furgon-personalizacion-2', 'cielo-estrellado-2', 'bmw-520i', 'pantalla-volvo-despues',
-  'tornasol', 'polarizado-lancha', 'territory-ppf', 'hogar-ventanales']
+const DESTACADOS = ['porsche-ppf', 'ppf-mazda-consola', 'polarizado-audi-a4', 'furgon-personalizacion-2', 'cielo-estrellado-2', 'bmw-520i', 'pantalla-volvo-despues',
+  'tornasol', 'polarizado-lancha', 'hogar-ventanales']
 const basePortafolio = [
   ['pantalla-volvo-despues', 'Pantalla Android en Volvo: después', 'tecnologia'],
   ['polarizado-lancha', 'Polarizado en lancha', 'nautico'],
   ['polarizado-audi-a4', 'Polarizado en Audi A4', 'polarizado'],
+  ['ppf-mazda-consola', 'PPF interior: consola piano black · Mazda CX-30', 'ppf'],
+  ['ppf-mazda-botonera', 'PPF en botonera de puerta · Mazda CX-30', 'ppf'],
+  ['ppf-mazda-tablero', 'PPF en tablero de instrumentos · Mazda CX-30', 'ppf'],
+  ['ppf-mazda-puerta-trasera', 'PPF en botonera trasera · Mazda CX-30', 'ppf'],
   ['pulido-de-focos', 'Pulido de focos', 'tecnologia'],
   ['hogar-ventanal-instalacion', 'Instalando lámina en ventanal', 'hogar'],
   ['cielo-estrellado-2', 'Cielo estrellado con fibra óptica', 'personalizacion'],
@@ -274,6 +278,7 @@ const baseVideosTv = [
   { id: 'tv-hazlo-unico', titulo: 'Hazlo único · personalización', video: '/tv/vp-hazlo-unico.mp4' },
   { id: 'tv-tecnologia', titulo: 'Tecnología y seguridad', video: '/tv/vp-tecnologia.mp4' },
   { id: 'tv-antes-despues', titulo: 'Antes y después · Audi A4', video: '/tv/vp-antes-despues.mp4' },
+  { id: 'tv-ppf-interior', titulo: 'PPF interior · Mazda CX-30', video: '/tv/vp-ppf-interior.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)

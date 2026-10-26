@@ -1,48 +1,57 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 
+// PPF explicado con un trabajo real: PPF interior en un Mazda CX-30 (piano black de consola,
+// botoneras, pantalla y tablero). La sección queda fija y cada paso del scroll muestra su video.
 const pasos = [
-  { t: 'El problema', d: 'Piedras, rayones y micro-rayas. Los pianos black se marcan con solo mirarlos.' },
-  { t: 'La lámina', d: 'Instalamos PPF transparente de alto rendimiento, panel por panel, al milímetro.' },
-  { t: 'Autorregenerable', d: 'Los rayones superficiales desaparecen con calor. Tu pintura queda como nueva.' },
+  { t: 'Preparación', d: 'Limpieza y descontaminación de cada pieza. Cero polvo, cero burbujas.', video: '/clips/ppf-preparacion.mp4' },
+  { t: 'Instalación', d: 'Lámina transparente cortada a medida y asentada con espátula, pieza por pieza.', video: '/clips/ppf-instalacion.mp4' },
+  { t: 'Protegido', d: 'El piano black queda a salvo de rayas y huellas, con el brillo de fábrica.', video: '/clips/ppf-resultado.mp4' },
 ]
-
-const piedras = Array.from({ length: 9 }, (_, i) => ({
-  x: 12 + ((i * 37) % 76), y: 18 + ((i * 53) % 60), d: i * 0.08,
-}))
 
 export default function PPFShield() {
   const root = useRef(null)
 
   useEffect(() => {
+    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const videos = [...root.current.querySelectorAll('.ppf-video')]
+    let actual = -1
+    let visible = false
+
+    // Solo se reproduce el video del paso activo, y solo mientras la sección está en pantalla
+    const sincronizar = () => {
+      videos.forEach((v, i) => {
+        if (i === actual && visible && !quieto) v.play().catch(() => {})
+        else v.pause()
+      })
+    }
+    const mostrar = (i) => {
+      if (i === actual) return
+      actual = i
+      root.current.dataset.paso = i
+      videos.forEach((v, k) => { if (k === i) v.currentTime = 0 })
+      sincronizar()
+    }
+
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting
+      if (visible) videos.forEach((v) => { v.preload = 'auto' })
+      sincronizar()
+    }, { threshold: 0.2 })
+    io.observe(root.current)
+
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
+      gsap.timeline({
         scrollTrigger: {
           trigger: root.current, start: 'top top', end: '+=1600', scrub: 0.3, pin: true,
-          onUpdate: (st) => root.current && (root.current.dataset.paso = Math.min(2, Math.floor(st.progress * 3))),
+          onUpdate: (st) => mostrar(Math.min(pasos.length - 1, Math.floor(st.progress * pasos.length))),
         },
       })
-      // 1. Impactos sin protección -> rayas
-      tl.fromTo('.ppf-rock', { x: () => gsap.utils.random(-400, 400), y: -500, scale: 0.4, opacity: 0 },
-        { x: 0, y: 0, scale: 1, opacity: 1, duration: 1, stagger: 0.08, ease: 'power2.in' })
-        .to('.ppf-rock', { opacity: 0, scale: 0.2, duration: 0.3, stagger: 0.08 }, 0.9)
-        .fromTo('.ppf-scratch', { scaleX: 0 }, { scaleX: 1, duration: 0.4, stagger: 0.06 }, 0.95)
-        .to('.ppf-panel', { '--dull': 1, duration: 1 }, 0.8)
-        // 2. La lámina recorre el panel
-        .fromTo('.ppf-film', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 2, ease: 'power1.inOut' }, 2.3)
-        .fromTo('.ppf-squeegee', { left: '0%', opacity: 1 }, { left: '100%', duration: 2, ease: 'power1.inOut' }, 2.3)
-        .to('.ppf-squeegee', { opacity: 0, duration: 0.2 }, 4.3)
-        // 3. Se regenera y las piedras rebotan
-        .to('.ppf-scratch', { opacity: 0, filter: 'blur(6px)', duration: 1.2, stagger: 0.05 }, 4.6)
-        .to('.ppf-panel', { '--dull': 0, duration: 1.2 }, 4.6)
-        .fromTo('.ppf-heat', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1.4, duration: 0.8, yoyo: true, repeat: 1 }, 4.5)
-        .fromTo('.ppf-rock2', { y: -500, opacity: 1 }, { y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.in' }, 5.6)
-        .to('.ppf-rock2', { y: -300, x: (i) => (i % 2 ? 300 : -300), rotate: 360, opacity: 0, duration: 0.8, stagger: 0.1, ease: 'power2.out' }, 6.2)
-        .fromTo('.ppf-spark', { scale: 0, opacity: 1 }, { scale: 2.4, opacity: 0, duration: 0.5, stagger: 0.1 }, 6.2)
-        .to('.ppf-panel', { rotateX: 18, rotateY: -14, duration: 3, ease: 'none' }, 0)
-        .to('.ppf-panel', { rotateX: 4, rotateY: 10, duration: 4, ease: 'none' }, 3)
+        .fromTo('.ppf-marco', { scale: 0.92, rotateY: -8 }, { scale: 1, rotateY: 0, duration: 1, ease: 'none' }, 0)
+        .to('.ppf-marco', { rotateY: 6, duration: 2, ease: 'none' }, 1)
     }, root)
-    return () => ctx.revert()
+    mostrar(0)
+    return () => { io.disconnect(); ctx.revert() }
   }, [])
 
   return (
@@ -58,26 +67,12 @@ export default function PPFShield() {
       </div>
 
       <div className="ppf-scene">
-        <div className="ppf-panel">
-          <div className="ppf-paint" />
-          {piedras.map((p, i) => (
-            <span key={i} className="ppf-scratch" style={{ left: `${p.x}%`, top: `${p.y}%`, rotate: `${(i * 47) % 180}deg`, width: `${40 + (i % 4) * 25}px` }} />
+        <div className="ppf-marco">
+          {pasos.map((p, i) => (
+            <video key={p.video} className="ppf-video" data-i={i} src={p.video} poster={p.video.replace(/\.mp4$/, '.jpg')}
+              muted loop playsInline preload="none" aria-hidden="true" />
           ))}
-          <div className="ppf-film"><div className="ppf-film-sheen" /></div>
-          <div className="ppf-squeegee" />
-          <div className="ppf-heat" />
-          {piedras.map((p, i) => (
-            <span key={i} className="ppf-rock" style={{ left: `${p.x}%`, top: `${p.y}%` }} />
-          ))}
-          {[25, 50, 75].map((x) => (
-            <span key={x}>
-              <span className="ppf-rock ppf-rock2" style={{ left: `${x}%`, top: '40%' }} />
-              <span className="ppf-spark" style={{ left: `${x}%`, top: '40%' }} />
-            </span>
-          ))}
-        </div>
-        <div className="ppf-labels">
-          <span>Pintura</span><span>Lámina PPF</span><span>Capa autorregenerable</span>
+          <span className="ppf-tag">Proceso real · PPF interior · Mazda CX-30</span>
         </div>
       </div>
     </section>
