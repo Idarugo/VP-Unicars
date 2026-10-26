@@ -283,6 +283,7 @@ const baseVideosTv = [
   { id: 'tv-tecnologia', titulo: 'Tecnología y seguridad', video: '/tv/vp-tecnologia.mp4' },
   { id: 'tv-antes-despues', titulo: 'Antes y después · Audi A4', video: '/tv/vp-antes-despues.mp4' },
   { id: 'tv-ppf-interior', titulo: 'PPF interior · Mazda CX-30', video: '/tv/vp-ppf-interior.mp4' },
+  { id: 'tv-nueva-web', titulo: 'Visita la nueva web · QR', video: '/tv/vp-nueva-web.mp4' },
 ]
 
 // Reseñas de la ficha de Google de VP Unicars (copiadas el 16/10/2026)
