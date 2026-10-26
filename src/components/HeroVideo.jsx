@@ -4,10 +4,10 @@ import { waLink } from '../data.js'
 import { irA } from './Nav.jsx'
 import { Icon, faWhatsapp, faLocationDot, faArrowDown } from '../icons.js'
 
-// Portada: video generado con Google Flow (Veo) al estilo de los reels de VP Unicars.
-// Al hacer scroll avanza cuadro a cuadro: la cámara se acerca mientras se instala el polarizado.
-const CARPETA = 'flow-taller'
-const TOTAL = 90
+// Portada: video real del taller (instalación de polarizado en un BMW, oct. 2026), estabilizado.
+// Al hacer scroll avanza cuadro a cuadro: la cámara se acerca hasta la espátula sobre el vidrio.
+const CARPETA = 'portada-real'
+const TOTAL = 96
 
 const Split = ({ text }) =>
   text.split('').map((c, i) => <span key={i} className="ch">{c === ' ' ? ' ' : c}</span>)
@@ -32,8 +32,8 @@ export default function HeroVideo({ listo }) {
     const movil = c.width < c.height
     const r = Math.max(c.width / img.width, c.height / img.height)
     const w = img.width * r, h = img.height * r
-    // En celular se centra en el vidrio y la espátula
-    const x = movil ? (c.width - w) * 0.45 : (c.width - w) / 2
+    // En celular se centra en el técnico, el vidrio y la espátula
+    const x = movil ? (c.width - w) * 0.58 : (c.width - w) / 2
     ctx.drawImage(img, x, (c.height - h) / 2, w, h)
   }
 
@@ -98,7 +98,7 @@ export default function HeroVideo({ listo }) {
 
   return (
     <section id="top" className="hv" ref={root}>
-      <canvas ref={canvas} className="hv-canvas" role="img" aria-label="Técnico de VP Unicars instalando polarizado en un BMW negro" />
+      <canvas ref={canvas} className="hv-canvas" role="img" aria-label="Técnico de VP Unicars instalando polarizado en un BMW en el taller" />
       <div className="hv-shade" />
 
       <div className="hv-copy">
