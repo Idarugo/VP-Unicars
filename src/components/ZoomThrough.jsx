@@ -10,7 +10,7 @@ export default function ZoomThrough() {
       const tl = gsap.timeline({
         scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1300', scrub: 0.3, pin: true },
       })
-      tl.fromTo('.zt-word', { scale: 1, backgroundPosition: '50% 30%' }, { scale: 42, backgroundPosition: '50% 60%', duration: 3, ease: 'power2.in' })
+      tl.fromTo('.zt-word', { scale: 1, backgroundPosition: '50% 30%' }, { scale: 42, backgroundPosition: '50% 50%', duration: 3, ease: 'power2.in' })
         .to('.zt-kicker', { opacity: 0, y: -40, duration: 0.6 }, 0)
         .fromTo('.zt-full', { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 1.2, ease: 'power2.out' }, 2.2)
         .to('.zt-word', { opacity: 0, duration: 0.4 }, 2.8)
@@ -25,7 +25,7 @@ export default function ZoomThrough() {
       <p className="zt-kicker eyebrow">Entra al taller</p>
       <div className="zt-word" aria-hidden="true">VP</div>
       <div className="zt-full">
-        <img src="/fotos/personalizacion.jpg" alt="Trabajo de personalización VP Unicars" />
+        <img src="/fotos/taller-focos.webp" alt="Foco de BMW con PPF instalado en VP Unicars" decoding="async" />
         <div className="zt-caption">
           <p className="line"><span>+1.900 autos</span></p>
           <p className="line"><span><em>transformados</em></span></p>

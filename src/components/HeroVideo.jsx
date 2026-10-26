@@ -3,63 +3,59 @@ import { gsap } from 'gsap'
 import { waLink } from '../data.js'
 import { irA } from './Nav.jsx'
 import { Icon, faWhatsapp, faLocationDot, faArrowDown } from '../icons.js'
+import { Secuencia, cuandoLibre } from '../cuadros.js'
 
 // Portada: video real del taller (instalación de polarizado en un BMW, oct. 2026), estabilizado.
 // Al hacer scroll avanza cuadro a cuadro: la cámara se acerca hasta la espátula sobre el vidrio.
-const CARPETA = 'portada-real'
+// Hay dos juegos de cuadros: 1600×900 para pantallas horizontales y un recorte vertical 576×1024
+// (sacado del video original) para celulares, así nunca se estira una imagen chica.
 const TOTAL = 96
+const VERTICAL = typeof window !== 'undefined' && window.innerWidth < window.innerHeight
+const CARPETA = `portada-real/${VERTICAL ? 'm' : 'd'}`
 
 const Split = ({ text }) =>
-  text.split('').map((c, i) => <span key={i} className="ch">{c === ' ' ? ' ' : c}</span>)
+  text.split('').map((c, i) => <span key={i} className="ch">{c === ' ' ? ' ' : c}</span>)
 
 export default function HeroVideo({ listo }) {
   const root = useRef(null)
   const canvas = useRef(null)
-  const frames = useRef([])
+  const seq = useRef(null)
   const estado = useRef({ f: 0, ultimo: -1 })
   const completarCarga = useRef(() => {})
 
   const pintar = () => {
     const e = estado.current
-    let i = Math.round(e.f)
-    const fr = frames.current
-    while (i > 0 && !(fr[i]?.complete && fr[i]?.naturalWidth)) i--
-    const img = fr[i]
-    if (!img?.complete || !img.naturalWidth || i === e.ultimo) return
+    const sq = seq.current
+    if (!sq) return
+    const pedido = Math.round(e.f)
+    sq.mover(pedido)
+    const i = sq.cercano(pedido)
+    if (i < 0 || i === e.ultimo) return
     e.ultimo = i
+    const img = sq.bitmaps[i]
     const c = canvas.current
     const ctx = c.getContext('2d')
-    const movil = c.width < c.height
     const r = Math.max(c.width / img.width, c.height / img.height)
     const w = img.width * r, h = img.height * r
-    // En celular se centra en el técnico, el vidrio y la espátula
-    const x = movil ? (c.width - w) * 0.58 : (c.width - w) / 2
-    ctx.drawImage(img, x, (c.height - h) / 2, w, h)
+    ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h)
   }
 
   useEffect(() => {
-    frames.current = Array(TOTAL)
-    const cargar = (i) => {
-      if (frames.current[i]) return
-      const img = new Image()
-      img.decoding = 'async'
-      if (i === 0) img.fetchPriority = 'high'
-      img.onload = () => { estado.current.ultimo = -1; pintar() } // repinta apenas llega un cuadro útil
-      img.src = `/seq/${CARPETA}/${String(i + 1).padStart(3, '0')}.webp`
-      frames.current[i] = img
-    }
-    // Al entrar: 1 de cada 4 cuadros (ya se puede recorrer completo, con 1/4 del peso).
-    // El resto se descarga apenas la persona empieza a deslizar la portada (o a los pocos segundos).
-    for (let i = 0; i < TOTAL; i += 4) cargar(i)
-    const timer = setTimeout(() => completarCarga.current(), 12000)
+    const urls = Array.from({ length: TOTAL }, (_, i) => `/seq/${CARPETA}/${String(i + 1).padStart(3, '0')}.webp`)
+    const sq = new Secuencia(urls, { alListo: () => { estado.current.ultimo = -1; pintar() } })
+    seq.current = sq
+    // Primero el cuadro inicial y 1 de cada 4 (la portada ya se puede recorrer). Apenas el navegador
+    // queda libre se descarga el resto en segundo plano, para que al deslizar ya esté todo.
+    sq.descargar([0], 'high')
+    sq.descargar(urls.map((_, i) => i).filter((i) => i % 4 === 0))
     completarCarga.current = () => {
-      clearTimeout(timer)
       completarCarga.current = () => {}
-      for (let i = 0; i < TOTAL; i++) cargar(i)
+      sq.descargar(urls.map((_, i) => i))
     }
+    const timer = setTimeout(() => cuandoLibre(() => completarCarga.current()), 1200)
 
     const ajustar = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.current.width = canvas.current.clientWidth * dpr
       canvas.current.height = canvas.current.clientHeight * dpr
       estado.current.ultimo = -1
@@ -70,6 +66,7 @@ export default function HeroVideo({ listo }) {
     return () => {
       window.removeEventListener('resize', ajustar)
       clearTimeout(timer)
+      sq.destruir()
     }
   }, [])
 

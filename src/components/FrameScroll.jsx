@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Icon, faArrowDown } from '../icons.js'
+import { Secuencia } from '../cuadros.js'
 
 // Efecto Apple: un video real que avanza cuadro a cuadro con el scroll.
 // Los cuadros se extrajeron de los reels de @vp_unicars a /public/seq/<nombre>/001.webp ...
@@ -12,29 +13,32 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
   const hud = useRef(null)
 
   useEffect(() => {
-    const frames = []
+    let sq = null
     const src = (i) => `/seq/${carpeta}/${String(i + 1).padStart(3, '0')}.webp`
     const estado = { f: 0 }
     let ultimo = -1
 
-    const pintar = (canvas, img, cover) => {
+    const pintar = (canvas, img, oscurecer = 0) => {
       const ctx = canvas.getContext('2d')
       const cw = canvas.width, ch = canvas.height
-      const r = cover ? Math.max(cw / img.width, ch / img.height) : Math.min(cw / img.width, ch / img.height)
+      const r = Math.max(cw / img.width, ch / img.height)
       const w = img.width * r, h = img.height * r
-      ctx.clearRect(0, 0, cw, ch)
       ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h)
+      // Oscurecer dentro del canvas: un filtro CSS obligaría a repintar toda la pantalla en cada cuadro
+      if (oscurecer) { ctx.fillStyle = `rgba(0,0,0,${oscurecer})`; ctx.fillRect(0, 0, cw, ch) }
     }
 
     const render = () => {
-      let i = Math.round(estado.f)
-      // Si el cuadro todavía no carga, usa el más cercano ya cargado
-      while (i > 0 && !(frames[i] && frames[i].complete && frames[i].naturalWidth)) i--
-      const img = frames[i]
-      if (!img || !img.complete || i === ultimo) return
+      if (!sq) return
+      // Si el cuadro todavía no está decodificado, usa el más cercano que sí lo esté
+      const pedido = Math.round(estado.f)
+      sq.mover(pedido)
+      const i = sq.cercano(pedido)
+      if (i < 0 || i === ultimo) return
       ultimo = i
-      pintar(fg.current, img, true)
-      pintar(bg.current, img, true)
+      const img = sq.bitmaps[i]
+      pintar(fg.current, img)
+      pintar(bg.current, img, 0.62)
       if (hud.current) hud.current.textContent = `${String(Math.round(estado.f) + 1).padStart(3, '0')} / ${total}`
     }
 
@@ -52,14 +56,9 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
     }
 
     const cargar = () => {
-      if (frames.length) return
-      for (let i = 0; i < total; i++) {
-        const img = new Image()
-        img.decoding = 'async'
-        img.src = src(i)
-        img.onload = () => { ultimo = -1; render() } // repinta apenas llega un cuadro útil
-        frames.push(img)
-      }
+      if (sq) return
+      sq = new Secuencia(Array.from({ length: total }, (_, i) => src(i)), { alListo: () => { ultimo = -1; render() } })
+      sq.descargar(Array.from({ length: total }, (_, i) => i))
     }
 
     const ctx = gsap.context(() => {
@@ -70,11 +69,11 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
         scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${total * 15}`, scrub: 0.25, pin: true },
       })
       tl.to(estado, { f: total - 1, duration: 10, ease: 'none', onUpdate: render }, 0)
-        .fromTo('.seq-frame', { scale: 0.55, borderRadius: 40, rotateX: 18, y: 80 },
-          { scale: 1, borderRadius: 0, rotateX: 0, y: 0, duration: 2.2, ease: 'power2.inOut' }, 0)
+        .fromTo('.seq-frame', { scale: 0.55, rotateX: 18, y: 80 },
+          { scale: 1, rotateX: 0, y: 0, duration: 2.2, ease: 'power2.inOut' }, 0)
         .fromTo('.seq-bg', { opacity: 0 }, { opacity: 1, duration: 2 }, 0)
         .to('.seq-intro', { opacity: 0, y: -60, duration: 1.4 }, 0.3)
-        .to('.seq-frame', { scale: 0.9, borderRadius: 36, duration: 1.2, ease: 'power2.inOut' }, 8.8)
+        .to('.seq-frame', { scale: 0.9, duration: 1.2, ease: 'power2.inOut' }, 8.8)
 
       beats.forEach((b, i) => {
         const sel = `.seq-beat[data-i="${i}"]`
@@ -88,6 +87,7 @@ export default function FrameScroll({ id, carpeta, total, kicker, titulo, beats,
     return () => {
       ctx.revert()
       window.removeEventListener('resize', ajustar)
+      sq?.destruir()
     }
   }, [carpeta, total, beats])
 

@@ -24,50 +24,72 @@ export default function TintReveal({
     const img = {}
     const estado = { p: 0 }
     const capa = document.createElement('canvas') // vidrios "sin polarizado" que se van borrando
+    const base = document.createElement('canvas') // "antes" ya recortado a los vidrios (se arma una vez por tamaño)
     let listo = false
+    let geo = null
+    let ultimoP = -1
 
-    const pintar = () => {
-      if (!listo) return
+    // Lo caro (escalar la foto y recortarla con la máscara) se hace solo al cambiar el tamaño
+    const preparar = () => {
       const c = canvas.current
-      const ctx = c.getContext('2d')
       const { antes, despues, vidrios } = img
       const r = Math.max(c.width / despues.width, c.height / despues.height)
       // En pantallas angostas el recorte se centra en los vidrios (≈55% del ancho de la foto)
       const w = despues.width * r, h = despues.height * r, y = (c.height - h) / 2
       const x = Math.min(0, Math.max(c.width - w, c.width / 2 - w * 0.55))
-      ctx.drawImage(despues, x, y, w, h)
+      geo = { x, y, w, h }
+      for (const k of [capa, base]) { k.width = c.width; k.height = c.height }
+      const b = base.getContext('2d')
+      b.drawImage(antes, x, y, w, h)
+      b.globalCompositeOperation = 'destination-in'
+      b.drawImage(vidrios, x, y, w, h)
+      b.globalCompositeOperation = 'source-over'
+      ultimoP = -1
+    }
+
+    const pintar = () => {
+      if (!listo) return
+      if (!geo) preparar()
+      const p = Math.round(estado.p * 400) / 400
+      if (p === ultimoP) return
+      ultimoP = p
+      const c = canvas.current
+      const ctx = c.getContext('2d')
+      const { x, y, w, h } = geo
+      ctx.drawImage(img.despues, x, y, w, h)
 
       // Dentro de los vidrios se ve el "antes", y la lámina lo va cubriendo de adelante (izq.) hacia atrás
-      if (capa.width !== c.width || capa.height !== c.height) { capa.width = c.width; capa.height = c.height }
       const k = capa.getContext('2d')
-      k.globalCompositeOperation = 'source-over'
-      k.clearRect(0, 0, capa.width, capa.height)
-      k.drawImage(antes, x, y, w, h)
+      k.globalCompositeOperation = 'copy'
+      k.drawImage(base, 0, 0)
       k.globalCompositeOperation = 'destination-in'
-      k.drawImage(vidrios, x, y, w, h)
       const g = k.createLinearGradient(x, 0, x + w, 0)
       for (let i = 0; i <= 10; i++) {
-        const s = Math.min(1, Math.max(0, estado.p * 1.5 - (i / 10) * 0.5))
+        const s = Math.min(1, Math.max(0, p * 1.5 - (i / 10) * 0.5))
         g.addColorStop(i / 10, `rgba(0,0,0,${1 - s * s * (3 - 2 * s)})`)
       }
       k.fillStyle = g
       k.fillRect(0, 0, capa.width, capa.height)
       ctx.drawImage(capa, 0, 0)
-      if (estadoTxt.current) estadoTxt.current.textContent = estado.p < 0.5 ? 'Sin polarizado' : 'Con polarizado'
+      if (estadoTxt.current) estadoTxt.current.textContent = p < 0.5 ? 'Sin polarizado' : 'Con polarizado'
     }
 
     const ajustar = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.current.width = canvas.current.clientWidth * dpr
       canvas.current.height = canvas.current.clientHeight * dpr
+      geo = null
       pintar()
     }
 
     const cargar = () => {
-      if (Object.keys(img).length) return
-      Promise.all(Object.entries(FOTOS).map(([k, src]) => new Promise((ok) => {
-        const i = new Image(); i.onload = ok; i.onerror = ok; i.src = src; img[k] = i
-      }))).then(() => { listo = Object.values(img).every((i) => i.naturalWidth); pintar() })
+      if (img.cargando) return
+      img.cargando = true
+      // ImageBitmap: decodificada en segundo plano, dibujarla en el canvas no traba el scroll
+      Promise.all(Object.entries(FOTOS).map(([k, src]) =>
+        fetch(src).then((r) => r.blob()).then(createImageBitmap).then((bmp) => { img[k] = bmp })))
+        .then(() => { listo = true; geo = null; pintar() })
+        .catch(() => {})
     }
 
     const ctx = gsap.context(() => {
