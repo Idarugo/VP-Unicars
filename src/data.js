@@ -23,10 +23,25 @@ const baseNegocio = {
 export const waLink = (texto = negocio.whatsappTexto) =>
   `https://wa.me/${negocio.whatsapp}?text=${encodeURIComponent(texto)}`
 
+// Mensaje para cotizar un servicio: emoji según lo que es (no todo es un auto) y nombres propios
+// con su mayúscula ("pantallas Android", "Apple CarPlay", "luces LED").
+const PROPIOS = new Set(['Android', 'Apple', 'Mazda', 'BMW', 'Audi'])
+export const emojiServicio = (t = '') => {
+  if (/hogar|oficina|arquitect|empavonado|lámina de seguridad|láminas de seguridad|ventan/i.test(t)) return '🏠'
+  if (/náutic|nautic|lancha|yate/i.test(t)) return '⛵'
+  if (/moto/i.test(t)) return '🏍️'
+  if (/flota|furg/i.test(t)) return '🚚'
+  return '🚘'
+}
+export const nombreServicio = (t = '') =>
+  (t === 'Arquitectónico' ? 'Polarizado arquitectónico' : t).split(' ').map((w, i, a) => (PROPIOS.has(w) || /.[A-Z]/.test(w) || (w === 'Auto' && a[i - 1] === 'Android') ? w : w.toLowerCase())).join(' ')
+export const waCotizar = (titulo, saludo = 'Hola VP Unicars!') =>
+  waLink(`${saludo} Quiero cotizar ${nombreServicio(titulo)} ${emojiServicio(titulo)}`)
+
 const baseStats = [
   { id: 'trabajos', valor: 1900, prefijo: '+', sufijo: '', label: 'Trabajos realizados', icono: 'trofeo' },
-  { id: 'seguidores', valor: 10.4, prefijo: '', sufijo: 'K', label: 'Seguidores en Instagram', decimales: 1, icono: 'instagram' },
-  { id: 'publicaciones', valor: 1992, prefijo: '', sufijo: '', label: 'Publicaciones de trabajos', icono: 'fotos' },
+  { id: 'seguidores', valor: 11, prefijo: '', sufijo: 'K', label: 'Seguidores en Instagram', icono: 'instagram' },
+  { id: 'publicaciones', valor: 2006, prefijo: '', sufijo: '', label: 'Publicaciones de trabajos', icono: 'fotos' },
   { id: 'uv', valor: 99, prefijo: '', sufijo: '%', label: 'Protección UV', icono: 'sol' },
 ]
 
@@ -323,8 +338,8 @@ const basePasos = [
 
 const baseFaqs = [
   {
-    q: '¿Qué diferencia hay entre Nanocarbon y Nanocerámico?',
-    a: 'Ambos son tecnologías de última generación. El Nanocarbon ofrece excelente rechazo de calor y no se decolora; el Nanocerámico va un paso más allá con el mayor rechazo térmico y máxima claridad, sin interferir con GPS ni señal de celular.',
+    q: '¿Qué diferencia hay entre Nanocarbón y Nanocerámico?',
+    a: 'Ambos son tecnologías de última generación. El Nanocarbón ofrece excelente rechazo de calor y no se decolora; el Nanocerámico va un paso más allá con el mayor rechazo térmico y máxima claridad, sin interferir con GPS ni señal de celular.',
   },
   {
     q: '¿El PPF se nota en la pintura?',
@@ -332,11 +347,11 @@ const baseFaqs = [
   },
   {
     q: '¿Trabajan hogares y oficinas?',
-    a: 'Sí. Instalamos polarizado arquitectónico espejo, bronce y control solar en casas, oficinas y locales comerciales.',
+    a: 'Sí. Instalamos polarizado arquitectónico espejo, bronce y control solar, empavonado y láminas de seguridad en casas, oficinas y locales comerciales. Para locales y oficinas entregamos certificado de instalación con la ficha técnica de la lámina.',
   },
   {
     q: '¿Qué otros servicios tienen?',
-    a: 'Además de polarizado y PPF, en VP Unicars hacemos audio, corta corriente e inmovilizadores, sistemas de seguridad, iluminación, electricidad automotriz y grabado de patentes. Todo se cotiza por nuestro WhatsApp.',
+    a: 'Además de polarizado y PPF, instalamos pantallas Android y Apple CarPlay, cámaras de retroceso, alarmas e inmovilizadores, audio, luces LED y cielo estrellado. También hacemos electricidad automotriz, grabado de patentes, branding de flotas, polarizado náutico y ahumado de micas de moto. Todo se cotiza por nuestro WhatsApp.',
   },
   {
     q: '¿Atienden a domicilio?',

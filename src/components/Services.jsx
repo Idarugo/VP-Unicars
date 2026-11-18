@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { servicios, waLink } from '../data.js'
+import { servicios, waLink, waCotizar } from '../data.js'
 import ServiceArt from './ServiceArt.jsx'
 import { Icon, faArrowRight, faWhatsapp } from '../icons.js'
 
@@ -75,7 +75,7 @@ export default function Services() {
               <h3>{s.titulo}</h3>
               <p>{s.texto}</p>
               <ul className="tags">{s.tags.map((t) => <li key={t}>{t}</li>)}</ul>
-              <a className="service-link" href={waLink(`Hola! Quiero cotizar ${s.titulo} 🚘`)} target="_blank" rel="noreferrer">
+              <a className="service-link" href={waCotizar(s.titulo, 'Hola!')} target="_blank" rel="noreferrer">
                 <Icon icon={faWhatsapp} /> Cotizar {s.titulo} <span><Icon icon={faArrowRight} /></span>
               </a>
             </div>

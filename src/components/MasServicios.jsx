@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { masServicios, waLink } from '../data.js'
+import { masServicios, waCotizar } from '../data.js'
 import Tecnologia from './Tecnologia.jsx'
 import { Icon, faVolumeHigh, faPowerOff, faBell, faLightbulb, faBolt, faIdCard, faWhatsapp, faArrowRight, faScrewdriverWrench, faCar, faStar, faTruck, faMotorcycle, faBorderAll, faTv, faVideo, faShip } from '../icons.js'
 
@@ -50,7 +50,7 @@ export default function MasServicios() {
             </div>
             <h3>{s.titulo}</h3>
             <p>{s.texto}</p>
-            <a className="service-link" href={waLink(`Hola VP Unicars! Quiero cotizar ${s.titulo.toLowerCase()} 🚘`)} target="_blank" rel="noreferrer" aria-label={`Cotizar ${s.titulo} por WhatsApp`}>
+            <a className="service-link" href={waCotizar(s.titulo)} target="_blank" rel="noreferrer" aria-label={`Cotizar ${s.titulo} por WhatsApp`}>
               <Icon icon={faWhatsapp} /> Cotizar <span><Icon icon={faArrowRight} /></span>
             </a>
           </article>

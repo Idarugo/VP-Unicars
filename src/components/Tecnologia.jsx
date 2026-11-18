@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { tecnologia, waLink } from '../data.js'
+import { tecnologia, waCotizar } from '../data.js'
 import { Icon, faWhatsapp, faChevronLeft, faChevronRight } from '../icons.js'
 
 // Riel de videos reales (pantallas, seguridad, luces, audio) dentro de "Más servicios", estilo reels.
@@ -48,7 +48,7 @@ export default function Tecnologia() {
               {x.etiqueta && <span className="tec-chip">{x.etiqueta}</span>}
               <h3>{x.titulo}</h3>
               {x.texto && <p>{x.texto}</p>}
-              <a href={waLink(`Hola VP Unicars! Quiero cotizar ${x.titulo.toLowerCase()} 🚘`)} target="_blank" rel="noreferrer" aria-label={`Cotizar ${x.titulo} por WhatsApp`}>
+              <a href={waCotizar(x.titulo)} target="_blank" rel="noreferrer" aria-label={`Cotizar ${x.titulo} por WhatsApp`}>
                 <Icon icon={faWhatsapp} /> Cotizar
               </a>
             </div>

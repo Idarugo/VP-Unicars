@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { Flip } from 'gsap/Flip'
-import { portafolio, categoriasPortafolio, waLink } from '../data.js'
+import { portafolio, categoriasPortafolio, waLink, emojiServicio } from '../data.js'
 import { Icon, faWhatsapp, faChevronLeft, faChevronRight, faXmark, faImages } from '../icons.js'
 
 gsap.registerPlugin(Flip)
@@ -125,7 +125,7 @@ export default function Portafolio() {
             <img key={actual.id} src={actual.foto} alt={actual.titulo} draggable="false" />
             <figcaption>
               <div><small>{NOMBRE[actual.categoria]} · {abierta + 1} / {lista.length}</small><b>{actual.titulo}</b></div>
-              <a className="btn" href={waLink(`Hola VP Unicars! Vi en su portafolio "${actual.titulo}" y quiero cotizar algo así 🚘`)} target="_blank" rel="noreferrer">
+              <a className="btn" href={waLink(`Hola VP Unicars! Vi en su portafolio "${actual.titulo}" y quiero cotizar algo así ${emojiServicio(`${actual.categoria} ${actual.titulo}`)}`)} target="_blank" rel="noreferrer">
                 <Icon icon={faWhatsapp} />&nbsp; Quiero algo así
               </a>
             </figcaption>
