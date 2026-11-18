@@ -5,6 +5,8 @@ import Formulario from './Formulario.jsx'
 import Agenda from './Agenda.jsx'
 import Estadisticas from './Estadisticas.jsx'
 import Mantencion from './Mantencion.jsx'
+import Paginacion from './Paginacion.jsx'
+import CertificadosSeguridad from './CertificadosSeguridad.jsx'
 import { vacio } from './store.js'
 import { generarPDF, descargar, compartir, nombreArchivo } from './pdf.js'
 import { exito, info, error as alertaError, confirmar, escapar } from './alertas.js'
@@ -16,33 +18,9 @@ import { useConfiguracionStore } from '../stores/configuracionStore.js'
 import { useTiempoRealStore } from '../stores/tiempoRealStore.js'
 import {
   Icon, faPlus, faMagnifyingGlass, faFilePdf, faArrowLeft, faRightFromBracket, faCopy, faTrash, faFileSignature,
-  faLock, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChevronLeft, faChevronRight, faChartLine,
-  faScrewdriverWrench, faKey,
+  faLock, faWhatsapp, faEye, faQrcode, faCalendarWeek, faBars, faChartLine,
+  faScrewdriverWrench, faKey, faBuilding,
 } from './iconos.js'
-
-// Números de página con "…" cuando hay muchas: 1 … 4 5 6 … 12
-const paginas = (actual, total) => {
-  const set = new Set([1, total, actual - 1, actual, actual + 1].filter((n) => n >= 1 && n <= total))
-  const lista = [...set].sort((a, b) => a - b)
-  return lista.flatMap((n, i) => (i && n - lista[i - 1] > 1 ? ['…', n] : [n]))
-}
-
-function Paginacion({ pagina, total, items, porPagina, onCambio }) {
-  const desde = (pagina - 1) * porPagina + 1
-  const hasta = Math.min(items, pagina * porPagina)
-  return (
-    <nav className="adm-pag" aria-label="Paginación">
-      <span className="adm-pag-info">Mostrando <b>{desde}–{hasta}</b> de <b>{items}</b></span>
-      <div className="adm-pag-btns">
-        <button className="adm-icon-btn" disabled={pagina === 1} onClick={() => onCambio(pagina - 1)} aria-label="Página anterior"><Icon icon={faChevronLeft} /></button>
-        {paginas(pagina, total).map((n, i) => (n === '…'
-          ? <span key={`e${i}`} className="adm-pag-dots">…</span>
-          : <button key={n} className={`adm-pag-n ${n === pagina ? 'is-on' : ''}`} onClick={() => onCambio(n)} aria-current={n === pagina ? 'page' : undefined}>{n}</button>))}
-        <button className="adm-icon-btn" disabled={pagina === total} onClick={() => onCambio(pagina + 1)} aria-label="Página siguiente"><Icon icon={faChevronRight} /></button>
-      </div>
-    </nav>
-  )
-}
 
 const fechaCorta = (iso) => iso.split('-').reverse().join('/')
 
@@ -106,7 +84,8 @@ export default function AdminApp() {
   useConfiguracionStore((s) => s.config) // vuelve a dibujar los certificados cuando llega la configuración
   const { conectado, ultimoCambio, iniciar: iniciarTiempoReal, terminar: terminarTiempoReal } = useTiempoRealStore()
 
-  const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver | estadisticas | mantencion
+  const [vista, setVista] = useState('agenda') // agenda | lista | nuevo | ver | seguridad | estadisticas | mantencion
+  const [inicialSeguridad, setInicialSeguridad] = useState(null)
   const [form, setForm] = useState(vacio)
   const [actual, setActual] = useState(null)
   const [q, setQ] = useState('')
@@ -190,8 +169,17 @@ export default function AdminApp() {
     setVista('nuevo')
   }
 
-  // Desde la agenda: certificado prellenado con los datos del trabajo
+  // Desde la agenda: certificado prellenado con los datos del trabajo.
+  // Láminas de seguridad en domicilio (casa, local u oficina) van a su propia sección.
   const certificadoDesdeTrabajo = (t) => {
+    if (t.servicio === 'Láminas de seguridad' && (t.lugar === 'domicilio' || !t.patente)) {
+      setInicialSeguridad({
+        fecha: t.fecha, razonSocial: t.cliente, telefono: t.telefono || '', direccion: t.direccion || '',
+        observaciones: t.notas || '', instalador: t.encargado || usuario.nombre,
+      })
+      setVista('seguridad')
+      return
+    }
     setForm({
       ...nuevoForm(), fecha: t.fecha, cliente: t.cliente, telefono: t.telefono || '', direccion: t.direccion || '',
       marca: t.marca || '', modelo: t.modelo || '', patente: t.patente || '', observaciones: t.notas || '',
@@ -214,6 +202,7 @@ export default function AdminApp() {
   const items = [
     ['agenda', faCalendarWeek, 'Agenda', vista === 'agenda', true],
     ['lista', faFileSignature, 'Certificados', ['lista', 'ver', 'nuevo'].includes(vista), puede('certificados.ver')],
+    ['seguridad', faBuilding, 'Lámina de seguridad', vista === 'seguridad', puede('certificados.ver')],
     ['estadisticas', faChartLine, 'Estadísticas', vista === 'estadisticas', puede('estadisticas.ver')],
     ['mantencion', faScrewdriverWrench, 'Mantención', vista === 'mantencion', puede('mantencion.ver')],
   ].filter((i) => i[4])
@@ -252,12 +241,14 @@ export default function AdminApp() {
 
       <header className="adm-mobilebar">
         <button className="adm-icon-btn" onClick={() => setMenu(true)} aria-label="Abrir menú"><Icon icon={faBars} /></button>
-        <span className="adm-mobilebar-t">{{ agenda: 'Agenda', estadisticas: 'Estadísticas', mantencion: 'Mantención' }[vista] || 'Certificados'}</span>
+        <span className="adm-mobilebar-t">{{ agenda: 'Agenda', seguridad: 'Lámina de seguridad', estadisticas: 'Estadísticas', mantencion: 'Mantención' }[vista] || 'Certificados'}</span>
         <img src="/admin/logo-vp.png" alt="VP Unicars" />
       </header>
 
       <div className="adm-content">
         {vista === 'agenda' && <Agenda onCertificado={certificadoDesdeTrabajo} />}
+
+        {vista === 'seguridad' && <CertificadosSeguridad inicial={inicialSeguridad} onInicialUsado={() => setInicialSeguridad(null)} />}
 
         {vista === 'estadisticas' && <Estadisticas />}
 

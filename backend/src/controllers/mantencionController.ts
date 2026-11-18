@@ -3,6 +3,7 @@ import { Pool, RowDataPacket } from "mysql2/promise";
 import { conteos, guardarTarea, leerTareas } from "../models/mantencionModel";
 import { guardarAjuste, leerAjuste, leerConfiguracion } from "../models/ajustesModel";
 import { todosLosCertificados } from "../models/certificadoModel";
+import { todosLosCertificadosSeguridad } from "../models/certificadoSeguridadModel";
 import { todosLosTrabajos } from "../models/trabajoModel";
 import { getAllUsuarios } from "../models/usuarioModel";
 import { listarHistorial, registrarHistorial } from "../models/historialModel";
@@ -63,6 +64,8 @@ export const exportarRespaldo = async (req: Request, res: Response) => {
       version: 1,
       fecha,
       certificados: await todosLosCertificados(pool),
+      certificadosSeguridad: await todosLosCertificadosSeguridad(pool),
+      fichasSeguridad: (await leerAjuste(pool, "fichas_seguridad")) || null,
       trabajos: await todosLosTrabajos(pool),
       usuarios: await getAllUsuarios(pool),
       configuracion: await leerConfiguracion(pool),

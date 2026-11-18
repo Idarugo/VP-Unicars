@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { publicService } from '../services/publicService.js'
-import { folio } from './config.js'
+import { folio, folioSeguridad, m2 } from './config.js'
 import { Icon, faShieldHalved, faCircleXmark } from './iconos.js'
 
 // Página pública de verificación (la abre el QR del certificado).
@@ -13,7 +13,7 @@ export default function Verificar() {
     const n = p.get('n') || ''
     const codigo = (p.get('c') || '').toUpperCase()
     if (!n || !codigo) return setEstado({ cargando: false, c: null, error: '' })
-    publicService.verificar(n, codigo)
+    publicService.verificar(n, codigo, p.get('t') === 'ls' ? 'ls' : '')
       .then((r) => setEstado({ cargando: false, c: r.data, error: '' }))
       .catch((e) => setEstado({ cargando: false, c: null, error: e.message }))
   }, [])
@@ -26,6 +26,18 @@ export default function Verificar() {
         {cargando ? <p className="adm-muted">Verificando certificado…</p> : c ? (
           <>
             <div className="adm-verif-ok"><Icon icon={faShieldHalved} /> Certificado válido</div>
+            {c.tipo === 'ls' ? (
+              <dl>
+                <dt>Documento</dt><dd>Lámina de seguridad</dd>
+                <dt>N° documento</dt><dd>{folioSeguridad(c.numero)}</dd>
+                <dt>Fecha de instalación</dt><dd>{c.fecha.split('-').reverse().join('/')}</dd>
+                {c.cliente && <><dt>Cliente</dt><dd>{c.cliente}</dd></>}
+                <dt>Inmueble</dt><dd>{c.inmueble}{c.comuna ? ` · ${c.comuna}` : ''}</dd>
+                <dt>Superficie</dt><dd>{m2(c.totalM2)} m² en {c.superficies} {c.superficies === 1 ? 'superficie' : 'superficies'}</dd>
+                {c.lamina && <><dt>Lámina</dt><dd>{c.lamina}</dd></>}
+                <dt>Emitido por</dt><dd>{c.empresa?.nombre}{c.empresa?.rut ? ` · RUT ${c.empresa.rut}` : ''}</dd>
+              </dl>
+            ) : (
             <dl>
               <dt>N° documento</dt><dd>{folio(c.numero)}</dd>
               <dt>Fecha de instalación</dt><dd>{c.fecha.split('-').reverse().join('/')}</dd>
@@ -34,6 +46,7 @@ export default function Verificar() {
               <dt>Láminas (VLT)</dt><dd>Delanteros {c.delanteros}% · Traseros {c.traseros}% · Luneta {c.luneta}%</dd>
               <dt>Emitido por</dt><dd>{c.empresa?.nombre}{c.empresa?.rut ? ` · RUT ${c.empresa.rut}` : ''}</dd>
             </dl>
+            )}
           </>
         ) : (
           <div className="adm-verif-no"><Icon icon={faCircleXmark} /> {error && !/encontr|incomplet/i.test(error) ? 'No pudimos verificar ahora, intenta en un momento' : 'No encontramos este certificado'}</div>

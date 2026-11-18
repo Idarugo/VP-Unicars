@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { conectarTiempoReal } from '../lib/api/tiempoReal.js'
 import { useAuthStore } from './authStore.js'
 import { useCertificadoStore } from './certificadoStore.js'
+import { useCertificadoSeguridadStore } from './certificadoSeguridadStore.js'
 import { useAgendaStore } from './agendaStore.js'
 import { useConfiguracionStore } from './configuracionStore.js'
 import { useEstadisticaStore } from './estadisticaStore.js'
@@ -15,6 +16,10 @@ const refrescar = {
     const c = useCertificadoStore.getState()
     c.fetchResumen()
     if (c.cargado) c.fetchCertificados({ page: c.meta.pagina, silencioso: true })
+    const s = useCertificadoSeguridadStore.getState()
+    s.fetchResumen()
+    if (s.cargado) s.fetchCertificados({ page: s.meta.pagina, silencioso: true })
+    if (s.fichas.length) s.fetchFichas()
   },
   trabajos: () => {
     const a = useAgendaStore.getState()

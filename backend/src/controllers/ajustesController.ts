@@ -24,10 +24,13 @@ export const updateConfiguracion = async (req: Request, res: Response) => {
       const limpio = Object.fromEntries(
         Object.entries(body[clave] as Record<string, unknown>).map(([k, v]) => [k, typeof v === "number" ? v : texto(v, 400)]),
       );
-      if (clave === "sistema" && "folioInicial" in limpio) {
-        const n = Number(limpio.folioInicial);
-        if (!Number.isInteger(n) || n < 1) return res.status(400).json({ ok: false, message: "El folio inicial debe ser un número positivo" });
-        limpio.folioInicial = n;
+      if (clave === "sistema") {
+        for (const k of ["folioInicial", "folioSeguridad"]) {
+          if (!(k in limpio)) continue;
+          const n = Number(limpio[k]);
+          if (!Number.isInteger(n) || n < 1) return res.status(400).json({ ok: false, message: "El folio inicial debe ser un número positivo" });
+          limpio[k] = n;
+        }
       }
       delete limpio.ultimoRespaldo; // lo administra el sistema
       await guardarSeccionConfig(pool, clave as ClaveConfig, limpio, req.usuario!.id);

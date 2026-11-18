@@ -21,6 +21,7 @@ async function main() {
 
   const resumen = {
     certificados: await conteo(`SELECT COUNT(*) AS n FROM certificados`),
+    certificadosSeguridad: await conteo(`SELECT COUNT(*) AS n FROM certificados_seguridad`),
     trabajos: await conteo(`SELECT COUNT(*) AS n FROM trabajos`),
     eventos: await conteo(`SELECT COUNT(*) AS n FROM eventos`),
     historial: await conteo(`SELECT COUNT(*) AS n FROM historial`),
@@ -38,18 +39,20 @@ async function main() {
   await conn.beginTransaction();
   try {
     await conn.query(`DELETE FROM certificados`);
+    await conn.query(`DELETE FROM certificados_seguridad`);
     await conn.query(`DELETE FROM trabajos`);
     await conn.query(`DELETE FROM eventos`);
     await conn.query(`DELETE FROM historial`);
     await conn.query(`DELETE FROM tareas_mantencion`);
     await conn.query(`DELETE FROM usuarios WHERE usuario NOT IN (?)`, [iniciales]);
-    await conn.query(`DELETE FROM ajustes WHERE clave IN ('folio', 'contenido_versiones')`);
+    await conn.query(`DELETE FROM ajustes WHERE clave IN ('folio', 'folio_seguridad', 'contenido_versiones')`);
     await conn.commit();
   } catch (e) {
     await conn.rollback();
     throw e;
   }
   await conn.query(`ALTER TABLE certificados AUTO_INCREMENT = 1`);
+  await conn.query(`ALTER TABLE certificados_seguridad AUTO_INCREMENT = 1`);
   await conn.query(`ALTER TABLE trabajos AUTO_INCREMENT = 1`);
   console.log("Datos de prueba borrados. El próximo certificado usará el N° inicial de Configuración.");
   await conn.end();

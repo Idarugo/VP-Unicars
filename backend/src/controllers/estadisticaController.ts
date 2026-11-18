@@ -28,8 +28,10 @@ export const getEstadisticas = async (req: Request, res: Response) => {
     const suma = (arr: { visitas: number; clics: number }[], k: "visitas" | "clics") => arr.reduce((a, r) => a + r[k], 0);
 
     const [certs] = await (pool as Pool).query<RowDataPacket[]>(
-      `SELECT COUNT(*) AS n FROM certificados WHERE anulado_en IS NULL AND fecha >= ?`,
-      [fechaLocal(desde)],
+      // Autos + lámina de seguridad
+      `SELECT (SELECT COUNT(*) FROM certificados WHERE anulado_en IS NULL AND fecha >= ?)
+            + (SELECT COUNT(*) FROM certificados_seguridad WHERE anulado_en IS NULL AND fecha >= ?) AS n`,
+      [fechaLocal(desde), fechaLocal(desde)],
     );
 
     return res.status(200).json({

@@ -25,3 +25,22 @@ export const telefono = (v: unknown): string | null => {
 };
 
 export const color = (v: unknown, defecto = "#ffc800") => (typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v : defecto);
+
+// RUT chileno con dígito verificador (módulo 11). Devuelve "77.429.138-5" o null si no es válido.
+export const rutFormateado = (v: unknown): string | null => {
+  const s = String(v ?? "").toUpperCase().replace(/[^0-9K]/g, "");
+  if (s.length < 2 || s.length > 9) return null;
+  const cuerpo = s.slice(0, -1);
+  const dv = s.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return null;
+  let suma = 0;
+  let mult = 2;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += Number(cuerpo[i]) * mult;
+    mult = mult === 7 ? 2 : mult + 1;
+  }
+  const r = 11 - (suma % 11);
+  const esperado = r === 11 ? "0" : r === 10 ? "K" : String(r);
+  if (dv !== esperado) return null;
+  return `${cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}-${dv}`;
+};

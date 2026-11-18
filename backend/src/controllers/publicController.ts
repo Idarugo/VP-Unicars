@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { leerConfiguracion } from "../models/ajustesModel";
 import { leerContenido } from "../models/contenidoModel";
 import { verificarCertificado } from "../models/certificadoModel";
+import { verificarCertificadoSeguridad } from "../models/certificadoSeguridadModel";
 import { registrarEvento } from "../models/eventoModel";
 import { texto } from "../utils/validar";
 import { emitirEstadisticas } from "../utils/tiempoReal";
@@ -27,10 +28,17 @@ export const verificarCertificadoPublico = async (req: Request, res: Response) =
     const codigo = texto(req.query.c, 8).toUpperCase();
     if (!Number.isInteger(numero) || !codigo) return res.status(400).json({ ok: false, message: "Datos de verificación incompletos" });
 
+    const { empresa } = await leerConfiguracion(pool);
+    // t=ls: certificado de lámina de seguridad (casas, locales y oficinas)
+    if (req.query.t === "ls") {
+      const seg = await verificarCertificadoSeguridad(pool, numero, codigo);
+      if (!seg) return res.status(404).json({ ok: false, message: "No encontramos este certificado" });
+      return res.status(200).json({ ok: true, data: { ...seg, tipo: "ls", empresa: { nombre: empresa.nombre, rut: empresa.rut } } });
+    }
+
     const cert = await verificarCertificado(pool, numero, codigo);
     if (!cert) return res.status(404).json({ ok: false, message: "No encontramos este certificado" });
 
-    const { empresa } = await leerConfiguracion(pool);
     return res.status(200).json({
       ok: true,
       data: { ...cert, patente: ocultarPatente(cert.patente as string), empresa: { nombre: empresa.nombre, rut: empresa.rut } },

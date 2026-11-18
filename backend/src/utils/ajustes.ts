@@ -16,6 +16,8 @@ export const CONFIG_DEFAULT = {
   },
   sistema: {
     folioInicial: 239,
+    // Lámina de seguridad (casas, locales y oficinas): sigue la numeración del Word que usaban (N° 0027)
+    folioSeguridad: 28,
     dominio: "vpunicars.cl",
     venceDominio: "2029-10-13",
     hosting: "Por definir",

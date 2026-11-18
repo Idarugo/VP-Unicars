@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import ContenidoWeb from './ContenidoWeb.jsx'
 import { exito, error as alertaError, confirmar, mostrarDato, pedirTexto, escapar } from './alertas.js'
-import { folio } from './config.js'
+import { folio, folioSeguridad } from './config.js'
 import { fechaLocal } from './store.js'
 import { useMantencionStore } from '../stores/mantencionStore.js'
 import { useConfiguracionStore } from '../stores/configuracionStore.js'
 import { useCertificadoStore } from '../stores/certificadoStore.js'
+import { useCertificadoSeguridadStore } from '../stores/certificadoSeguridadStore.js'
 import { useAuthStore } from '../stores/authStore.js'
 import {
   Icon, faScrewdriverWrench, faCircleCheck, faTriangleExclamation, faCircleXmark, faGlobe, faServer, faDatabase, faFloppyDisk, faRotateLeft, faPlus, faDownload, faUserPlus, faKey, faMagnifyingGlass, faClockRotateLeft, faUsers, faGear, faPenToSquare, faHeartPulse, faWhatsapp,
@@ -103,6 +104,7 @@ function Estado({ onTab }) {
         <header><h2>Resumen de datos</h2><span>Lo que guarda la base de datos</span></header>
         <dl className="mt-dl">
           <dt>Certificados vigentes</dt><dd>{c ? c.certificados : '—'}</dd>
+          <dt>Lámina de seguridad</dt><dd>{c ? c.certificadosSeguridad ?? 0 : '—'}</dd>
           <dt>Último N°</dt><dd>{c?.ultimoNumero ? folio(c.ultimoNumero) : '—'}</dd>
           <dt>Trabajos en agenda</dt><dd>{c ? c.trabajos : '—'}</dd>
           <dt>Usuarios activos</dt><dd>{c ? c.usuariosActivos : '—'}</dd>
@@ -117,14 +119,16 @@ function Configuracion() {
   const { config, saving, fetchConfiguracion, guardarConfiguracion, restaurarConfiguracion } = useConfiguracionStore()
   const siguiente = useCertificadoStore((x) => x.resumen.siguiente)
   const fetchResumen = useCertificadoStore((x) => x.fetchResumen)
-  useEffect(() => { fetchConfiguracion() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const siguienteSeg = useCertificadoSeguridadStore((x) => x.resumen.siguiente)
+  const fetchResumenSeg = useCertificadoSeguridadStore((x) => x.fetchResumen)
+  useEffect(() => { fetchConfiguracion(); fetchResumenSeg() }, []) // eslint-disable-line react-hooks/exhaustive-deps
   if (!config) return <p className="adm-muted">Cargando configuración…</p>
-  return <FormConfig key={JSON.stringify(config)} config={config} siguiente={siguiente} saving={saving}
-    onGuardar={async (p) => { if (await guardarConfiguracion(p)) { fetchResumen(); exito('Configuración guardada: ya se usa en los certificados nuevos') } }}
-    onRestaurar={async () => { if (await restaurarConfiguracion()) { fetchResumen(); exito('Configuración original restaurada') } }} />
+  return <FormConfig key={JSON.stringify(config)} config={config} siguiente={siguiente} siguienteSeg={siguienteSeg} saving={saving}
+    onGuardar={async (p) => { if (await guardarConfiguracion(p)) { fetchResumen(); fetchResumenSeg(); exito('Configuración guardada: ya se usa en los certificados nuevos') } }}
+    onRestaurar={async () => { if (await restaurarConfiguracion()) { fetchResumen(); fetchResumenSeg(); exito('Configuración original restaurada') } }} />
 }
 
-function FormConfig({ config, siguiente, saving, onGuardar, onRestaurar }) {
+function FormConfig({ config, siguiente, siguienteSeg, saving, onGuardar, onRestaurar }) {
   const [e, setE] = useState({ ...config.empresa })
   const [c, setC] = useState({ ...config.certificacion })
   const [s, setS] = useState({ ...config.sistema })
@@ -146,8 +150,11 @@ function FormConfig({ config, siguiente, saving, onGuardar, onRestaurar }) {
       </section>
       <section className="st-card adm-form">
         <header><h2>Sistema</h2><span>Numeración, dominio y hosting</span></header>
-        <div className="adm-row adm-row--3">
+        <div className="adm-row">
           <label>N° mínimo del próximo certificado<input min="1" {...f(s, setS, 'folioInicial', 'number')} /><small>Próximo: {siguiente ? folio(siguiente) : '—'}</small></label>
+          <label>N° mínimo · lámina de seguridad<input min="1" {...f(s, setS, 'folioSeguridad', 'number')} /><small>Próximo: {siguienteSeg ? folioSeguridad(siguienteSeg) : '—'}</small></label>
+        </div>
+        <div className="adm-row">
           <label>Dominio<input {...f(s, setS, 'dominio')} /></label>
           <label>Vencimiento del dominio<input {...f(s, setS, 'venceDominio', 'date')} /></label>
         </div>
@@ -265,6 +272,17 @@ const COLS_CERT = [
   ['tipo', 'Tipo'], ['marca', 'Marca'], ['modelo', 'Modelo'], ['anio', 'Año'], ['patente', 'Patente'], ['delanteros', '% Delanteros'],
   ['traseros', '% Traseros'], ['luneta', '% Luneta'], ['observaciones', 'Observaciones'], ['codigo', 'Código verificación'],
 ]
+const COLS_SEG = [
+  ['numero', 'N°'], ['fecha', 'Fecha'], ['razonSocial', 'Razón social'], ['rut', 'RUT'], ['inmueble', 'Inmueble'], ['direccion', 'Dirección'],
+  ['comuna', 'Comuna'], ['contacto', 'Contacto'], ['telefono', 'Teléfono'], ['instalador', 'Instalador'], ['lamina', 'Lámina'],
+  ['detalle', 'Superficies'], ['totalM2', 'Total m²'], ['garantia', 'Garantía'], ['observaciones', 'Observaciones'], ['codigo', 'Código verificación'],
+]
+const filasSeg = (lista = []) => lista.map((c) => ({
+  ...c,
+  numero: folioSeguridad(c.numero),
+  lamina: c.ficha ? `${c.ficha.producto} ${c.ficha.espesorMil} mil · ${c.ficha.marca}` : '',
+  detalle: c.superficies.map((s) => `${s.ubicacion}: ${s.m2} m²`).join(' / '),
+}))
 const COLS_AGENDA = [
   ['fecha', 'Fecha'], ['hora', 'Hora'], ['servicio', 'Servicio'], ['encargado', 'Encargado'], ['lugar', 'Lugar'], ['cliente', 'Cliente'],
   ['telefono', 'Teléfono'], ['marca', 'Marca'], ['modelo', 'Modelo'], ['patente', 'Patente'], ['estado', 'Estado'], ['notas', 'Notas'],
@@ -279,6 +297,7 @@ function Respaldos() {
     const r = await descargarRespaldo()
     if (!r) return
     if (tipo === 'certificados') { bajar(`certificados-vp-${hoy}.csv`, csv(r.certificados, COLS_CERT), 'text/csv;charset=utf-8'); exito('Certificados exportados para Excel') }
+    if (tipo === 'seguridad') { bajar(`certificados-lamina-seguridad-vp-${hoy}.csv`, csv(filasSeg(r.certificadosSeguridad), COLS_SEG), 'text/csv;charset=utf-8'); exito('Certificados de lámina de seguridad exportados para Excel') }
     if (tipo === 'agenda') { bajar(`agenda-vp-${hoy}.csv`, csv(r.trabajos, COLS_AGENDA), 'text/csv;charset=utf-8'); exito('Agenda exportada para Excel') }
     if (tipo === 'completo') { bajar(`respaldo-vp-unicars-${hoy}.json`, JSON.stringify(r, null, 2), 'application/json'); exito('Respaldo completo descargado') }
   }
@@ -291,12 +310,13 @@ function Respaldos() {
         <header><h2>Exportar a Excel</h2><span>Para revisar o entregar al cliente</span></header>
         <div className="mt-acciones">
           <button className="adm-btn adm-btn--ghost" disabled={saving} onClick={() => exportar('certificados')}><Icon icon={faDownload} /> Certificados{c ? ` (${c.certificados})` : ''}</button>
+          <button className="adm-btn adm-btn--ghost" disabled={saving} onClick={() => exportar('seguridad')}><Icon icon={faDownload} /> Lámina de seguridad{c ? ` (${c.certificadosSeguridad ?? 0})` : ''}</button>
           <button className="adm-btn adm-btn--ghost" disabled={saving} onClick={() => exportar('agenda')}><Icon icon={faDownload} /> Agenda{c ? ` (${c.trabajos})` : ''}</button>
         </div>
       </section>
       <section className="st-card">
         <header><h2>Respaldo completo</h2><span>{ultimo ? `Último: ${fechaHora(ultimo)}` : 'Aún no se descarga ninguno'}</span></header>
-        <p className="adm-muted">Certificados, agenda, usuarios (sin claves), configuración, contenido e historial en un archivo JSON. Guárdalo fuera del servidor.</p>
+        <p className="adm-muted">Certificados (autos y lámina de seguridad), agenda, usuarios (sin claves), configuración, contenido e historial en un archivo JSON. Guárdalo fuera del servidor.</p>
         <div className="mt-acciones">
           <button className="adm-btn" disabled={saving} onClick={() => exportar('completo')}><Icon icon={faDownload} /> {saving ? 'Generando…' : 'Descargar respaldo'}</button>
         </div>

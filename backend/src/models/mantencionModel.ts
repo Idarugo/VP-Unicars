@@ -22,6 +22,7 @@ export const conteos = async (pool: Pool) => {
       SELECT
         (SELECT COUNT(*) FROM certificados WHERE anulado_en IS NULL) AS certificados,
         (SELECT MAX(numero) FROM certificados) AS ultimoNumero,
+        (SELECT COUNT(*) FROM certificados_seguridad WHERE anulado_en IS NULL) AS certificadosSeguridad,
         (SELECT COUNT(*) FROM trabajos) AS trabajos,
         (SELECT COUNT(*) FROM usuarios WHERE activo = 1) AS usuariosActivos
     `,
@@ -30,6 +31,7 @@ export const conteos = async (pool: Pool) => {
   return {
     certificados: Number(r.certificados),
     ultimoNumero: r.ultimoNumero ? Number(r.ultimoNumero) : null,
+    certificadosSeguridad: Number(r.certificadosSeguridad),
     trabajos: Number(r.trabajos),
     usuariosActivos: Number(r.usuariosActivos),
   };

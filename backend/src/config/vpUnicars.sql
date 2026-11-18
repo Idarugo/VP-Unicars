@@ -48,6 +48,35 @@ CREATE TABLE IF NOT EXISTS certificados (
   CONSTRAINT fk_cert_anulado FOREIGN KEY (anulado_por) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Certificados de lámina de seguridad para casas, locales y oficinas (numeración propia: "LS-0028").
+-- Las superficies y la ficha técnica se guardan como JSON: así el certificado emitido no cambia
+-- aunque después se edite la ficha de la lámina.
+CREATE TABLE IF NOT EXISTS certificados_seguridad (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  numero INT NOT NULL UNIQUE,
+  codigo VARCHAR(8) NOT NULL,
+  fecha DATE NOT NULL,
+  razon_social VARCHAR(140) NOT NULL,
+  rut VARCHAR(12) NULL,
+  direccion VARCHAR(160) NOT NULL,
+  comuna VARCHAR(60) NULL,
+  contacto VARCHAR(100) NULL,
+  telefono VARCHAR(20) NULL,
+  inmueble VARCHAR(40) NOT NULL,
+  instalador VARCHAR(100) NOT NULL,
+  superficies TEXT NOT NULL,
+  ficha TEXT NOT NULL,
+  garantia VARCHAR(60) NULL,
+  observaciones VARCHAR(200) NULL,
+  creado_por INT NULL,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  anulado_en DATETIME NULL,
+  anulado_por INT NULL,
+  INDEX idx_certseg_fecha (fecha),
+  CONSTRAINT fk_certseg_creado FOREIGN KEY (creado_por) REFERENCES usuarios(id) ON DELETE SET NULL,
+  CONSTRAINT fk_certseg_anulado FOREIGN KEY (anulado_por) REFERENCES usuarios(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS trabajos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   fecha DATE NOT NULL,

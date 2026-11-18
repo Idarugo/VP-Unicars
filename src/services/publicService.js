@@ -4,7 +4,7 @@ import { apiClient } from '../lib/api/apiClient.js'
 export const publicService = {
   getContenido: (signal) => apiClient.get('/public/contenido', { token: null, signal }),
   getResenas: () => apiClient.get('/public/resenas', { token: null }),
-  verificar: (n, c) => apiClient.get(`/public/certificados/verificar?${new URLSearchParams({ n, c })}`, { token: null }),
+  verificar: (n, c, t = '') => apiClient.get(`/public/certificados/verificar?${new URLSearchParams(t ? { n, c, t } : { n, c })}`, { token: null }),
   // sendBeacon no bloquea la navegación al abrir WhatsApp
   evento: (payload) => {
     const url = `${import.meta.env.VITE_API_URL || '/api'}/public/eventos`
