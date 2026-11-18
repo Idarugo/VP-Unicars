@@ -9,7 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "db:init": "ts-node-dev --transpile-only src/scripts/initDb.ts",
-    "db:limpiar": "ts-node-dev --transpile-only src/scripts/limpiarDatos.ts"
+    "db:limpiar": "ts-node-dev --transpile-only src/scripts/limpiarDatos.ts",
+    "respaldo": "node dist/scripts/respaldo.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
 import { Pool, RowDataPacket } from "mysql2/promise";
 import { conteos, guardarTarea, leerTareas } from "../models/mantencionModel";
-import { guardarAjuste, leerAjuste, leerConfiguracion } from "../models/ajustesModel";
-import { todosLosCertificados } from "../models/certificadoModel";
-import { todosLosCertificadosSeguridad } from "../models/certificadoSeguridadModel";
-import { todosLosTrabajos } from "../models/trabajoModel";
-import { getAllUsuarios } from "../models/usuarioModel";
-import { listarHistorial, registrarHistorial } from "../models/historialModel";
+import { leerConfiguracion } from "../models/ajustesModel";
+import { armarRespaldo } from "../utils/respaldo";
 import { emitir, totalConectados } from "../utils/tiempoReal";
 
 const TAREAS = ["fotos", "whatsapp", "contenido", "respaldo", "reporte"];
@@ -57,25 +53,7 @@ export const updateTarea = async (req: Request, res: Response) => {
 export const exportarRespaldo = async (req: Request, res: Response) => {
   try {
     const pool = req.app.get("pool");
-    const fecha = new Date().toISOString();
-
-    const respaldo = {
-      app: "vp-unicars",
-      version: 1,
-      fecha,
-      certificados: await todosLosCertificados(pool),
-      certificadosSeguridad: await todosLosCertificadosSeguridad(pool),
-      fichasSeguridad: (await leerAjuste(pool, "fichas_seguridad")) || null,
-      trabajos: await todosLosTrabajos(pool),
-      usuarios: await getAllUsuarios(pool),
-      configuracion: await leerConfiguracion(pool),
-      contenido: (await leerAjuste(pool, "contenido")) || {},
-      historial: await listarHistorial(pool, "", 2000),
-    };
-
-    const sistema = (await leerAjuste<Record<string, unknown>>(pool, "sistema")) || {};
-    await guardarAjuste(pool, "sistema", { ...sistema, ultimoRespaldo: fecha }, req.usuario!.id);
-    await registrarHistorial(pool, req.usuario!, "Descargó respaldo", "Respaldo completo");
+    const respaldo = await armarRespaldo(pool, req.usuario!);
     emitir("mantencion", req.usuario!.id);
 
     return res.status(200).json({ ok: true, data: respaldo });
